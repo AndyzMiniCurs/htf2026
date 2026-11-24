@@ -82,9 +82,12 @@ export const glitchQuerySchema = z.object({
   q: z.string().trim().max(200).optional(),
   status: z.array(glitchStatusSchema).optional(),
   type: z.array(glitchTypeSchema).optional(),
-  /** ISO date or date-time, inclusive. */
+  /**
+   * Inclusive lower bound. Send a full ISO instant (`new Date(y, m, d).toISOString()`) so a day
+   * means the guardian's local day; a bare `YYYY-MM-DD` is read as a UTC day.
+   */
   from: z.string().max(40).optional(),
-  /** ISO date or date-time, inclusive (a bare date covers that whole day). */
+  /** Inclusive upper bound, same rules as `from` (a bare date covers that whole UTC day). */
   to: z.string().max(40).optional(),
   sort: z.enum(GLITCH_SORTS).optional(),
 })

@@ -133,7 +133,7 @@ export const fixtureDashboard: Dashboard = {
     creature: 0,
     unknown: 0,
   },
-  recent: fixtureGlitches.slice(0, 3),
+  recent: fixtureGlitches,
   lockdown: false,
 }
 
