@@ -20,15 +20,19 @@ Stack: TypeScript · React · TanStack Start (Router, Query, Table) · PostgreSQ
 docker compose up -d db        # Postgres on localhost:5432 (htf/htf/htf)
 cd app
 npm install
-npm run db:setup               # push Drizzle schema + seed glitches
+npm run db:init                # push the Drizzle schema; seed demo data only if the DB is empty
 npm run dev                    # http://localhost:3000
 ```
 
-Everything in Docker: `docker compose --profile full up --build`
+`npm run db:setup` pushes the schema and **resets** all data to the demo seed (use it to rehearse).
+
+Everything in Docker: `docker compose --profile full up --build`. A one-shot `migrate` service runs
+`db:init` before the app starts, so a fresh machine needs no extra step. Ports can be moved with
+`DB_PORT` / `APP_PORT`, e.g. `APP_PORT=3300 docker compose --profile full up --build`.
 
 ### Demo accounts
 
-Created by `npm run db:setup` (re-running it resets them).
+Created by `npm run db:init` on an empty database; `npm run db:setup` resets them.
 
 | Codename | Role | Password |
 |----------|------|----------|
