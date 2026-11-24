@@ -104,15 +104,16 @@ function useLabelLayout(): Map<string, LabelSlot> {
     const placed: Array<{ left: number; right: number; top: number; bottom: number }> = []
     for (const box of boxes) {
       let { top, bottom } = box
-      for (let tries = 0; tries < boxes.length; tries++) {
-        const hit = placed.find(
+      const overlapped = () =>
+        placed.find(
           (p) =>
             box.left < p.right + LABEL_GAP &&
             box.right > p.left - LABEL_GAP &&
             top < p.bottom + LABEL_GAP &&
             bottom > p.top - LABEL_GAP,
         )
-        if (!hit) break
+      // Each step clears the box it hit and only ever moves up, so this ends within placed.length steps.
+      for (let hit = overlapped(); hit; hit = overlapped()) {
         const up = bottom - (hit.top - LABEL_GAP)
         top -= up
         bottom -= up
