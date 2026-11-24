@@ -105,14 +105,14 @@ function Rail({ items }: { items: Array<NavItem> }) {
       className="sticky top-20 z-20 hidden h-[calc(100dvh-5rem)] w-22 shrink-0 flex-col items-center gap-2 border-r border-line bg-[color-mix(in_oklab,var(--ground)_70%,transparent)] py-6 backdrop-blur-md lg:flex"
     >
       {items.map((item) => (
-        <NavEntry key={item.label} item={item} className={railItem} iconClass="size-7" tooltip />
+        <NavEntry key={item.label} item={item} className={railItem} iconClass="size-9" tooltip />
       ))}
     </nav>
   )
 }
 
 const hotbarItem =
-  'flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-transparent text-fg-muted text-[0.7rem] font-medium transition-colors'
+  'group flex h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent text-fg-muted text-[0.7rem] font-medium transition-colors'
 
 /** Phone navigation: four hotbar slots and the report seal raised in the middle. */
 function Hotbar({ items }: { items: Array<NavItem> }) {
@@ -130,7 +130,7 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
             key={item.label}
             item={item}
             className={hotbarItem}
-            iconClass="size-7"
+            iconClass="size-9"
             showLabel
           />
         ))}
@@ -148,7 +148,7 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
             key={item.label}
             item={item}
             className={hotbarItem}
-            iconClass="size-7"
+            iconClass="size-9"
             showLabel
           />
         ))}
@@ -174,10 +174,21 @@ function NavEntry({
   showLabel?: boolean
   tooltip?: boolean
 }) {
-  const Icon = item.icon
   const content = (
     <>
-      <Icon className={iconClass} />
+      <img
+        src={item.image}
+        alt=""
+        width={128}
+        height={128}
+        draggable={false}
+        className={cx(
+          iconClass,
+          'rounded-md object-cover transition-[filter,transform] duration-200',
+          'group-hover:scale-105 group-hover:brightness-110',
+          'group-aria-[current=page]:brightness-110',
+        )}
+      />
       {showLabel && <span className="max-w-full truncate">{item.label}</span>}
       {tooltip && (
         <span
@@ -195,7 +206,7 @@ function NavEntry({
         type="button"
         disabled
         aria-label={showLabel ? undefined : item.label}
-        className={cx(className, 'cursor-not-allowed opacity-50')}
+        className={cx(className, 'cursor-not-allowed opacity-75')}
       >
         {content}
       </button>
