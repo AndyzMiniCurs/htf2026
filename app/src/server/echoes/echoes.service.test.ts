@@ -1,4 +1,4 @@
-import { eq, inArray, like, sql } from 'drizzle-orm'
+import { eq, inArray, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db } from '#/db/index.ts'
 import { echoImages, echoes, glitches, guardians } from '#/db/schema.ts'
@@ -18,7 +18,6 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
   const created: Array<string> = []
 
   beforeAll(async () => {
-    await db.delete(guardians).where(like(guardians.codename, 'echotest-%'))
     const rows = await db
       .insert(guardians)
       .values({
@@ -103,7 +102,8 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
   })
 
   it('stores nothing when the image is rejected', async () => {
-    const count = () => db.$count(glitches)
+    // Count only this test's reporter: other writers (dev server, sensor simulator) may run in parallel.
+    const count = () => db.$count(echoes, eq(echoes.reportingGuardianId, reporter.guardianId))
     const before = await count()
     await expect(
       reportEcho(reporter, {
