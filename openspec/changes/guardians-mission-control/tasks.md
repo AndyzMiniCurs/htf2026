@@ -46,7 +46,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 ## 5. Real-time monitoring
 
-- [ ] 5.1 [BE] Write `server/events/bus.ts` and the `GET /api/events` SSE route (session required, 15 s heartbeat, notification events only to the target guardian); publish events from every write service; verify `curl -N` with a session cookie prints events while reporting an echo
+- [x] 5.1 [BE] Write `server/events/bus.ts` and the `GET /api/events` SSE route (session required, 15 s heartbeat, notification events only to the target guardian); publish events from every write service; verify `curl -N` with a session cookie prints events while reporting an echo
 - [x] 5.2 [BE] Write `server/monitoring/magic.ts` (pure, weights from the spec) and the real `getDashboard` (`recent` = every open glitch + the 5 latest FIXED, newest first); verify unit tests: all fixed -> 100, one normal `LEAKED` -> 90, never below 0
 - [ ] 5.3 [BE] Write the sensor simulator (3 s random walk for 3 sensors, lazy start once per process), the real `getSensorSeries` and `triggerIncident` (C); verify readings grow in `sensor_readings` and `triggerIncident` produces a visible drop
 - [ ] 5.4 [BE] Implement `setLockdown` (C) stored in `app_state`, publishing a `lockdown` event; verify a defender call -> `FORBIDDEN`

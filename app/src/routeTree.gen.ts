@@ -19,6 +19,7 @@ import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
 import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppSensorsRouteImport } from './routes/_app/sensors'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as AppEchoesNewRouteImport } from './routes/_app/echoes/new'
 import { Route as AppGlitchesIndexRouteImport } from './routes/_app/glitches/index'
 import { Route as AppGlitchesGlitchIdRouteImport } from './routes/_app/glitches/$glitchId'
@@ -73,6 +74,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiEventsRoute = ApiEventsRouteImport.update({
+  id: '/api/events',
+  path: '/api/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppEchoesNewRoute = AppEchoesNewRouteImport.update({
   id: '/echoes/new',
   path: '/echoes/new',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
   '/settings': typeof AppSettingsRoute
+  '/api/events': typeof ApiEventsRoute
   '/echoes/new': typeof AppEchoesNewRoute
   '/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
   '/api/images/$echoId': typeof ApiImagesEchoIdRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
   '/settings': typeof AppSettingsRoute
+  '/api/events': typeof ApiEventsRoute
   '/': typeof AppIndexRoute
   '/echoes/new': typeof AppEchoesNewRoute
   '/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/_app/map': typeof AppMapRoute
   '/_app/sensors': typeof AppSensorsRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/api/events': typeof ApiEventsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/echoes/new': typeof AppEchoesNewRoute
   '/_app/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/sensors'
     | '/settings'
+    | '/api/events'
     | '/echoes/new'
     | '/glitches/$glitchId'
     | '/api/images/$echoId'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/sensors'
     | '/settings'
+    | '/api/events'
     | '/'
     | '/echoes/new'
     | '/glitches/$glitchId'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/_app/map'
     | '/_app/sensors'
     | '/_app/settings'
+    | '/api/events'
     | '/_app/'
     | '/_app/echoes/new'
     | '/_app/glitches/$glitchId'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiEventsRoute: typeof ApiEventsRoute
   ApiImagesEchoIdRoute: typeof ApiImagesEchoIdRoute
 }
 
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/events': {
+      id: '/api/events'
+      path: '/api/events'
+      fullPath: '/api/events'
+      preLoaderRoute: typeof ApiEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/echoes/new': {
       id: '/_app/echoes/new'
       path: '/echoes/new'
@@ -332,6 +352,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiEventsRoute: ApiEventsRoute,
   ApiImagesEchoIdRoute: ApiImagesEchoIdRoute,
 }
 export const routeTree = rootRouteImport

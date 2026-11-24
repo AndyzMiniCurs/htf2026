@@ -1,3 +1,4 @@
+import { publish } from '../events/bus.ts'
 import * as repo from './echoes.repository.ts'
 import { readEchoImage } from './image.ts'
 import type { ReportEchoInput, ReportEchoResult } from '#/lib/echo.ts'
@@ -17,6 +18,8 @@ export async function reportEcho(
     location: input.location,
     image,
   })
+  publish({ type: 'glitch.created', glitchId })
+  publish({ type: 'echo.created', echoId, glitchId })
   return {
     echo: {
       echoId,

@@ -1,4 +1,5 @@
 import { AppError } from '#/lib/errors.ts'
+import { publish } from '../events/bus.ts'
 import * as repo from './glitches.repository.ts'
 import { assertCanAdvance, canReopen, nextStatus } from './status.ts'
 import type { GlitchDetail, GlitchListItem, GlitchQuery } from '#/lib/glitch.ts'
@@ -41,6 +42,7 @@ export async function advanceStatus(actor: Guardian, glitchId: string): Promise<
   if (!(await repo.updateGlitchStatus(glitchId, state.status, to, fixed))) {
     throw new AppError('CONFLICT', `${glitchId} changed in the meantime, reload and try again`)
   }
+  publish({ type: 'glitch.updated', glitchId })
   return listItem(glitchId)
 }
 
@@ -56,5 +58,6 @@ export async function reopenGlitch(glitchId: string): Promise<GlitchListItem> {
   if (!(await repo.updateGlitchStatus(glitchId, 'FIXED', 'LEAKED', null))) {
     throw new AppError('CONFLICT', `${glitchId} changed in the meantime, reload and try again`)
   }
+  publish({ type: 'glitch.updated', glitchId })
   return listItem(glitchId)
 }
