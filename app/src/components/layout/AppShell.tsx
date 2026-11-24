@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Ellipsis } from 'lucide-react'
 import { cx } from '#/components/ui/cx.ts'
-import { Button } from '#/components/ui/Button.tsx'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
@@ -67,11 +66,13 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">
           <LivePulse />
-          <div className="hidden lg:block">
-            <Button size="md" icon={<HornIcon className="size-5" />}>
-              Report an echo
-            </Button>
-          </div>
+          <Link
+            to="/echoes/new"
+            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-colors hover:bg-royal-hi lg:inline-flex"
+          >
+            <HornIcon className="size-5" />
+            Report an echo
+          </Link>
           {me && <GuardianMenu me={me} />}
         </div>
       </div>
@@ -135,13 +136,13 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
           />
         ))}
         <div className="flex flex-1 justify-center">
-          <button
-            type="button"
+          <Link
+            to="/echoes/new"
             aria-label="Report an echo"
             className="-mt-7 grid size-16 place-items-center rounded-full border-4 border-ground bg-[radial-gradient(circle_at_35%_30%,var(--gold-hi),var(--gold)_45%,var(--gold-deep))] text-[#2a1a05] shadow-[0_10px_24px_-6px_var(--gold)] transition-transform active:scale-95"
           >
             <HornIcon className="size-8" />
-          </button>
+          </Link>
         </div>
         {right.map((item) => (
           <NavEntry
@@ -217,7 +218,7 @@ function NavEntry({
       to={item.to}
       aria-label={showLabel ? undefined : item.label}
       className={className}
-      activeOptions={{ exact: true }}
+      activeOptions={{ exact: item.to === '/' }}
       activeProps={{
         className:
           'text-gold-hi! border-gold/80! bg-[radial-gradient(circle_at_50%_35%,color-mix(in_oklab,var(--gold)_24%,transparent),color-mix(in_oklab,var(--gold-deep)_18%,var(--field))_75%)] shadow-[0_0_18px_-4px_var(--gold),inset_0_1px_0_color-mix(in_oklab,var(--gold-hi)_40%,transparent)]',

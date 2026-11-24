@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppEchoesNewRouteImport } from './routes/_app/echoes/new'
+import { Route as AppGlitchesIndexRouteImport } from './routes/_app/glitches/index'
+import { Route as AppGlitchesGlitchIdRouteImport } from './routes/_app/glitches/$glitchId'
 import { Route as ApiImagesEchoIdRouteImport } from './routes/api/images.$echoId'
 
 const AppRoute = AppRouteImport.update({
@@ -28,6 +31,21 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEchoesNewRoute = AppEchoesNewRouteImport.update({
+  id: '/echoes/new',
+  path: '/echoes/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGlitchesIndexRoute = AppGlitchesIndexRouteImport.update({
+  id: '/glitches/',
+  path: '/glitches/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGlitchesGlitchIdRoute = AppGlitchesGlitchIdRouteImport.update({
+  id: '/glitches/$glitchId',
+  path: '/glitches/$glitchId',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiImagesEchoIdRoute = ApiImagesEchoIdRouteImport.update({
   id: '/api/images/$echoId',
   path: '/api/images/$echoId',
@@ -37,26 +55,55 @@ const ApiImagesEchoIdRoute = ApiImagesEchoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
+  '/echoes/new': typeof AppEchoesNewRoute
+  '/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
   '/api/images/$echoId': typeof ApiImagesEchoIdRoute
+  '/glitches/': typeof AppGlitchesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof AppIndexRoute
+  '/echoes/new': typeof AppEchoesNewRoute
+  '/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
   '/api/images/$echoId': typeof ApiImagesEchoIdRoute
+  '/glitches': typeof AppGlitchesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/echoes/new': typeof AppEchoesNewRoute
+  '/_app/glitches/$glitchId': typeof AppGlitchesGlitchIdRoute
   '/api/images/$echoId': typeof ApiImagesEchoIdRoute
+  '/_app/glitches/': typeof AppGlitchesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/api/images/$echoId'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/echoes/new'
+    | '/glitches/$glitchId'
+    | '/api/images/$echoId'
+    | '/glitches/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/api/images/$echoId'
-  id: '__root__' | '/_app' | '/login' | '/_app/' | '/api/images/$echoId'
+  to:
+    | '/login'
+    | '/'
+    | '/echoes/new'
+    | '/glitches/$glitchId'
+    | '/api/images/$echoId'
+    | '/glitches'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/_app/'
+    | '/_app/echoes/new'
+    | '/_app/glitches/$glitchId'
+    | '/api/images/$echoId'
+    | '/_app/glitches/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +135,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/echoes/new': {
+      id: '/_app/echoes/new'
+      path: '/echoes/new'
+      fullPath: '/echoes/new'
+      preLoaderRoute: typeof AppEchoesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/glitches/': {
+      id: '/_app/glitches/'
+      path: '/glitches'
+      fullPath: '/glitches/'
+      preLoaderRoute: typeof AppGlitchesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/glitches/$glitchId': {
+      id: '/_app/glitches/$glitchId'
+      path: '/glitches/$glitchId'
+      fullPath: '/glitches/$glitchId'
+      preLoaderRoute: typeof AppGlitchesGlitchIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/images/$echoId': {
       id: '/api/images/$echoId'
       path: '/api/images/$echoId'
@@ -100,10 +168,16 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppEchoesNewRoute: typeof AppEchoesNewRoute
+  AppGlitchesGlitchIdRoute: typeof AppGlitchesGlitchIdRoute
+  AppGlitchesIndexRoute: typeof AppGlitchesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppEchoesNewRoute: AppEchoesNewRoute,
+  AppGlitchesGlitchIdRoute: AppGlitchesGlitchIdRoute,
+  AppGlitchesIndexRoute: AppGlitchesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

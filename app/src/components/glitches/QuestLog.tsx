@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { ScrollText, Sparkles } from 'lucide-react'
 import { cx } from '#/components/ui/cx.ts'
@@ -35,7 +36,7 @@ export function QuestLog({ glitches, highlightedId, onHighlight }: QuestLogProps
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Quest
+            <QuestCard
               glitch={glitch}
               highlighted={highlightedId === glitch.glitchId}
               onHighlight={onHighlight}
@@ -47,26 +48,28 @@ export function QuestLog({ glitches, highlightedId, onHighlight }: QuestLogProps
   )
 }
 
-function Quest({
+/** One glitch as a quest entry; opens its detail page. */
+export function QuestCard({
   glitch,
-  highlighted,
+  highlighted = false,
   onHighlight,
 }: {
   glitch: GlitchListItem
-  highlighted: boolean
-  onHighlight: (glitchId: string | null) => void
+  highlighted?: boolean
+  onHighlight?: (glitchId: string | null) => void
 }) {
   const status = STATUS_META[glitch.status]
   const type = TYPE_META[glitch.type]
   const TypeIcon = type.icon
   const StatusIcon = status.icon
   return (
-    <article
-      tabIndex={0}
-      onMouseEnter={() => onHighlight(glitch.glitchId)}
-      onMouseLeave={() => onHighlight(null)}
-      onFocus={() => onHighlight(glitch.glitchId)}
-      onBlur={() => onHighlight(null)}
+    <Link
+      to="/glitches/$glitchId"
+      params={{ glitchId: glitch.glitchId }}
+      onMouseEnter={() => onHighlight?.(glitch.glitchId)}
+      onMouseLeave={() => onHighlight?.(null)}
+      onFocus={() => onHighlight?.(glitch.glitchId)}
+      onBlur={() => onHighlight?.(null)}
       className={cx(
         'group grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1 rounded-xl border p-3.5 transition-[border-color,background-color,box-shadow] duration-300',
         highlighted
@@ -100,7 +103,7 @@ function Quest({
           {glitch.assignee ? glitch.assignee.codename : 'Unassigned'}
         </span>
       </div>
-    </article>
+    </Link>
   )
 }
 

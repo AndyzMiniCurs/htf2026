@@ -66,6 +66,14 @@ export const DISTRICTS: Array<District> = [
 /** Half the width of the world plane that glitch map coordinates (0..100) cover. */
 const WORLD_HALF = 21
 
+/** A district's centre in map coordinates (0..100), the inverse of the mapping in placeGlitch. */
+export function districtMapPoint(district: District): { x: number; y: number } {
+  return {
+    x: 50 + (district.position[0] / WORLD_HALF) * 50,
+    y: 50 + (district.position[2] / WORLD_HALF) * 50,
+  }
+}
+
 /** Deterministic 0..1 from a string, so a glitch keeps its spot across renders and visitors. */
 function hash(text: string): number {
   let h = 2166136261
