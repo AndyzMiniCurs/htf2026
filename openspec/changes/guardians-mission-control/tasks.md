@@ -53,7 +53,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 5.5 [FE] Write the `useLiveEvents` hook (EventSource, backoff reconnect, `router.invalidate()` on data events, lockdown and notification dispatch); verify that an echo reported in browser A appears in browser B within 2 s
 - [x] 5.6 [FE] Build the dashboard `/`: SVG magic gauge, counts per status and type, recent glitches, lockdown banner; verify the gauge drops when a glitch is reported (UI done 2026-11-24; the drop shows once 5.2 makes getDashboard real)
 - [ ] 5.7 [FE] Build `/sensors`: one `recharts` line chart per sensor (last 15 min), appended live; verify the charts move without reload
-- [ ] 5.8 [FE] Build `/map`: `public/achrona-map.svg` with type-colored markers placed by percentage; tapping a marker shows a summary card with a link; verify a fixed glitch's marker disappears live
+- [x] 5.8 [FE] Build `/map`: `public/achrona-map.svg` with type-colored markers placed by percentage; tapping a marker shows a summary card with a link; verify a fixed glitch's marker disappears live (fixed glitches are filtered out; the live part arrives with 5.5)
 - [ ] 5.9 [FE] Add the lockdown toggle (C) and the red lockdown theme (`data-lockdown` on `<html>`); verify all open browsers switch within 2 s
 
 ## 6. AI automation (Jev)

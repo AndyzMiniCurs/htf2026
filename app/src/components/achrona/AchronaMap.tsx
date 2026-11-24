@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react'
 import { useId } from 'react'
 import { cx } from '#/components/ui/cx.ts'
-import { TYPE_META } from '#/components/glitches/glitch-meta.ts'
+import { STATUS_META, TYPE_META } from '#/components/glitches/glitch-meta.ts'
 import { DISTRICTS, districtMapPoint } from './world.ts'
 import type { GlitchListItem, Location } from '#/lib/glitch.ts'
 
@@ -21,6 +21,9 @@ type AchronaMapProps = {
   value?: Location | null
   /** Makes the map a location picker. */
   onPick?: (location: Location) => void
+  /** Makes the glitch markers buttons; called with the tapped glitch. */
+  onSelectGlitch?: (glitchId: string) => void
+  selectedId?: string | null
   className?: string
 }
 
@@ -28,7 +31,14 @@ type AchronaMapProps = {
  * The chart of Achrona seen from above: the same districts as the 3D world, at the same
  * places, so a spot picked here is where its rift appears in the world.
  */
-export function AchronaMap({ glitches = [], value, onPick, className }: AchronaMapProps) {
+export function AchronaMap({
+  glitches = [],
+  value,
+  onPick,
+  onSelectGlitch,
+  selectedId = null,
+  className,
+}: AchronaMapProps) {
   const gradientId = useId()
   const picking = Boolean(onPick)
 
@@ -105,28 +115,66 @@ export function AchronaMap({ glitches = [], value, onPick, className }: AchronaM
             </g>
           )
         })}
-        {glitches.map(({ glitchId, status, type, location }) =>
-          status === 'FIXED' || !location ? null : (
-            <g key={glitchId}>
-              <circle
-                cx={toView(location.x)}
-                cy={toView(location.y)}
-                r="2.6"
-                fill={TYPE_META[type].color}
-                fillOpacity=".25"
-              />
-              <circle
-                cx={toView(location.x)}
-                cy={toView(location.y)}
-                r="1.3"
-                fill={TYPE_META[type].color}
-                stroke="#0c0f1a"
-                strokeWidth=".4"
-              />
-            </g>
-          ),
-        )}
+        {!onSelectGlitch &&
+          glitches.map(({ glitchId, status, type, location }) =>
+            status === 'FIXED' || !location ? null : (
+              <g key={glitchId}>
+                <circle
+                  cx={toView(location.x)}
+                  cy={toView(location.y)}
+                  r="2.6"
+                  fill={TYPE_META[type].color}
+                  fillOpacity=".25"
+                />
+                <circle
+                  cx={toView(location.x)}
+                  cy={toView(location.y)}
+                  r="1.3"
+                  fill={TYPE_META[type].color}
+                  stroke="#0c0f1a"
+                  strokeWidth=".4"
+                />
+              </g>
+            ),
+          )}
       </svg>
+      {onSelectGlitch &&
+        glitches.map((glitch) => {
+          if (glitch.status === 'FIXED' || !glitch.location) return null
+          const { label, color, icon: Icon } = TYPE_META[glitch.type]
+          const selected = glitch.glitchId === selectedId
+          return (
+            <button
+              key={glitch.glitchId}
+              type="button"
+              aria-label={`${glitch.glitchId}, ${STATUS_META[glitch.status].label}, ${label}`}
+              aria-pressed={selected}
+              onClick={() => onSelectGlitch(glitch.glitchId)}
+              className="group absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full"
+              style={{
+                left: `${toView(glitch.location.x)}%`,
+                top: `${toView(glitch.location.y)}%`,
+              }}
+            >
+              {glitch.status === 'LEAKED' && (
+                <span
+                  aria-hidden
+                  className="absolute inset-1.5 rounded-full motion-safe:animate-ping"
+                  style={{ background: color, opacity: 0.35 }}
+                />
+              )}
+              <span
+                className={cx(
+                  'relative grid size-8 place-items-center rounded-full border-2 bg-ground shadow-[0_4px_10px_rgb(0_0_0/0.6)] transition-transform duration-200 group-hover:scale-110',
+                  selected && 'scale-125 border-gold',
+                )}
+                style={selected ? undefined : { borderColor: color }}
+              >
+                <Icon aria-hidden className="size-4" style={{ color }} />
+              </span>
+            </button>
+          )
+        })}
       {value && (
         <MapPin
           aria-hidden
