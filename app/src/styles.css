@@ -716,6 +716,105 @@ html[data-desync='heavy'] {
   }
 }
 
+/* The war table (components/achrona): a night chart sheet lying on a dark table. */
+.war-table {
+  background: radial-gradient(70% 90% at 50% 40%, #141a36, #07090f 75%), #07090f;
+}
+.chart-sheet,
+.chart-sea {
+  background: radial-gradient(75% 70% at 50% 42%, #1d2756, #0c1029 70%, #080b1a), #0c1029;
+}
+.chart-sheet {
+  box-shadow:
+    0 0 0 1px rgb(224 182 106 / 0.35),
+    0 0 0 5px rgb(10 12 24 / 0.9),
+    0 0 0 6px rgb(224 182 106 / 0.18),
+    0 30px 60px -20px rgb(0 0 0 / 0.9);
+}
+/* Magic flowing along the ley lines, toward the islands. */
+.ley-flow {
+  animation: ley-flow 2.4s linear infinite;
+}
+@keyframes ley-flow {
+  to {
+    stroke-dashoffset: -8.4;
+  }
+}
+/* A ley line to a torn island sputters. */
+.ley-torn {
+  animation:
+    ley-flow 1.2s linear infinite,
+    ley-sputter 2.6s steps(1) infinite;
+}
+@keyframes ley-sputter {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.15;
+  }
+  16% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.35;
+  }
+  58% {
+    opacity: 1;
+  }
+}
+.compass-ring {
+  animation: compass-turn 60s linear infinite;
+}
+@keyframes compass-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* The radar beam: a gilt wedge whose leading edge points north at rest, fading outward. */
+.radar-beam {
+  background: conic-gradient(
+    from -42deg,
+    transparent 0deg,
+    rgb(243 211 154 / 0.1) 40deg,
+    rgb(255 236 200 / 0.5) 41.6deg,
+    transparent 42deg
+  );
+  mask: radial-gradient(circle, transparent 3%, #000 12%, #000 30%, transparent 66%);
+  mix-blend-mode: screen;
+}
+/* Ripples sent out by a rift that is still leaking. */
+.rift-ripple {
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid;
+  border-radius: 9999px;
+  animation: rift-ripple 2.2s var(--ease-out-expo) infinite;
+  pointer-events: none;
+}
+@keyframes rift-ripple {
+  from {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+/* The Desync's taint breathes around its rifts. */
+.taint {
+  animation: taint-breathe 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes taint-breathe {
+  50% {
+    opacity: 0.6;
+  }
+}
+
 /* Day and night: the new sky washes in as a circle from where the guardian tapped. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
