@@ -8,31 +8,54 @@ import { EmptyState } from '#/components/ui/EmptyState.tsx'
 import { Panel } from '#/components/ui/Panel.tsx'
 import { RelativeTime } from '#/components/ui/RelativeTime.tsx'
 import { getErrorCode } from '#/lib/errors.ts'
-import { getGlitch } from '#/lib/glitches.functions.ts'
-import type { Echo, GlitchDetail } from '#/lib/glitch.ts'
+import { getGlitch, getGlitches } from '#/lib/glitches.functions.ts'
+import { listGuardians } from '#/lib/guardians.functions.ts'
+import {
+  CommandPanel,
+  MoveEcho,
+  StageActions,
+  UpdateForm,
+  permissionsFor,
+} from '#/components/glitches/GlitchActions.tsx'
+import type { Echo, GlitchDetail, GlitchListItem } from '#/lib/glitch.ts'
 
 export const Route = createFileRoute('/_app/glitches/$glitchId')({
-  loader: async ({ params }) => {
+  loader: async ({ params, context }) => {
+    let glitch: GlitchDetail
     try {
-      return await getGlitch({ data: { glitchId: params.glitchId } })
+      glitch = await getGlitch({ data: { glitchId: params.glitchId } })
     } catch (err) {
       if (getErrorCode(err) === 'NOT_FOUND' || getErrorCode(err) === 'VALIDATION') throw notFound()
       throw err
     }
+    // Commanders also need the roster and the other open glitches for assign, merge and move.
+    const commander = context.me.role === 'commander'
+    const [guardians, open] = commander
+      ? await Promise.all([
+          listGuardians(),
+          getGlitches({ data: { status: ['LEAKED', 'ASSESSING', 'CONTAINING'] } }),
+        ])
+      : [[], []]
+    return { glitch, guardians, openGlitches: open }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.glitchId ?? 'Glitch'} · Guardians of the Grid` }],
+    meta: [{ title: `${loaderData?.glitch.glitchId ?? 'Glitch'} · Guardians of the Grid` }],
   }),
   component: GlitchPage,
   notFoundComponent: GlitchNotFound,
 })
 
 function GlitchPage() {
-  const glitch = Route.useLoaderData()
+  const { glitch, guardians, openGlitches } = Route.useLoaderData()
+  const { me } = Route.useRouteContext()
+  const permissions = permissionsFor(me, glitch)
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <BackToLog />
-      <Header glitch={glitch} />
+      <Header
+        glitch={glitch}
+        actions={<StageActions glitch={glitch} permissions={permissions} />}
+      />
       {glitch.mergedInto && (
         <p className="flex items-center gap-2 rounded-lg border border-gold/50 bg-gold/10 px-4 py-3 text-fg">
           <GitMerge aria-hidden className="size-5 text-gold" />
@@ -47,10 +70,26 @@ function GlitchPage() {
         </p>
       )}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <Panel heading={`Echoes (${glitch.echoes.length})`}>
-          <EchoTimeline echoes={glitch.echoes} />
-        </Panel>
         <div className="flex flex-col gap-5">
+          <Panel heading={`Echoes (${glitch.echoes.length})`}>
+            <EchoTimeline
+              echoes={glitch.echoes}
+              movable={permissions.canCommand ? openGlitches : null}
+              glitchId={glitch.glitchId}
+            />
+          </Panel>
+          {permissions.canWork && !glitch.mergedInto && (
+            <Panel heading="Report progress">
+              <UpdateForm glitchId={glitch.glitchId} />
+            </Panel>
+          )}
+        </div>
+        <div className="flex flex-col gap-5">
+          {permissions.canCommand && (
+            <Panel heading="Command">
+              <CommandPanel glitch={glitch} guardians={guardians} openGlitches={openGlitches} />
+            </Panel>
+          )}
           <Panel heading="Where">
             {glitch.location ? (
               <AchronaMap glitches={[glitch]} />
@@ -79,7 +118,7 @@ function BackToLog() {
   )
 }
 
-function Header({ glitch }: { glitch: GlitchDetail }) {
+function Header({ glitch, actions }: { glitch: GlitchDetail; actions: React.ReactNode }) {
   return (
     <Panel>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -107,8 +146,9 @@ function Header({ glitch }: { glitch: GlitchDetail }) {
             )}
           </p>
         </div>
-        <div className="w-full lg:w-[26rem]">
+        <div className="flex w-full flex-col gap-4 lg:w-[26rem]">
           <LifecycleStrip status={glitch.status} />
+          <div className="flex justify-end">{actions}</div>
         </div>
       </div>
     </Panel>
@@ -116,7 +156,16 @@ function Header({ glitch }: { glitch: GlitchDetail }) {
 }
 
 /** Echoes oldest first, like a chronicle of how the glitch unfolded. */
-function EchoTimeline({ echoes }: { echoes: Array<Echo> }) {
+function EchoTimeline({
+  echoes,
+  movable,
+  glitchId,
+}: {
+  echoes: Array<Echo>
+  /** Open glitches an echo can be moved to; null when the viewer cannot move echoes. */
+  movable: Array<GlitchListItem> | null
+  glitchId: string
+}) {
   if (echoes.length === 0) {
     return (
       <EmptyState icon={<ScrollText />} title="No echoes yet">
@@ -138,6 +187,9 @@ function EchoTimeline({ echoes }: { echoes: Array<Echo> }) {
               <span className="label-caps text-[0.62rem] text-gold">commander</span>
             )}
             <RelativeTime iso={echo.timestamp} className="text-sm text-fg-faint" />
+            {movable && (
+              <MoveEcho echoId={echo.echoId} currentGlitchId={glitchId} openGlitches={movable} />
+            )}
             {echo.groupedByAi && (
               <Badge
                 color="var(--curse-hi)"
