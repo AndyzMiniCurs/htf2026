@@ -37,13 +37,18 @@ function useAction() {
   const router = useRouter()
   const toast = useToast()
   const [pending, setPending] = useState<string | null>(null)
-  async function run(key: string, action: () => Promise<unknown>, success: string) {
+  /** Resolves to the action's result, or null when it failed (the toast already said why). */
+  async function run<TResult>(
+    key: string,
+    action: () => Promise<TResult>,
+    success: string,
+  ): Promise<TResult | null> {
     setPending(key)
     try {
-      await action()
+      const result = await action()
       toast.show({ tone: 'success', title: success })
       await router.invalidate()
-      return true
+      return result
     } catch (err) {
       const code = getErrorCode(err)
       toast.show({
@@ -54,7 +59,7 @@ function useAction() {
             ? err.message
             : 'Mission control did not answer. Check your connection and try again.',
       })
-      return false
+      return null
     } finally {
       setPending(null)
     }
@@ -97,7 +102,7 @@ export function StageActions({
       </p>
     )
   }
-  const next = GLITCH_STATUSES[GLITCH_STATUSES.indexOf(glitch.status) + 1] as GlitchStatus
+  const next = GLITCH_STATUSES[GLITCH_STATUSES.indexOf(glitch.status) + 1]
   const NextIcon = STATUS_META[next].icon
   return (
     <Button
@@ -276,18 +281,16 @@ export function MoveEcho({
         onChange={async (e) => {
           const target = e.target.value
           if (!target) return
-          let landed: string | null = null
-          const ok = await run(
+          const moved = await run(
             'move',
-            async () => {
-              landed = (
-                await moveEcho({ data: { echoId, toGlitchId: target === 'new' ? null : target } })
-              ).glitchId
-            },
+            () => moveEcho({ data: { echoId, toGlitchId: target === 'new' ? null : target } }),
             target === 'new' ? 'Echo moved out to a new glitch' : `Echo moved to ${target}`,
           )
-          if (ok && landed && target === 'new') {
-            await router.navigate({ to: '/glitches/$glitchId', params: { glitchId: landed } })
+          if (moved && target === 'new') {
+            await router.navigate({
+              to: '/glitches/$glitchId',
+              params: { glitchId: moved.glitchId },
+            })
           }
         }}
         className="h-9 rounded-lg border border-line bg-field px-2 text-sm text-fg-muted hover:border-line-strong focus:border-royal-hi focus:outline-none"
