@@ -9,26 +9,12 @@ import {
 import { fixtureEchoes, fixtureMe } from '#/lib/fixtures.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
+import * as echoes from '#/server/echoes/echoes.service.ts'
 
 export const reportEcho = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .validator(parseReportEchoForm)
-  .handler(
-    async ({ data }): Promise<ReportEchoResult> => ({
-      echo: {
-        echoId: 200,
-        glitchId: 'GL-0200',
-        description: data.description,
-        timestamp: new Date().toISOString(),
-        reporter: fixtureMe,
-        location: data.location,
-        groupedByAi: false,
-        imageUrl: null,
-      },
-      glitchId: 'GL-0200',
-      outcome: 'created',
-    }),
-  )
+  .handler(async ({ data, context }): Promise<ReportEchoResult> => echoes.reportEcho(context.guardian, data))
 
 export const addGlitchUpdate = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
