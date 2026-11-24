@@ -6,7 +6,7 @@ How: `design.md` (D1-D8). Behaviour: `specs/oracle/spec.md`.
 
 ## 1. Contract
 
-- [ ] 1.1 [BE] Extend `lib/assistant.ts`: the five new `INTENTS`, `oracleActionSchema` / `OracleAction`, `action` on `assistantAnswerSchema`, optional `history` (≤ 6, question 1-500 chars) on `askAssistantInput`; return `action: null` from the current answers; update D12 in `guardians-mission-control/design.md` in the same commit; verify `npm run typecheck` and the existing assistant tests pass, and tell Andu
+- [x] 1.1 [BE] Extend `lib/assistant.ts`: the five new `INTENTS`, `oracleActionSchema` / `OracleAction`, `action` on `assistantAnswerSchema`, optional `history` (≤ 6, question 1-500 chars) on `askAssistantInput`; return `action: null` from the current answers; update D12 in `guardians-mission-control/design.md` in the same commit; verify `npm run typecheck` and the existing assistant tests pass, and tell Andu
 
 ## 2. Foresight (pitch beat)
 

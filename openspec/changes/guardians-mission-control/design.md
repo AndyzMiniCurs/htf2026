@@ -173,7 +173,7 @@ type LiveEvent =
 | `getLeaderboard` (monitoring) | `void` | `LeaderboardEntry[]` |
 | `getReport` (monitoring) (C) | `void` | `Report` |
 | `getNotificationPrefs` / `setNotificationPrefs` (notifications) | `void` / `NotificationPrefs` | `NotificationPrefs` |
-| `askAssistant` (assistant) | `{ question: string }` (1-500 chars) | `AssistantAnswer` |
+| `askAssistant` (assistant) | `{ question: string; history?: Array<{ question: string; glitchIds: string[] }> }` (question 1-500 chars, history ≤ 6; change `oracle-foresight`) | `AssistantAnswer` (`{ intent; text; glitchIds; suggestions; action: OracleAction \| null }`) |
 | `GET /api/events` (server route) | session cookie | SSE stream of `LiveEvent` |
 | `GET /api/images/$echoId` (server route) | session cookie | image bytes with stored mime |
 

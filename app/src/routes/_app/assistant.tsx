@@ -25,6 +25,11 @@ const INTENT_LABEL: Record<Intent, string> = {
   'glitch-assignee': 'who is assigned',
   'magic-level': 'magic level',
   'glitch-runbook': 'what to do (runbook)',
+  foresight: 'what is coming',
+  'assign-glitch': 'assign a glitch',
+  'advance-glitch': 'advance a glitch',
+  'report-echo': 'report an echo',
+  'set-lockdown': 'lockdown',
   unknown: 'something I cannot answer yet',
 }
 

@@ -10,6 +10,11 @@ const INTENT_HINTS: Record<Intent, string> = {
   'glitch-assignee': 'who is assigned to or working on a glitch',
   'magic-level': 'how much magic is left, the magic level or reserve',
   'glitch-runbook': 'what to do about a glitch, the steps to fix it',
+  foresight: 'what is coming, what will break soon, predictions about the sensors',
+  'assign-glitch': 'a request to assign or give a glitch to a defender',
+  'advance-glitch': 'a request to move a glitch to its next status, or mark it fixed',
+  'report-echo': 'a request to report a new problem or echo',
+  'set-lockdown': 'a request to turn the city lockdown on or off',
   unknown: 'anything else',
 }
 
@@ -39,6 +44,15 @@ export type AssistantData = {
   glitch: GlitchDetail | null
 }
 
+// shortcut: intents still being built answer as unknown, removed once each has its template.
+const ANSWERED = new Set<Intent>([
+  'active-summary',
+  'glitch-status',
+  'glitch-assignee',
+  'magic-level',
+  'glitch-runbook',
+])
+
 const isOpen = (g: GlitchListItem) => g.status !== 'FIXED'
 const label = (g: GlitchListItem) => `${g.glitchId} (${g.type}, ${g.status})`
 
@@ -60,9 +74,10 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
     text,
     glitchIds,
     suggestions: asked === 'unknown' ? suggestions : [],
+    action: null,
   })
 
-  if (intent === 'unknown') {
+  if (intent === 'unknown' || !ANSWERED.has(intent)) {
     return answer(
       "I can't answer that yet. I know about active glitches, their status, who handles them, their runbooks and the magic level. Try one of these:",
     )
