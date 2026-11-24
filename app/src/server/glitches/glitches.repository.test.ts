@@ -1,4 +1,4 @@
-import { like, sql } from 'drizzle-orm'
+import { eq, inArray, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db } from '#/db/index.ts'
 import { echoes, glitches, guardians } from '#/db/schema.ts'
@@ -11,18 +11,18 @@ const reachable = await db.execute(sql`select 1`).then(
 )
 
 const token = `zq${Date.now().toString(36)}`
+/** Fixed ids far above the sequence; this test owns exactly these rows and nothing else. */
+const OWN_GLITCH_IDS = ['GL-9701', 'GL-9702', 'GL-9703', 'GL-9704']
 const ids = (items: Array<{ glitchId: string }>) => items.map((g) => g.glitchId)
 
 describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
   let guardianId = 0
 
-  async function cleanup() {
-    await db.delete(glitches).where(like(glitches.glitchId, 'GL-97%'))
-    await db.delete(guardians).where(like(guardians.codename, 'test-%'))
-  }
+  const deleteOwnGlitches = () =>
+    db.delete(glitches).where(inArray(glitches.glitchId, OWN_GLITCH_IDS))
 
   beforeAll(async () => {
-    await cleanup()
+    await deleteOwnGlitches() // leftovers of a crashed earlier run
     const inserted = await db
       .insert(guardians)
       .values({ codename: `test-${token}`, role: 'defender', passwordHash: 'x' })
@@ -84,7 +84,8 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
   })
 
   afterAll(async () => {
-    await cleanup()
+    await deleteOwnGlitches()
+    await db.delete(guardians).where(eq(guardians.guardianId, guardianId))
     await db.$client.end()
   })
 
