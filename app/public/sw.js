@@ -1,8 +1,8 @@
 // Guardians of the Grid service worker: keeps the app shell and its heavy assets available
 // offline. Data stays network-only; the page keeps showing what it last loaded.
-const CACHE = 'achrona-v1'
+const CACHE = 'achrona-v2'
 // Pages are cached as they are visited (they need a session), so the shell is static files only.
-const SHELL = ['/manifest.webmanifest', '/icon-192.png', '/icon-512.png']
+const SHELL = ['/manifest.webmanifest', '/favicon.svg', '/icon-192.png', '/icon-512.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)))

@@ -74,7 +74,7 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
           className="nav-progress absolute inset-x-0 -bottom-px h-0.5 bg-[linear-gradient(90deg,var(--gold-deep),var(--gold-hi),var(--curse-hi))] shadow-[0_0_10px_var(--gold)]"
         />
       )}
-      <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
+      <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:h-20 lg:pr-8 lg:pl-5">
         <Link to="/" className="flex min-h-11 shrink-0 items-center gap-3 rounded-lg">
           <Crest className="size-10 drop-shadow-[0_4px_10px_rgb(165_43_217/0.5)] lg:size-12" />
           <span className="flex flex-col">
