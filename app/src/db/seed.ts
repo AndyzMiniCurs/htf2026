@@ -1,8 +1,15 @@
+// Relative imports only: seed runs under plain node, which doesn't resolve the `#/` alias.
 import { sql } from 'drizzle-orm'
 import { hashPassword } from '../server/auth/password.ts'
 import { db } from './index.ts'
 import { glitches, guardians } from './schema.ts'
-// Relative import: seed runs under plain node, which doesn't resolve the `#/` alias.
+
+// `--if-empty` (used by `db:init` and the Docker migrate service) never wipes existing data.
+if (process.argv.includes('--if-empty') && (await db.$count(guardians)) > 0) {
+  console.log('Database already has guardians, seed skipped.')
+  await db.$client.end()
+  process.exit(0)
+}
 
 /** Demo accounts; the passwords are listed in the root README. */
 const demoGuardians = [
