@@ -1,0 +1,28 @@
+{
+  "projectName": "htf2026",
+  "mode": "file-router",
+  "bundler": "vite",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "npm",
+  "git": false,
+  "install": true,
+  "intent": false,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "postgresql"
+    }
+  },
+  "projectPreset": "default",
+  "routerOnly": false,
+  "includeExamples": true,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "drizzle",
+    "tanstack-query",
+    "table",
+    "nitro",
+    "eslint"
+  ]
+}

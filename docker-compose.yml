@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: htf
+      POSTGRES_PASSWORD: htf
+      POSTGRES_DB: htf
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U htf -d htf"]
+      interval: 2s
+      retries: 15
+
+  app:
+    build: ./app
+    profiles: ["full"] # dev runs the app locally with `npm run dev`; `docker compose --profile full up` runs everything
+    environment:
+      DATABASE_URL: postgresql://htf:htf@db:5432/htf
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
