@@ -61,11 +61,22 @@ The system SHALL create a glitch on its own, reported by the system, when sensor
 - **THEN** no new glitch is created
 
 ### Requirement: Automatic assignment
-A new glitch SHALL be assigned to the defender the AI ranks best, based on which types they fixed before and how many open glitches they already hold. A commander can always reassign.
+A new glitch SHALL be assigned by the forecast pressure (see Forecast). In a storm or steady hours it goes to the defender with the best skill at its type (speed against everyone else at that type, trusted more with more fixes), weighed down by the open glitches they hold, with the AI's fit weighed in when it has an opinion. In a lull it becomes a training quest for the least practised defender holding at most one open glitch, so the experts stay rested. A commander can always reassign.
 
-#### Scenario: Specialist
-- **WHEN** a `portal` glitch is created and defender "Nova" fixed the most portal glitches and has the fewest open ones
-- **THEN** the glitch is assigned to Nova
+#### Scenario: Specialist in a storm
+- **WHEN** a storm is forecast and a `portal` glitch is created, and defender "Orion" seals portal glitches fastest and holds few open ones
+- **THEN** the glitch is assigned to Orion
+
+#### Scenario: Training quest in a lull
+- **WHEN** a lull is forecast and a glitch is created
+- **THEN** it is assigned to the free defender with the least skill at its type
+
+### Requirement: Forecast
+The system SHALL forecast new glitches for each of the next 12 hours with a model trained on past incidents (time of day and week, and the last day's activity), with an 80% range, and SHALL report the model's error on a held-out last week next to the weekday-and-hour average's. From the forecast it SHALL project magic at the usual fixing pace and call the next 3 hours a storm (1.5× the usual drain or magic heading under 20%), a lull (0.7× or less) or steady. Where the incident history is synthetic it SHALL say so. The `/forecast` page shows the verdict, the hourly forecast, the magic projection, who the next glitch of each type would go to and why, each defender's skill per type, and incidents per weekday and hour.
+
+#### Scenario: Evening storm
+- **WHEN** the history has its busiest hours in the evening and the forecast is read in the afternoon
+- **THEN** the peak hour shown is in the evening and new glitches go to the strongest defender per type
 
 ### Requirement: Runbook
 Each glitch SHALL get a runbook: an ordered list of 3 to 6 steps chosen and ranked by AI from a curated step library for its type, filled in with the glitch's own data (location, sensor, ids). Guardians SHALL be able to tick off steps.

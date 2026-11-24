@@ -2,8 +2,9 @@ import { AppError } from '#/lib/errors.ts'
 import { SENSORS, sensorIdSchema } from '#/lib/monitoring.ts'
 import { getClassifier } from '../ai/classifier.ts'
 import { buildRunbook } from '../ai/runbook.ts'
-import { pickAssignee } from '../ai/triage.ts'
+import { rateFit } from '../ai/triage.ts'
 import { publish } from '../events/bus.ts'
+import { chooseAssignee } from '../forecast/forecast.service.ts'
 import { findGuardianById } from '../guardians/guardians.repository.ts'
 import { notifyAssigned, notifyStatus } from '../notifications/notifications.service.ts'
 import * as repo from './glitches.repository.ts'
@@ -134,10 +135,15 @@ export async function assignGlitch(
   return listItem(glitchId)
 }
 
-/** Gives a new glitch to the best-suited defender (AI) or the least-loaded one (no AI). */
+/**
+ * Gives a new glitch to a defender by the forecast's pressure: the strongest for the type when a
+ * storm is coming, a training quest for the least practised when it is calm. Skills come from
+ * the fix record; the AI's fit is weighed in when it has an opinion.
+ */
 export async function autoAssign(glitchId: string, type: GlitchType): Promise<void> {
-  const guardianId = await pickAssignee(getClassifier(), type, await repo.listDefenderLoads())
-  if (guardianId !== null) await assignGlitch(glitchId, guardianId)
+  const fit = await rateFit(getClassifier(), type, await repo.listDefenderLoads())
+  const pick = await chooseAssignee(type, fit)
+  if (pick) await assignGlitch(glitchId, pick.guardianId)
 }
 
 /** Commander only (middleware). Every echo moves over; the merged glitch leaves the list. */

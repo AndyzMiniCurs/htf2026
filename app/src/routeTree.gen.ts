@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
 import { Route as AppCouncilReportRouteImport } from './routes/_app/council-report'
+import { Route as AppForecastRouteImport } from './routes/_app/forecast'
 import { Route as AppGuardiansRouteImport } from './routes/_app/guardians'
 import { Route as AppLabRouteImport } from './routes/_app/lab'
 import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
@@ -48,6 +49,11 @@ const AppAssistantRoute = AppAssistantRouteImport.update({
 const AppCouncilReportRoute = AppCouncilReportRouteImport.update({
   id: '/council-report',
   path: '/council-report',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppForecastRoute = AppForecastRouteImport.update({
+  id: '/forecast',
+  path: '/forecast',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGuardiansRoute = AppGuardiansRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/assistant': typeof AppAssistantRoute
   '/council-report': typeof AppCouncilReportRoute
+  '/forecast': typeof AppForecastRoute
   '/guardians': typeof AppGuardiansRoute
   '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/assistant': typeof AppAssistantRoute
   '/council-report': typeof AppCouncilReportRoute
+  '/forecast': typeof AppForecastRoute
   '/guardians': typeof AppGuardiansRoute
   '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/assistant': typeof AppAssistantRoute
   '/_app/council-report': typeof AppCouncilReportRoute
+  '/_app/forecast': typeof AppForecastRoute
   '/_app/guardians': typeof AppGuardiansRoute
   '/_app/lab': typeof AppLabRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/assistant'
     | '/council-report'
+    | '/forecast'
     | '/guardians'
     | '/lab'
     | '/leaderboard'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/assistant'
     | '/council-report'
+    | '/forecast'
     | '/guardians'
     | '/lab'
     | '/leaderboard'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/assistant'
     | '/_app/council-report'
+    | '/_app/forecast'
     | '/_app/guardians'
     | '/_app/lab'
     | '/_app/leaderboard'
@@ -256,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/council-report'
       fullPath: '/council-report'
       preLoaderRoute: typeof AppCouncilReportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/forecast': {
+      id: '/_app/forecast'
+      path: '/forecast'
+      fullPath: '/forecast'
+      preLoaderRoute: typeof AppForecastRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/guardians': {
@@ -341,6 +360,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAssistantRoute: typeof AppAssistantRoute
   AppCouncilReportRoute: typeof AppCouncilReportRoute
+  AppForecastRoute: typeof AppForecastRoute
   AppGuardiansRoute: typeof AppGuardiansRoute
   AppLabRoute: typeof AppLabRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
@@ -356,6 +376,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAssistantRoute: AppAssistantRoute,
   AppCouncilReportRoute: AppCouncilReportRoute,
+  AppForecastRoute: AppForecastRoute,
   AppGuardiansRoute: AppGuardiansRoute,
   AppLabRoute: AppLabRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,

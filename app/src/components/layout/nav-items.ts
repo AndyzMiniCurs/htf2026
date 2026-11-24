@@ -9,6 +9,7 @@ export type NavItem = {
     | '/guardians'
     | '/map'
     | '/sensors'
+    | '/forecast'
     | '/leaderboard'
     | '/assistant'
     | '/settings'
@@ -23,6 +24,7 @@ export const navItems: Array<NavItem> = [
   { label: 'Quest log', image: '/icons/realm/quest-log.webp', to: '/glitches', hotbar: true },
   { label: 'Map of Achrona', image: '/icons/realm/map.webp', to: '/map', hotbar: true },
   { label: 'Sensors', image: '/icons/realm/sensors.webp', to: '/sensors' },
+  { label: 'Foresight', image: '/icons/realm/forecast.webp', to: '/forecast' },
   { label: 'Oracle', image: '/icons/realm/oracle.webp', to: '/assistant', hotbar: true },
   { label: 'Hall of Fame', image: '/icons/realm/hall-of-fame.webp', to: '/leaderboard' },
   {

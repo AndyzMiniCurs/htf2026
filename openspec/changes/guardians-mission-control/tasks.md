@@ -70,6 +70,8 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 6.9 [FE] Show the runbook checklist on the detail page (tick steps live); verify ticking persists after reload (UI and permissions verified; persistence follows when setRunbookStep is real, today it returns the fixture runbook)
 - [x] 6.10 [FE] Build the `/assistant` chat screen: message list, input, suggestion chips, links to mentioned glitches, mobile keyboard-safe layout; verify each intent from the spec (UI verified on desktop and phone against the stub; intents become real with 6.7)
 - [x] 6.11 [FE] Add client-side image moderation with `nsfwjs` before upload (lazy-loaded model, clear rejection message); verify a safe image uploads and the model loads only on the report page
+- [x] 6.12 [BE] Forecast: 8 weeks of synthetic incident history (`glitch_history`, seeded), a TensorFlow.js network forecasting the next 12 hours (held-out week error vs weekday-and-hour average), magic projection, storm/lull call, per-type defender skills, and auto-assignment by pressure (experts in a storm, training quests in a lull); pure rules tested
+- [x] 6.13 [FE] Build `/forecast` (Foresight): verdict, hourly forecast with range, magic projection with the lockdown line, next assignee per type, skill matrix, weekday-hour heatmap, model card labelled synthetic; verify on desktop and phone
 
 ## 7. Engagement and reporting
 

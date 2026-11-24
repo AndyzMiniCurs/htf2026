@@ -2,7 +2,8 @@
 import { sql } from 'drizzle-orm'
 import { hashPassword } from '../server/auth/password.ts'
 import { db } from './index.ts'
-import { echoes, glitches, guardians, sensorReadings } from './schema.ts'
+import { generateHistory } from './history.ts'
+import { echoes, glitchHistory, glitches, guardians, sensorReadings } from './schema.ts'
 
 // `--if-empty` (used by `db:init` and the Docker migrate service) never wipes existing data.
 if (process.argv.includes('--if-empty') && (await db.$count(guardians)) > 0) {
@@ -284,10 +285,14 @@ const readingRows = Object.entries(SENSOR_BASELINES).flatMap(([sensorId, baselin
   })
 })
 
+/** Eight weeks of synthetic closed incidents for the forecast model and skill profiles. */
+const historyRows = generateHistory(NOW, 8)
+
 // Wipe and refill so the seed can be re-run safely.
 await db.transaction(async (tx) => {
   await tx.execute(sql`truncate table
-    echo_images, echoes, sessions, notification_prefs, sensor_readings, app_state, glitches, guardians
+    echo_images, echoes, sessions, notification_prefs, sensor_readings, app_state, glitch_history,
+    glitches, guardians
     restart identity cascade`)
   await tx.execute(sql`alter sequence glitch_seq restart with 200`)
   await tx.insert(guardians).values(
@@ -301,9 +306,10 @@ await db.transaction(async (tx) => {
   await tx.insert(glitches).values(demo.map((d) => d.glitch))
   await tx.insert(echoes).values(echoRows)
   await tx.insert(sensorReadings).values(readingRows)
+  await tx.insert(glitchHistory).values(historyRows)
 })
 await db.$client.end()
 
 console.log(
-  `Seeded ${demoGuardians.length} guardians, ${demo.length} glitches, ${echoRows.length} echoes and ${readingRows.length} sensor readings.`,
+  `Seeded ${demoGuardians.length} guardians, ${demo.length} glitches, ${echoRows.length} echoes, ${readingRows.length} sensor readings and ${historyRows.length} history incidents.`,
 )

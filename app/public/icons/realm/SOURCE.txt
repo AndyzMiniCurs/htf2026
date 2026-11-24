@@ -2,5 +2,6 @@ Painted RPG icons, all CC0 (public domain), from OpenGameArt:
 - overview, quest-log, sensors, oracle, hall-of-fame, guardians, settings: "Fantasy RPG Icons 0" and "Fantasy RPG Icons 2"
   https://opengameart.org/content/fantasy-rpg-icons-0
   https://opengameart.org/content/fantasy-rpg-icons-2
+- forecast (tornado): "Fantasy RPG Icons 2", https://opengameart.org/content/fantasy-rpg-icons-2
 - map: "Fantasy Parchment Set" by MELLE, https://opengameart.org/content/fantasy-parchment-set
 Converted to 128px WebP.

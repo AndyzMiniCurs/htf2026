@@ -4,6 +4,7 @@ import { AppError } from '#/lib/errors.ts'
 import { publish, subscribe } from '../events/bus.ts'
 import * as glitchRepo from '../glitches/glitches.repository.ts'
 import { listGuardians } from '../guardians/guardians.repository.ts'
+import { warmForecast } from '../forecast/forecast.service.ts'
 import { notifyLockdown } from '../notifications/notifications.service.ts'
 import { badgesFor } from './badges.ts'
 import { AUTO_LOCKDOWN_BELOW, canLift, nextLockdown } from './lockdown.ts'
@@ -44,6 +45,7 @@ const RECENTLY_FIXED = 5
 export async function getDashboard(): Promise<Dashboard> {
   ensureSensorSimulator()
   ensureAutoLockdown()
+  warmForecast()
   const [open, fixed, byStatus, lockdown] = await Promise.all([
     glitchRepo.listGlitches({ status: ['LEAKED', 'ASSESSING', 'CONTAINING'] }),
     glitchRepo.listRecentlyFixed(RECENTLY_FIXED),

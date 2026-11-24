@@ -5,7 +5,7 @@ import {
   classifyType,
   findMatchingGlitch,
   moderate,
-  pickAssignee,
+  rateFit,
   saysSolved,
 } from './triage.ts'
 import type { Classifier } from './classifier.ts'
@@ -98,7 +98,7 @@ describe('saysSolved', () => {
   })
 })
 
-describe('pickAssignee', () => {
+describe('rateFit', () => {
   const nova: DefenderLoad = {
     guardianId: 1,
     codename: 'Nova',
@@ -118,18 +118,21 @@ describe('pickAssignee', () => {
     openCount: 3,
   }
 
-  it('picks the specialist with the lower load', async () => {
+  it("maps the AI's fit to each defender", async () => {
     const ai = fake({
       score: async (_q, items) => items.map((p) => (p.includes('portal') ? 0.9 : 0.2)),
     })
-    expect(await pickAssignee(ai, 'portal', [ivy, rex, nova])).toBe(nova.guardianId)
+    expect(await rateFit(ai, 'portal', [ivy, rex, nova])).toEqual(
+      new Map([
+        [ivy.guardianId, 0.9],
+        [rex.guardianId, 0.2],
+        [nova.guardianId, 0.9],
+      ]),
+    )
   })
 
-  it('falls back to the least-loaded defender without AI', async () => {
-    expect(await pickAssignee(nullClassifier, 'portal', [ivy, nova, rex])).toBe(rex.guardianId)
-  })
-
-  it('returns null when there are no defenders', async () => {
-    expect(await pickAssignee(nullClassifier, 'portal', [])).toBeNull()
+  it('has no opinion without AI or without defenders', async () => {
+    expect(await rateFit(nullClassifier, 'portal', [ivy, nova, rex])).toBeNull()
+    expect(await rateFit(nullClassifier, 'portal', [])).toBeNull()
   })
 })

@@ -91,21 +91,18 @@ const profile = (d: DefenderLoad) => {
 }
 
 /**
- * AI suitability × 1/(1 + open load); without AI the least-loaded defender (design D6).
- * Ties go to the lower load, then the first defender. Null when there are no defenders.
+ * The AI's 0..1 opinion of how well each defender fits a glitch type, judging by what they fixed
+ * before; null without an opinion. The staffing rule weighs it in (design D6, forecast).
  */
-export async function pickAssignee(
+export async function rateFit(
   classifier: Classifier,
   type: GlitchType,
   defenders: Array<DefenderLoad>,
-): Promise<number | null> {
+): Promise<Map<number, number> | null> {
   if (defenders.length === 0) return null
   const scores = await classifier.score(
     `How suited is this defender for a ${type} glitch, judging by the glitch types they fixed before?`,
     defenders.map(profile),
   )
-  const ranked = defenders
-    .map((d, i) => ({ d, value: scores ? (scores[i] ?? 0) / (1 + d.openCount) : 0 }))
-    .sort((a, b) => b.value - a.value || a.d.openCount - b.d.openCount)
-  return ranked[0]?.d.guardianId ?? null
+  return scores && new Map(defenders.map((d, i) => [d.guardianId, scores[i] ?? 0]))
 }

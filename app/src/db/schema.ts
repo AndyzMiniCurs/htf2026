@@ -102,6 +102,23 @@ export const notificationPrefs = pgTable('notification_prefs', {
   onLockdown: boolean('on_lockdown').notNull().default(true),
 })
 
+/**
+ * Synthetic, already-closed incidents from the weeks before the demo: what the forecast model
+ * and the defenders' skill profiles learn from. Never listed as glitches.
+ */
+export const glitchHistory = pgTable(
+  'glitch_history',
+  {
+    id: serial('id').primaryKey(),
+    /** ISO 8601. */
+    openedAt: text('opened_at').notNull(),
+    type: text('type', { enum: GLITCH_TYPES }).notNull(),
+    fixedAt: text('fixed_at').notNull(),
+    fixedBy: integer('fixed_by').references(() => guardians.guardianId, { onDelete: 'set null' }),
+  },
+  (t) => [index('glitch_history_opened_idx').on(t.openedAt)],
+)
+
 /** Small global flags, e.g. `lockdown`. */
 export const appState = pgTable('app_state', {
   key: text('key').primaryKey(),

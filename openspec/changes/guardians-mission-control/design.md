@@ -169,6 +169,7 @@ type LiveEvent =
 | `getDashboard` (monitoring) | `void` | `Dashboard` |
 | `getSensorSeries` (monitoring) | `{ minutes?: number }` (default 15) | `SensorSeries[]` |
 | `setLockdown` (monitoring) (C) | `{ on: boolean }` | `{ on: boolean }` |
+| `getForecast` (forecast) | `void` | `Forecast` |
 | `triggerIncident` (monitoring) (C) | `{ sensorId: SensorId }` | `void` |
 | `getLeaderboard` (monitoring) | `void` | `LeaderboardEntry[]` |
 | `getReport` (monitoring) (C) | `void` | `Report` |
