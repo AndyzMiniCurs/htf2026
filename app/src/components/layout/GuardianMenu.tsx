@@ -1,5 +1,5 @@
 import { Link, useRouter } from '@tanstack/react-router'
-import { LogOut, Monitor, Moon, ScrollText, Sun } from 'lucide-react'
+import { LogOut, Monitor, Moon, Presentation, ScrollText, Sun } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { cx } from '#/components/ui/cx.ts'
 import { useToast } from '#/components/ui/Toast.tsx'
@@ -132,6 +132,17 @@ export function GuardianMenu({ me }: { me: Guardian }) {
             >
               <ScrollText aria-hidden className="size-4" />
               Report to the High Council
+            </Link>
+          )}
+          {commander && (
+            <Link
+              to="/present"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="mt-1 flex h-11 w-full items-center gap-2.5 rounded-lg px-3 text-left text-fg-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              <Presentation aria-hidden className="size-4" />
+              Presenter
             </Link>
           )}
           <button

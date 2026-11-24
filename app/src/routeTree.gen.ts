@@ -19,6 +19,7 @@ import { Route as AppGuardiansRouteImport } from './routes/_app/guardians'
 import { Route as AppLabRouteImport } from './routes/_app/lab'
 import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
 import { Route as AppMapRouteImport } from './routes/_app/map'
+import { Route as AppPresentRouteImport } from './routes/_app/present'
 import { Route as AppSensorsRouteImport } from './routes/_app/sensors'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as ApiEventsRouteImport } from './routes/api/events'
@@ -76,6 +77,11 @@ const AppMapRoute = AppMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPresentRoute = AppPresentRouteImport.update({
+  id: '/present',
+  path: '/present',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSensorsRoute = AppSensorsRouteImport.update({
   id: '/sensors',
   path: '/sensors',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
+  '/present': typeof AppPresentRoute
   '/sensors': typeof AppSensorsRoute
   '/settings': typeof AppSettingsRoute
   '/api/events': typeof ApiEventsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
+  '/present': typeof AppPresentRoute
   '/sensors': typeof AppSensorsRoute
   '/settings': typeof AppSettingsRoute
   '/api/events': typeof ApiEventsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/_app/lab': typeof AppLabRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/map': typeof AppMapRoute
+  '/_app/present': typeof AppPresentRoute
   '/_app/sensors': typeof AppSensorsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/api/events': typeof ApiEventsRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/leaderboard'
     | '/map'
+    | '/present'
     | '/sensors'
     | '/settings'
     | '/api/events'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/leaderboard'
     | '/map'
+    | '/present'
     | '/sensors'
     | '/settings'
     | '/api/events'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_app/lab'
     | '/_app/leaderboard'
     | '/_app/map'
+    | '/_app/present'
     | '/_app/sensors'
     | '/_app/settings'
     | '/api/events'
@@ -305,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/present': {
+      id: '/_app/present'
+      path: '/present'
+      fullPath: '/present'
+      preLoaderRoute: typeof AppPresentRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/sensors': {
       id: '/_app/sensors'
       path: '/sensors'
@@ -365,6 +384,7 @@ interface AppRouteChildren {
   AppLabRoute: typeof AppLabRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMapRoute: typeof AppMapRoute
+  AppPresentRoute: typeof AppPresentRoute
   AppSensorsRoute: typeof AppSensorsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -381,6 +401,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLabRoute: AppLabRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,
   AppMapRoute: AppMapRoute,
+  AppPresentRoute: AppPresentRoute,
   AppSensorsRoute: AppSensorsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,

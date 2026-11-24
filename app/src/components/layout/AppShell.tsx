@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { cx } from '#/components/ui/cx.ts'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { useOnline } from '#/hooks/useOnline.ts'
+import { PresenterKeys } from '#/components/demo/PresenterKeys.tsx'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
 import { LockdownControl } from './LockdownControl.tsx'
@@ -37,6 +38,7 @@ export function AppShell({ me, magicLevel, openGlitches, children }: AppShellPro
       <CurseVeins />
       <Desync openGlitches={openGlitches} />
       <GlobalShortcuts />
+      {me?.role === 'commander' && <PresenterKeys />}
       <a
         href="#main"
         className="label-caps sr-only z-50 rounded-full bg-royal px-4 py-2 text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3"

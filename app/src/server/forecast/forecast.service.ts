@@ -244,6 +244,12 @@ export async function chooseAssignee(
   return chooseDefender(mode, forType(type))
 }
 
+/** Presenter reset: the history was rewritten, so the next forecast trains a fresh model. */
+export function resetForecast(): void {
+  delete (globalThis as WithModel)[MODEL_KEY]
+  warmForecast()
+}
+
 /** Starts training early, so the first visit to the forecast does not wait for it. */
 export function warmForecast(): void {
   if ((globalThis as WithModel)[MODEL_KEY]) return

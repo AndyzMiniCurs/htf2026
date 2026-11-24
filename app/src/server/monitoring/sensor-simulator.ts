@@ -108,6 +108,14 @@ export function triggerIncident(sensorId: SensorId): void {
   }
 }
 
+/** Presenter reset: every sensor back to normal, no incident running. */
+export function resetSensorSimulator(): void {
+  const state = simulator()
+  if (!state) return
+  state.incidents.clear()
+  for (const id of SENSOR_IDS) state.values[id] = SENSOR_CONFIG[id].baseline
+}
+
 async function tick(state: SimulatorState): Promise<void> {
   if (state.busy) return
   state.busy = true
