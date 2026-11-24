@@ -64,7 +64,7 @@ export function Desync({ openGlitches }: { openGlitches: number }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-50 print:hidden"
+      className="pointer-events-none fixed inset-0 z-50 overflow-hidden print:hidden"
       style={{ '--desync': level } as CSSProperties}
     >
       {level > 0 && <div className="desync-veil absolute inset-0" />}

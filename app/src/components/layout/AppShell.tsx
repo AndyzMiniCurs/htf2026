@@ -33,8 +33,6 @@ type AppShellProps = {
 export function AppShell({ me, magicLevel, openGlitches, children }: AppShellProps) {
   const online = useOnline()
   const items = navItems.filter((item) => !item.commanderOnly || me?.role === 'commander')
-  // The rendered match, not the location: the location changes before the new page is ready.
-  const page = useRouterState({ select: (state) => state.matches.at(-1)?.pathname })
   return (
     <div className="flex min-h-dvh flex-col">
       <CurseVeins />
@@ -47,7 +45,7 @@ export function AppShell({ me, magicLevel, openGlitches, children }: AppShellPro
         Skip to content
       </a>
       <Hud me={me} magicLevel={magicLevel} />
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-x-clip">
         <Rail items={items} />
         <main
           id="main"
@@ -56,10 +54,8 @@ export function AppShell({ me, magicLevel, openGlitches, children }: AppShellPro
           <OfflineNotice />
           {/* Offline, every form control on the page pauses; links and reading keep working. */}
           <fieldset disabled={!online} className="contents">
-            {/* Keyed by route so each page plays its entrance once on arrival. */}
-            <div key={page} className="page-enter">
-              {children}
-            </div>
+            {/* A new page's blocks are fresh DOM, so they play this entrance without a remount. */}
+            <div className="page-enter">{children}</div>
           </fieldset>
         </main>
       </div>
