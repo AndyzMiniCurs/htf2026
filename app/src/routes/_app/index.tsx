@@ -1,50 +1,68 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { ShieldAlert } from 'lucide-react'
 import { AchronaDiorama } from '#/components/achrona/AchronaDiorama.tsx'
 import { QuestLog, QuestLogHeading } from '#/components/glitches/QuestLog.tsx'
-import { STATUS_META } from '#/components/glitches/glitch-meta.ts'
+import { STATUS_META, TYPE_META } from '#/components/glitches/glitch-meta.ts'
 import { Panel } from '#/components/ui/Panel.tsx'
 import { RelativeTime } from '#/components/ui/RelativeTime.tsx'
-import { GLITCH_STATUSES } from '#/lib/glitch.ts'
+import { GLITCH_STATUSES, GLITCH_TYPES } from '#/lib/glitch.ts'
 import { getDashboard } from '#/lib/monitoring.functions.ts'
-import type { GlitchListItem, GlitchStatus } from '#/lib/glitch.ts'
+import { getGlitches } from '#/lib/glitches.functions.ts'
+import { MagicGauge } from '#/components/achrona/MagicGauge.tsx'
+import type { GlitchListItem, GlitchStatus, GlitchType } from '#/lib/glitch.ts'
 
 export const Route = createFileRoute('/_app/')({
-  loader: () => getDashboard(),
+  // The world and the quest log show every glitch; the dashboard brings the realm's totals.
+  loader: async () => {
+    const [dashboard, glitches] = await Promise.all([getDashboard(), getGlitches({ data: {} })])
+    return { dashboard, glitches }
+  },
   component: OverviewPage,
 })
 
 function OverviewPage() {
-  const dashboard = Route.useLoaderData()
+  const { dashboard, glitches } = Route.useLoaderData()
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
-  const open = dashboard.recent.filter((g) => g.status !== 'FIXED')
+  const open = glitches.filter((g) => g.status !== 'FIXED')
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       <h1 className="sr-only">Overview of Achrona</h1>
-      <Panel
-        flush
-        heading="Achrona"
-        actions={<StatusTally byStatus={dashboard.byStatus} />}
-        className="overflow-hidden"
-      >
-        <div className="relative h-[clamp(20rem,52vh,46rem)] lg:h-[calc(100dvh-15rem)]">
-          <AchronaDiorama
-            glitches={dashboard.recent}
-            highlightedId={highlightedId}
-            onHighlight={setHighlightedId}
-            onSelect={setHighlightedId}
-          />
-          <Chronicle glitches={dashboard.recent} />
+      {dashboard.lockdown && <LockdownBanner />}
+      <div className="flex min-w-0 flex-col gap-5">
+        <Panel
+          flush
+          heading="Achrona"
+          actions={<StatusTally byStatus={dashboard.byStatus} />}
+          className="overflow-hidden"
+        >
+          <div className="relative h-[clamp(20rem,52vh,46rem)] lg:h-[max(26rem,calc(100dvh-27rem))]">
+            <AchronaDiorama
+              glitches={glitches}
+              highlightedId={highlightedId}
+              onHighlight={setHighlightedId}
+              onSelect={setHighlightedId}
+            />
+            <Chronicle glitches={glitches} />
+          </div>
+        </Panel>
+        <div className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)]">
+          <Panel heading="Magic">
+            <MagicGauge level={dashboard.magicLevel} />
+          </Panel>
+          <Panel heading="Glitches by kind">
+            <TypeTally byType={dashboard.byType} />
+          </Panel>
         </div>
-      </Panel>
+      </div>
 
       <Panel
         heading={<QuestLogHeading count={open.length} />}
         className="lg:max-h-[calc(100dvh-8.5rem)] lg:overflow-y-auto"
       >
         <QuestLog
-          glitches={dashboard.recent}
+          glitches={glitches}
           highlightedId={highlightedId}
           onHighlight={setHighlightedId}
         />
@@ -90,5 +108,50 @@ function Chronicle({ glitches }: { glitches: Array<GlitchListItem> }) {
         ))}
       </ul>
     </div>
+  )
+}
+
+/** How many glitches of each kind are on record, each kind in its own colour and sigil. */
+function TypeTally({ byType }: { byType: Record<GlitchType, number> }) {
+  const max = Math.max(1, ...GLITCH_TYPES.map((t) => byType[t]))
+  return (
+    <ul className="flex flex-col gap-2.5" aria-label="Glitches per type">
+      {GLITCH_TYPES.map((type) => {
+        const { label, color, icon: Icon } = TYPE_META[type]
+        const count = byType[type]
+        return (
+          <li
+            key={type}
+            className="grid grid-cols-[1.5rem_8.5rem_minmax(0,1fr)_2rem] items-center gap-3"
+          >
+            <Icon aria-hidden className="size-5" style={{ color }} />
+            <span className="truncate text-fg">{label}</span>
+            <span className="h-2 overflow-hidden rounded-full bg-field">
+              <span
+                className="block h-full rounded-full transition-[width] duration-700 ease-out-expo"
+                style={{ width: `${(count / max) * 100}%`, background: color }}
+              />
+            </span>
+            <span className="title-gothic text-right text-xl tabular">{count}</span>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+/** Shown on every overview while a commander holds the city in lockdown. */
+function LockdownBanner() {
+  return (
+    <p
+      role="alert"
+      className="flex items-center gap-3 rounded-xl border border-ember bg-[color-mix(in_oklab,var(--ember)_18%,var(--panel))] px-5 py-3.5 text-fg lg:col-span-2"
+    >
+      <ShieldAlert aria-hidden className="size-6 shrink-0 text-ember" />
+      <span>
+        <strong className="title-gothic mr-2 text-2xl text-ember">Lockdown</strong>A great attack is
+        under way. Report every echo, hold your post.
+      </span>
+    </p>
   )
 }
