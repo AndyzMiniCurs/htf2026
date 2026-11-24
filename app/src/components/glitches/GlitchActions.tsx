@@ -1,6 +1,7 @@
 import { useRouter } from '@tanstack/react-router'
 import { GitMerge, RotateCcw, Send } from 'lucide-react'
 import { useState } from 'react'
+import { SealingBattle } from '#/components/battle/SealingBattle.tsx'
 import { Button } from '#/components/ui/Button.tsx'
 import { Select, Textarea } from '#/components/ui/Field.tsx'
 import { useToast } from '#/components/ui/Toast.tsx'
@@ -68,12 +69,25 @@ function useAction() {
 }
 
 /** The stage controls: advance one step, or (commanders) reopen a fixed glitch. */
-export function StageActions({
+export function StageActions(props: { glitch: GlitchDetail; permissions: GlitchPermissions }) {
+  const [battle, setBattle] = useState(false)
+  // The battle outlives the stage change it causes, so its victory card stays on screen.
+  return (
+    <>
+      <StageControls {...props} onSeal={() => setBattle(true)} />
+      {battle && <SealingBattle glitch={props.glitch} open onClose={() => setBattle(false)} />}
+    </>
+  )
+}
+
+function StageControls({
   glitch,
   permissions,
+  onSeal,
 }: {
   glitch: GlitchDetail
   permissions: GlitchPermissions
+  onSeal: () => void
 }) {
   const { run, pending } = useAction()
   if (glitch.mergedInto) return null
@@ -104,6 +118,14 @@ export function StageActions({
   }
   const next = GLITCH_STATUSES[GLITCH_STATUSES.indexOf(glitch.status) + 1]
   const NextIcon = STATUS_META[next].icon
+  // Sealing is fought, not clicked (spec: sealing-battle); the battle offers a plain seal too.
+  if (glitch.status === 'CONTAINING') {
+    return (
+      <Button size="lg" icon={<NextIcon aria-hidden className="size-5" />} onClick={onSeal}>
+        {ADVANCE_LABEL.CONTAINING}
+      </Button>
+    )
+  }
   return (
     <Button
       size="lg"

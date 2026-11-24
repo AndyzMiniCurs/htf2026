@@ -72,11 +72,11 @@ The battle SHALL always offer "Seal without the battle", which advances the glit
 - **THEN** the glitch becomes `FIXED` without playing
 
 #### Scenario: Keyboard only
-- **WHEN** a guardian uses only Tab or arrow keys, Space and S
+- **WHEN** a guardian uses only the arrow keys, Space and S
 - **THEN** they can aim at shards, cast, summon and win
 
 ### Requirement: Short battles
-A battle with no misses SHALL take between 15 and 40 seconds, so it fits the flow of work and a live pitch.
+A battle SHALL be winnable within 40 seconds of steady play, so it fits the flow of work and a live pitch.
 
 #### Scenario: Steady play
 - **WHEN** a guardian hits a shard about once per second

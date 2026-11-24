@@ -8,7 +8,7 @@ import type { AchronaSceneProps } from './AchronaScene.tsx'
 const AchronaScene = lazy(() => import('./AchronaScene.tsx'))
 
 const PHONE = '(max-width: 767px)'
-function useIsPhone() {
+export function useIsPhone() {
   return useSyncExternalStore(
     (onChange) => {
       const query = matchMedia(PHONE)
@@ -47,7 +47,7 @@ function DioramaPlaceholder() {
 }
 
 /** A failed WebGL context or model load costs the world view, never the page around it. */
-class SceneBoundary extends Component<
+export class SceneBoundary extends Component<
   { fallback: ReactNode; children: ReactNode },
   { failed: boolean }
 > {

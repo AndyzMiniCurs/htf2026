@@ -7,6 +7,9 @@ export const BATTLE = {
   fullCharge: 100,
 } as const
 
+/** Weak points orbiting the creature. */
+export const SHARD_COUNT = 5
+
 export type BattleState = {
   health: number
   charge: number
