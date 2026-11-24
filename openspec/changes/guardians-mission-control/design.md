@@ -195,4 +195,4 @@ Backend's first task publishes every `lib/*.ts` type and schema plus stub `*.fun
 
 ## Open Questions
 
-- Exact Jev endpoint, payload and pricing limits. Task 1.4 answers this; it changes only `jev.classifier.ts`.
+- ~~Exact Jev endpoint, payload and pricing limits.~~ Answered in task 1.4: `POST https://api.typesafe.ai/v1/systemone`, `Authorization: Bearer $TYPESAFE_API_KEY` (confirmed with curl: a bad key gives a 401 JSON error). Body `{ model, state, questions: { <id>: { type: 'noul' | 'choice', instructions, criteria? } } }`, answers at `answers.<id>.noul` (P(yes)) or `answers.<id>.probabilities` (per choice key). Model pinned to `jev-1.13.0` so thresholds stay stable. `score()` is one request with one `noul` question per item. The success shape comes from TypeSafe's published examples and has not been seen live (no key yet); the adapter validates it with zod and treats any mismatch as `null`.
