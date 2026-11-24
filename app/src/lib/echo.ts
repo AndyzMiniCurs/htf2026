@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { AppError } from './errors.ts'
-import { echoSchema, glitchIdSchema, locationSchema } from './glitch.ts'
-import type { Location } from './glitch.ts'
+import { echoSchema, glitchIdSchema } from './glitch.ts'
+import { validate } from './validate.ts'
 
 export const ECHO_DESCRIPTION_MIN = 3
 export const ECHO_DESCRIPTION_MAX = 1000
@@ -26,12 +26,14 @@ export const reportEchoFields = z
     message: 'Location needs both x and y',
     path: ['x'],
   })
+  .transform(({ description, x, y }) => ({
+    description,
+    location: x !== undefined && y !== undefined ? { x, y } : null,
+  }))
 
-export type ReportEchoInput = {
-  description: string
-  location: Location | null
-  image: File | null
-}
+export type ReportEchoInput = z.output<typeof reportEchoFields> & { image: File | null }
+
+const parseReportEchoFields = validate(reportEchoFields)
 
 /**
  * Validator for `reportEcho`. The client sends FormData with `description`, optional `x`/`y`
@@ -43,23 +45,13 @@ export function parseReportEchoForm(data: FormData): ReportEchoInput {
     const value = data.get(name)
     return typeof value === 'string' && value !== '' ? value : undefined
   }
-  const result = reportEchoFields.safeParse({
-    description: field('description') ?? '',
-    x: field('x'),
-    y: field('y'),
-  })
-  if (!result.success) {
-    const issue = result.error.issues.at(0)
-    throw new AppError(
-      'VALIDATION',
-      issue ? `${issue.path.join('.')}: ${issue.message}` : 'Invalid echo',
-    )
-  }
-  const { description, x, y } = result.data
   const image = data.get('image')
   return {
-    description,
-    location: x !== undefined && y !== undefined ? locationSchema.parse({ x, y }) : null,
+    ...parseReportEchoFields({
+      description: field('description') ?? '',
+      x: field('x'),
+      y: field('y'),
+    }),
     image: image instanceof File && image.size > 0 ? image : null,
   }
 }
