@@ -174,3 +174,27 @@ export async function updateGlitchStatus(
     .returning({ glitchId: glitches.glitchId })
   return rows.length > 0
 }
+
+/** The most recently fixed glitches, latest fix first. */
+export async function listRecentlyFixed(limit: number): Promise<Array<GlitchListItem>> {
+  const rows = await selectGlitches()
+    .where(and(isNull(glitches.mergedInto), eq(glitches.status, 'FIXED')))
+    .orderBy(sql`${glitches.fixedAt} desc nulls last`, desc(glitches.timestamp))
+    .limit(limit)
+  return rows.map(toListItem)
+}
+
+/** Number of non-merged glitches per status. */
+export async function countByStatus(): Promise<Record<GlitchStatus, number>> {
+  const rows = await db
+    .select({ status: glitches.status, count: sql<number>`count(*)::int` })
+    .from(glitches)
+    .where(isNull(glitches.mergedInto))
+    .groupBy(glitches.status)
+  const counts = Object.fromEntries(GLITCH_STATUSES.map((s) => [s, 0])) as Record<
+    GlitchStatus,
+    number
+  >
+  for (const row of rows) counts[row.status] = row.count
+  return counts
+}

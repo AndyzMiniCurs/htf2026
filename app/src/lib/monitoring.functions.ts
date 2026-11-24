@@ -1,18 +1,14 @@
 import { createServerFn } from '@tanstack/react-start'
-import {
-  fixtureDashboard,
-  fixtureLeaderboard,
-  fixtureReport,
-  fixtureSensorSeries,
-} from '#/lib/fixtures.ts'
+import { fixtureLeaderboard, fixtureReport, fixtureSensorSeries } from '#/lib/fixtures.ts'
 import { sensorSeriesInput, setLockdownInput, triggerIncidentInput } from '#/lib/monitoring.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
+import * as monitoring from '#/server/monitoring/monitoring.service.ts'
 import type { Dashboard, LeaderboardEntry, Report, SensorSeries } from '#/lib/monitoring.ts'
 
 export const getDashboard = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
-  .handler(async (): Promise<Dashboard> => fixtureDashboard)
+  .handler(async (): Promise<Dashboard> => monitoring.getDashboard())
 
 export const getSensorSeries = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
