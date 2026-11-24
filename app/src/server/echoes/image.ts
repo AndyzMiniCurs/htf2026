@@ -20,8 +20,6 @@ export async function readEchoImage(file: File): Promise<{ mime: EchoImageMime; 
   if (file.size > ECHO_IMAGE_MAX_BYTES)
     throw new AppError('VALIDATION', 'image: Images can be at most 5 MB')
   const bytes = Buffer.from(await file.arrayBuffer())
-  if (bytes.length > ECHO_IMAGE_MAX_BYTES)
-    throw new AppError('VALIDATION', 'image: Images can be at most 5 MB')
   const mime = detectImageMime(bytes)
   if (!mime) throw new AppError('VALIDATION', 'image: Only JPEG, PNG or WebP images are allowed')
   return { mime, bytes }
