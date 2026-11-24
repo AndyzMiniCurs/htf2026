@@ -16,9 +16,13 @@ export async function askAssistant(
   { question, history = [] }: AskAssistantInput,
 ): Promise<AssistantAnswer> {
   // A follow-up without an id is about the last glitch the conversation named.
-  const last = history.at(-1)
   const glitchId =
-    findGlitchId(question) ?? last?.glitchIds[0] ?? (last ? findGlitchId(last.question) : null)
+    findGlitchId(question) ??
+    history
+      .map((h) => h.glitchIds[0] ?? findGlitchId(h.question))
+      .filter((id) => id !== null)
+      .at(-1) ??
+    null
   const [intent, dashboard, glitch, guardians] = await Promise.all([
     pickIntent(
       getClassifier(),

@@ -17,12 +17,12 @@ How: `design.md` (D1-D8). Behaviour: `specs/oracle/spec.md`.
 ## 3. Memory
 
 - [x] 3.1 [BE] Use `history` in `askAssistant`: the context glitch and earlier questions in the intent prompt (D4); verify tests: "who is working on it?" after a GL-0142 exchange → GL-0142's assignee, the same question with no history → asks which glitch
-- [ ] 3.2 [FE] Send the last 6 exchanges (question + answer `glitchIds`) as `history` from the Oracle page; verify the GL-0142 → "who is working on it?" follow-up in the browser
+- [x] 3.2 [FE] Send the last 6 exchanges (question + answer `glitchIds`) as `history` from the Oracle page; verify the GL-0142 → "who is working on it?" follow-up in the browser
 
 ## 4. Actions
 
 - [x] 4.1 [BE] Add the four action intents with deterministic arguments and permission checks (D5); `askAssistant` takes the asking guardian; verify a test per action (proposal built), per gap (no glitch, unknown defender, FIXED glitch, short description) and per permission refusal (defender asks for lockdown or assignment)
-- [ ] 4.2 [FE] Show the confirm card for `answer.action` and on Confirm call the existing server function (D6), showing the result or the error message as an Oracle line; verify with Aegis: "give GL-0142 to Orion" → Confirm → Orion is assigned live in a second browser; Cancel changes nothing
+- [x] 4.2 [FE] Show the confirm card for `answer.action` and on Confirm call the existing server function (D6), showing the result or the error message as an Oracle line; verify with Aegis: "give GL-0142 to Orion" → Confirm → Orion is assigned live in a second browser; Cancel changes nothing
 
 ## 5. Low-cost model
 
