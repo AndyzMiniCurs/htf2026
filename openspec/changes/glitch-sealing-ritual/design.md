@@ -21,7 +21,7 @@ State: `{ health, maxHealth, charge, hits, misses, summoned, startedAt, endedAt,
 Why: the rules are where bugs hide; keeping them out of the render loop makes them testable without WebGL.
 
 ### D2. Arena scene (`components/battle/BattleScene.tsx`, lazy)
-A separate small `<Canvas>`, not the world scene: dark arena floor with a rune circle, the creature (a cluster of large emissive octahedrons around a pulsing core, tinted with the kind's colour, slowly rotating, recoiling on hits), 5 shards orbiting at varied radii and speeds, bloom and vignette. Spells are short-lived additive meshes (a bolt line from camera to shard via drei `Line`, an expanding ring, `Sparkles` burst) driven by a small effects queue in component state. The familiar is a glowing orb with a trail (drei `Trail`) that arcs in from off-screen and strikes the core. Loaded with `lazy()` inside `ClientOnly`/`Suspense`/the existing `SceneBoundary` pattern so a WebGL failure falls back to the 2D controls.
+A separate small `<Canvas>`, not the world scene: dark arena floor with a rune circle, the creature (a cluster of large emissive octahedrons around a pulsing core, tinted with the kind's colour, slowly rotating, recoiling on hits), 5 shards orbiting at varied radii and speeds, bloom and vignette. Spells are short-lived additive meshes (a bolt line from camera to shard via drei `Line`, an expanding ring, `Sparkles` burst) driven by a small effects queue in component state. The familiar (D5) leaps in on an arc from off-screen with a trail (drei `Trail`) and strikes the core. Loaded with `lazy()` inside `ClientOnly`/`Suspense`/the existing `SceneBoundary` pattern so a WebGL failure falls back to the 2D controls.
 Alternative: reuse the world scene and fight on the island. Rejected: too many objects to aim at on a phone, and the world's camera is cinematic, not interactive.
 
 ### D3. Input and accessibility
@@ -31,7 +31,7 @@ Pointer: r3f `onClick` on shards (hit) and on the arena floor (miss). Keyboard: 
 `StageActions` opens `<SealingBattle glitch=… onSealed=… />` (a full-screen native `<dialog>` like `components/ui/Dialog.tsx`) when the current stage is `CONTAINING`; other stages keep the plain button. On `won`, the overlay calls `advanceStatus({ data: { glitchId } })` once (guarded by a ref), shows the victory card on success, and offers retry on failure without leaving the dialog. "Seal without the battle" calls the same function directly. Closing before success calls nothing. After success the dialog's "Back to the glitch" closes it and `router.invalidate()` refreshes the page.
 
 ### D5. The familiar: Claude
-A single exported constant `FAMILIAR = { name: 'Claude', title: 'AI familiar' }` in `components/battle/familiar.ts`; the summon button reads "Summon Claude". The team chose the name as a hackathon pitch joke (the project is not published). The familiar is drawn by us (glowing orb with a trail); no third-party logos or brand art are used.
+A single exported constant `FAMILIAR = { name: 'Claude', title: 'AI familiar' }` in `components/battle/familiar.ts`; the summon button reads "Summon Claude". The team chose the name as a hackathon pitch joke (the project is not published). The familiar is modelled by us as a small voxel creature in the spirit of the Claude Code mascot: an orange block body built from instanced cubes, two dark eye blocks, little legs, a soft glow and a trail as it leaps in and strikes. It is built from three.js boxes in code; no image or model files are copied, and no logos are used.
 
 ### Server functions / HTTP endpoints
 

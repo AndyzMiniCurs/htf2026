@@ -9,7 +9,7 @@ Legend: **[FE] = Andu**. This change has no backend tasks; it reuses `advanceSta
 ## 2. Arena
 
 - [ ] 2.1 [FE] Build `BattleScene.tsx` (D2): arena floor with rune circle, kind-tinted crystal creature with pulsing core, five orbiting shards, bloom and vignette, lazy-loaded behind ClientOnly/Suspense/error boundary; verify it renders for each glitch kind with no console errors
-- [ ] 2.2 [FE] Add spell effects (bolt, ring, spark burst) on hit and the familiar's arcing strike with a trail on summon; verify each plays once per action and reduced motion drops the bursts and shake
+- [ ] 2.2 [FE] Add spell effects (bolt, ring, spark burst) on hit and Claude, the voxel familiar (D5), leaping in on an arc with a trail to strike on summon; verify each plays once per action and reduced motion drops the bursts and shake
 
 ## 3. Overlay and flow
 
