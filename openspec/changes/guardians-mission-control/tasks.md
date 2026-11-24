@@ -55,6 +55,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 5.7 [FE] Build `/sensors`: one `recharts` line chart per sensor (last 15 min), appended live; verify the charts move without reload (polls every 3 s until 5.5 live events exist)
 - [x] 5.8 [FE] Build `/map`: `public/achrona-map.svg` with type-colored markers placed by percentage; tapping a marker shows a summary card with a link; verify a fixed glitch's marker disappears live (fixed glitches are filtered out; the live part arrives with 5.5)
 - [x] 5.9 [FE] Add the lockdown toggle (C) and the red lockdown theme (`data-lockdown` on `<html>`); verify all open browsers switch within 2 s (the commander switches at once, others via the lockdown live event once 5.1/5.4 exist)
+- [x] 5.10 [BE] Automatic lockdown: on below 20% magic, off again at 20%+ only if it switched itself on, lifting refused (`CONFLICT`) under 20%; pure rule `server/monitoring/lockdown.ts` with tests, re-checked after every glitch event
 
 ## 6. AI automation (Jev)
 

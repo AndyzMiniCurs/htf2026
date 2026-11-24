@@ -4,6 +4,7 @@ import { Button } from '#/components/ui/Button.tsx'
 import { Dialog } from '#/components/ui/Dialog.tsx'
 import { useToast } from '#/components/ui/Toast.tsx'
 import { cx } from '#/components/ui/cx.ts'
+import { getErrorCode } from '#/lib/errors.ts'
 import { setLockdown } from '#/lib/monitoring.functions.ts'
 import { useLiveRealm } from './LiveRealm.tsx'
 
@@ -31,11 +32,15 @@ export function LockdownControl() {
           : 'Achrona is back to watch duty.',
       })
       setConfirming(false)
-    } catch {
+    } catch (err) {
       toast.show({
         tone: 'error',
         title: 'Lockdown unchanged',
-        body: 'Mission control did not answer. Try again.',
+        // CONFLICT: magic is still under the automatic threshold, and the server says so.
+        body:
+          getErrorCode(err) === 'CONFLICT' && err instanceof Error
+            ? err.message
+            : 'Mission control did not answer. Try again.',
       })
     } finally {
       setPending(false)

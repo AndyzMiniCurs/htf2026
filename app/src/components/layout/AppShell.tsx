@@ -8,7 +8,6 @@ import { useOnline } from '#/hooks/useOnline.ts'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
 import { LockdownControl } from './LockdownControl.tsx'
-import { useLiveRealm } from './LiveRealm.tsx'
 import { GlobalShortcuts } from './ShortcutHelp.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
 import { Desync } from './Desync.tsx'
@@ -92,7 +91,6 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
         </div>
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">
-          <LivePulse />
           {me?.role === 'commander' && <LockdownControl />}
           <Link
             to="/echoes/new"
@@ -110,34 +108,6 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
         <MagicVial level={magicLevel} compact />
       </div>
     </header>
-  )
-}
-
-/** The live link to mission control: green while events flow, amber while reconnecting. */
-function LivePulse() {
-  const { status } = useLiveRealm()
-  const online = useOnline()
-  const live = online && status === 'live'
-  return (
-    <span
-      role="status"
-      title={live ? 'Receiving live updates' : 'Reconnecting to mission control'}
-      className="label-caps hidden items-center gap-2 rounded-full border border-line px-3 py-1.5 text-fg-muted sm:inline-flex"
-    >
-      <span className="relative flex size-2.5">
-        {live && (
-          <span className="absolute inset-0 rounded-full bg-verdant motion-safe:animate-ping" />
-        )}
-        <span className={cx('relative size-2.5 rounded-full', live ? 'bg-verdant' : 'bg-amber')} />
-      </span>
-      {!online
-        ? 'Offline'
-        : live
-          ? 'Live'
-          : status === 'connecting'
-            ? 'Connecting'
-            : 'Reconnecting'}
-    </span>
   )
 }
 

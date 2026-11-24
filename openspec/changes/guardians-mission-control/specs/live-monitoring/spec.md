@@ -47,7 +47,7 @@ The system SHALL ingest readings from simulated IoT sensors (magic reserve, ley-
 - **THEN** that sensor's chart shows it without reload
 
 ### Requirement: Lockdown mode
-A commander SHALL be able to switch lockdown mode on and off. While it is on, every guardian's screen SHALL show a clear lockdown state (red theme and banner). Commander only.
+A commander SHALL be able to switch lockdown mode on and off. While it is on, every guardian's screen SHALL show a clear lockdown state (red theme and banner). Commander only. Lockdown SHALL also switch on by itself when the magic level falls below 20%, and a lockdown that switched on by itself SHALL switch off by itself once magic is back at 20% or more. A commander SHALL NOT be able to lift any lockdown while magic is below 20%; a lockdown a commander declared SHALL never lift by itself.
 
 #### Scenario: Activate lockdown
 - **WHEN** a commander turns lockdown on
@@ -56,3 +56,15 @@ A commander SHALL be able to switch lockdown mode on and off. While it is on, ev
 #### Scenario: Defender tries
 - **WHEN** a defender tries to toggle lockdown
 - **THEN** the change is rejected with a forbidden error
+
+#### Scenario: Magic runs low
+- **WHEN** a glitch change brings the magic level below 20%
+- **THEN** lockdown switches on for every open screen within 2 seconds, without a commander
+
+#### Scenario: Magic recovers
+- **WHEN** lockdown switched on by itself and fixes bring magic back to 20% or more
+- **THEN** lockdown switches off for every open screen within 2 seconds
+
+#### Scenario: Lifting too early
+- **WHEN** a commander tries to lift the lockdown while magic is below 20%
+- **THEN** the change is rejected with a conflict error that says magic must recover first

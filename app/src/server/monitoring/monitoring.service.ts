@@ -1,10 +1,12 @@
 import { GLITCH_TYPES } from '#/lib/glitch.ts'
 import { SENSORS, SENSOR_IDS } from '#/lib/monitoring.ts'
-import { publish } from '../events/bus.ts'
+import { AppError } from '#/lib/errors.ts'
+import { publish, subscribe } from '../events/bus.ts'
 import * as glitchRepo from '../glitches/glitches.repository.ts'
 import { listGuardians } from '../guardians/guardians.repository.ts'
 import { notifyLockdown } from '../notifications/notifications.service.ts'
 import { badgesFor } from './badges.ts'
+import { AUTO_LOCKDOWN_BELOW, canLift, nextLockdown } from './lockdown.ts'
 import { magicLevel } from './magic.ts'
 import * as repo from './monitoring.repository.ts'
 import { forecastSensor } from './forecast.ts'
@@ -23,6 +25,7 @@ import type {
   SensorSeries,
 } from '#/lib/monitoring.ts'
 import type { Fix } from './badges.ts'
+import type { LockdownState } from './lockdown.ts'
 import type { Forecast } from './forecast.ts'
 
 export type SensorForesight = {
@@ -40,6 +43,7 @@ const RECENTLY_FIXED = 5
 
 export async function getDashboard(): Promise<Dashboard> {
   ensureSensorSimulator()
+  ensureAutoLockdown()
   const [open, fixed, byStatus, lockdown] = await Promise.all([
     glitchRepo.listGlitches({ status: ['LEAKED', 'ASSESSING', 'CONTAINING'] }),
     glitchRepo.listRecentlyFixed(RECENTLY_FIXED),
@@ -101,10 +105,56 @@ export function triggerIncident(sensorId: SensorId): void {
 
 /** Commander-only (middleware): stores the flag and switches every open screen live. */
 export async function setLockdown(on: boolean): Promise<{ on: boolean }> {
-  await repo.setLockdown(on)
-  publish({ type: 'lockdown', on })
-  await notifyLockdown(on)
+  if (!on && !canLift(await currentMagic())) {
+    throw new AppError(
+      'CONFLICT',
+      `Magic is under ${AUTO_LOCKDOWN_BELOW}%: the lockdown holds until it recovers.`,
+    )
+  }
+  await applyLockdown({ on, auto: false })
   return { on }
+}
+
+async function applyLockdown(state: LockdownState): Promise<void> {
+  await repo.setLockdownState(state)
+  publish({ type: 'lockdown', on: state.on })
+  await notifyLockdown(state.on)
+}
+
+async function currentMagic(): Promise<number> {
+  return magicLevel(
+    await glitchRepo.listGlitches({ status: ['LEAKED', 'ASSESSING', 'CONTAINING'] }),
+  )
+}
+
+/** Applies the automatic lockdown rule to the magic level as it is now. */
+async function syncLockdown(): Promise<void> {
+  const current = await repo.getLockdownState()
+  const next = nextLockdown(await currentMagic(), current)
+  if (next.on !== current.on) await applyLockdown(next)
+}
+
+const AUTO_LOCKDOWN_KEY = Symbol.for('achrona.autoLockdown')
+type WithAutoLockdown = typeof globalThis & { [AUTO_LOCKDOWN_KEY]?: true }
+
+/**
+ * Re-checks the lockdown after every glitch change, wherever it came from (echo, status, merge).
+ * Checks run one after another so two quick changes cannot both declare it. Once per process.
+ */
+export function ensureAutoLockdown(): void {
+  const host = globalThis as WithAutoLockdown
+  if (host[AUTO_LOCKDOWN_KEY]) return
+  host[AUTO_LOCKDOWN_KEY] = true
+  let queue = Promise.resolve()
+  const check = () => {
+    queue = queue
+      .then(syncLockdown)
+      .catch((error: unknown) => console.warn('Automatic lockdown check failed', error))
+  }
+  subscribe(({ event }) => {
+    if (event.type === 'glitch.created' || event.type === 'glitch.updated') check()
+  })
+  check()
 }
 
 const REPORT_TOP = 5
