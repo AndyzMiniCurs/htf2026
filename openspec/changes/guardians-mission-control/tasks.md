@@ -82,7 +82,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 ## 8. Demo readiness (integration)
 
-- [ ] 8.1 [BE] Expand the seed into a realistic demo: about 15 glitches across all types, statuses and map spots, echoes from several guardians, 15 min of sensor history; `db:setup` stays re-runnable; verify a fresh `docker compose down -v && npm run db:setup`
+- [x] 8.1 [BE] Expand the seed into a realistic demo: about 15 glitches across all types, statuses and map spots, echoes from several guardians, 15 min of sensor history; `db:setup` stays re-runnable; verify a fresh `docker compose down -v && npm run db:setup`
 - [ ] 8.2 [BE] Pass `TYPESAFE_API_KEY` through `docker-compose.yml`, update the root README (env vars, demo accounts); verify `docker compose --profile full up --build` serves the full app
 - [ ] 8.3 [FE] Mobile pass: every page at 375 px (no horizontal scroll, 44 px tap targets, bottom nav, keyboard does not cover inputs); verify on a real phone over the LAN
 - [ ] 8.4 [FE] Rehearse the pitch demo script end to end in two browsers (defender phone + commander desktop): report -> AI groups/types/assigns -> live gauge/map -> runbook -> fix -> leaderboard -> lockdown -> PDF; verify it runs twice without errors

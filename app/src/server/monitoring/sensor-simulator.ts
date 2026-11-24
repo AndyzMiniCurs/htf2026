@@ -13,8 +13,8 @@ export const SENSOR_CONFIG: Record<
   { baseline: number; location: Location; glitchType: GlitchType }
 > = {
   'magic-reserve': { baseline: 82, location: { x: 50, y: 48 }, glitchType: 'magic-drain' },
-  'ley-flux': { baseline: 64, location: { x: 72, y: 70 }, glitchType: 'magic-drain' },
-  'portal-stability': { baseline: 91, location: { x: 26, y: 32 }, glitchType: 'portal' },
+  'ley-flux': { baseline: 64, location: { x: 84, y: 78 }, glitchType: 'magic-drain' },
+  'portal-stability': { baseline: 91, location: { x: 12, y: 68 }, glitchType: 'portal' },
 }
 
 const TICK_MS = 3000
