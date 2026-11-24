@@ -3,7 +3,7 @@ import { getClassifier } from '../ai/classifier.ts'
 import { classifyType, findMatchingGlitch, moderate } from '../ai/triage.ts'
 import { publish } from '../events/bus.ts'
 import { listMatchCandidates, updateGlitchStatus } from '../glitches/glitches.repository.ts'
-import { requireActiveGlitch } from '../glitches/glitches.service.ts'
+import { autoAssign, requireActiveGlitch } from '../glitches/glitches.service.ts'
 import { notifyStatus } from '../notifications/notifications.service.ts'
 import { assertAssigneeOrCommander } from '../glitches/status.ts'
 import * as repo from './echoes.repository.ts'
@@ -75,7 +75,9 @@ export async function reportEcho(
   if (!match) {
     const created = await repo.insertEchoWithNewGlitch(echo, { type })
     publish({ type: 'glitch.created', glitchId: created.glitchId })
-    return result(created.glitchId, created.echoId, 'created')
+    const response = result(created.glitchId, created.echoId, 'created')
+    await autoAssign(created.glitchId, type)
+    return response
   }
 
   const { glitchId } = match
@@ -107,6 +109,7 @@ export async function reportPrediction(prediction: {
   )
   publish({ type: 'glitch.created', glitchId: created.glitchId })
   publish({ type: 'echo.created', ...created })
+  await autoAssign(created.glitchId, prediction.type)
   return created
 }
 

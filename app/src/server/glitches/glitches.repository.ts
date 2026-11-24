@@ -217,6 +217,36 @@ export async function listMatchCandidates(fixedSince: string, limit: number) {
     .limit(limit)
 }
 
+/** Every defender with the types they fixed before and how many open glitches they hold. */
+export async function listDefenderLoads() {
+  const [defenders, fixes, open] = await Promise.all([
+    db
+      .select({ guardianId: guardians.guardianId, codename: guardians.codename })
+      .from(guardians)
+      .where(eq(guardians.role, 'defender'))
+      .orderBy(asc(guardians.guardianId)),
+    db
+      .select({ guardianId: glitches.fixedBy, type: glitches.type, n: sql<number>`count(*)::int` })
+      .from(glitches)
+      .where(
+        and(eq(glitches.status, 'FIXED'), isNull(glitches.mergedInto), isNotNull(glitches.fixedBy)),
+      )
+      .groupBy(glitches.fixedBy, glitches.type),
+    db
+      .select({ guardianId: glitches.assignedGuardianId, n: sql<number>`count(*)::int` })
+      .from(glitches)
+      .where(and(sql`${glitches.status} <> 'FIXED'`, isNull(glitches.mergedInto)))
+      .groupBy(glitches.assignedGuardianId),
+  ])
+  return defenders.map((d) => ({
+    ...d,
+    fixedByType: Object.fromEntries(
+      fixes.filter((f) => f.guardianId === d.guardianId).map((f) => [f.type, f.n]),
+    ),
+    openCount: open.find((o) => o.guardianId === d.guardianId)?.n ?? 0,
+  }))
+}
+
 /** Number of non-merged glitches per status. */
 export async function countByStatus(): Promise<Record<GlitchStatus, number>> {
   const rows = await db

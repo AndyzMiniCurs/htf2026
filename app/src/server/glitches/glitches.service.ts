@@ -2,12 +2,19 @@ import { AppError } from '#/lib/errors.ts'
 import { SENSORS, sensorIdSchema } from '#/lib/monitoring.ts'
 import { getClassifier } from '../ai/classifier.ts'
 import { buildRunbook } from '../ai/runbook.ts'
+import { pickAssignee } from '../ai/triage.ts'
 import { publish } from '../events/bus.ts'
 import { findGuardianById } from '../guardians/guardians.repository.ts'
 import { notifyAssigned, notifyStatus } from '../notifications/notifications.service.ts'
 import * as repo from './glitches.repository.ts'
 import { assertAssigneeOrCommander, canReopen, nextStatus } from './status.ts'
-import type { GlitchDetail, GlitchListItem, GlitchQuery, RunbookStep } from '#/lib/glitch.ts'
+import type {
+  GlitchDetail,
+  GlitchListItem,
+  GlitchQuery,
+  GlitchType,
+  RunbookStep,
+} from '#/lib/glitch.ts'
 import type { SensorId } from '#/lib/monitoring.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
@@ -125,6 +132,12 @@ export async function assignGlitch(
   publish({ type: 'glitch.updated', glitchId })
   if (guardianId !== null) await notifyAssigned(glitchId, guardianId)
   return listItem(glitchId)
+}
+
+/** Gives a new glitch to the best-suited defender (AI) or the least-loaded one (no AI). */
+export async function autoAssign(glitchId: string, type: GlitchType): Promise<void> {
+  const guardianId = await pickAssignee(getClassifier(), type, await repo.listDefenderLoads())
+  if (guardianId !== null) await assignGlitch(glitchId, guardianId)
 }
 
 /** Commander only (middleware). Every echo moves over; the merged glitch leaves the list. */

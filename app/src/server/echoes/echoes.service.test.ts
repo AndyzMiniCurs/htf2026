@@ -172,6 +172,17 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     expect(glitch).toMatchObject({ type: 'time-anomaly' })
   })
 
+  it('assigns a new glitch to a defender, the least-loaded one without AI', async () => {
+    const result = await reportEcho(reporter, {
+      description: 'Unassigned so far',
+      location: null,
+      image: null,
+    })
+    created.push(result.glitchId)
+    const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, result.glitchId))
+    expect(glitch).toMatchObject({ assignedGuardianId: expect.any(Number) })
+  })
+
   it('groups a duplicate under the open glitch, marked grouped by AI', async () => {
     const first = await reportEcho(reporter, {
       description: 'Clock tower time loop',
