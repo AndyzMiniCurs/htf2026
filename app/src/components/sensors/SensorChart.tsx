@@ -154,7 +154,7 @@ export function SensorChart({ series }: { series: SensorSeries }) {
       <button
         type="button"
         onClick={() => setAsTable((v) => !v)}
-        className="mt-3 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg"
+        className="mt-1 min-h-11 text-sm text-fg-muted underline decoration-line-strong underline-offset-4 hover:text-fg"
       >
         {asTable ? 'Show chart' : 'Show latest readings as a table'}
       </button>

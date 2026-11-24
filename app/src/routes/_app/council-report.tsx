@@ -44,7 +44,7 @@ function CouncilReportPage() {
       </div>
 
       {/* The sheet: parchment on screen, plain paper in print. */}
-      <article className="rounded-sm bg-[#f4ead2] px-8 py-10 font-serif text-[#24192e] shadow-[0_24px_60px_-24px_rgb(0_0_0/0.8)] sm:px-14 print:rounded-none print:bg-white print:p-0 print:shadow-none">
+      <article className="rounded-sm bg-[#f4ead2] px-5 py-8 font-serif text-[#24192e] shadow-[0_24px_60px_-24px_rgb(0_0_0/0.8)] sm:px-14 print:rounded-none print:bg-white print:p-0 print:shadow-none">
         <header className="flex items-center gap-5 border-b-2 border-[#24192e] pb-5">
           <Crest className="size-16 shrink-0 [print-color-adjust:exact]" />
           <div>
@@ -81,37 +81,41 @@ function CouncilReportPage() {
           {open.length === 0 ? (
             <p>No glitch is open. Every rift is sealed.</p>
           ) : (
-            <table className="w-full text-left text-[0.95rem]">
-              <thead>
-                <tr className="border-b border-[#24192e]">
-                  <th className="py-1.5 pr-3">Glitch</th>
-                  <th className="py-1.5 pr-3">Echo</th>
-                  <th className="py-1.5 pr-3">Kind</th>
-                  <th className="py-1.5 pr-3">Stage</th>
-                  <th className="py-1.5 pr-3">Guardian</th>
-                  <th className="py-1.5">Opened</th>
-                </tr>
-              </thead>
-              <tbody>
-                {open.map((g) => (
-                  <tr
-                    key={g.glitchId}
-                    className="border-b border-[#24192e]/25 align-top break-inside-avoid"
-                  >
-                    <td className="py-1.5 pr-3 font-bold whitespace-nowrap">{g.glitchId}</td>
-                    <td className="py-1.5 pr-3">{g.description}</td>
-                    <td className="py-1.5 pr-3 whitespace-nowrap">{TYPE_META[g.type].label}</td>
-                    <td className="py-1.5 pr-3 whitespace-nowrap">{STATUS_META[g.status].label}</td>
-                    <td className="py-1.5 pr-3 whitespace-nowrap">
-                      {g.assignee?.codename ?? 'Unassigned'}
-                    </td>
-                    <td className="py-1.5 whitespace-nowrap">
-                      {shortDate.format(new Date(g.timestamp))}
-                    </td>
+            <div className="-mx-1 overflow-x-auto print:overflow-visible">
+              <table className="w-full min-w-[34rem] text-left text-[0.95rem] print:min-w-0">
+                <thead>
+                  <tr className="border-b border-[#24192e]">
+                    <th className="py-1.5 pr-3">Glitch</th>
+                    <th className="py-1.5 pr-3">Echo</th>
+                    <th className="py-1.5 pr-3">Kind</th>
+                    <th className="py-1.5 pr-3">Stage</th>
+                    <th className="py-1.5 pr-3">Guardian</th>
+                    <th className="py-1.5">Opened</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {open.map((g) => (
+                    <tr
+                      key={g.glitchId}
+                      className="border-b border-[#24192e]/25 align-top break-inside-avoid"
+                    >
+                      <td className="py-1.5 pr-3 font-bold whitespace-nowrap">{g.glitchId}</td>
+                      <td className="py-1.5 pr-3">{g.description}</td>
+                      <td className="py-1.5 pr-3 whitespace-nowrap">{TYPE_META[g.type].label}</td>
+                      <td className="py-1.5 pr-3 whitespace-nowrap">
+                        {STATUS_META[g.status].label}
+                      </td>
+                      <td className="py-1.5 pr-3 whitespace-nowrap">
+                        {g.assignee?.codename ?? 'Unassigned'}
+                      </td>
+                      <td className="py-1.5 whitespace-nowrap">
+                        {shortDate.format(new Date(g.timestamp))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Section>
 

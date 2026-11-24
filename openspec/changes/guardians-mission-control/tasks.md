@@ -84,7 +84,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 - [x] 8.1 [BE] Expand the seed into a realistic demo: about 15 glitches across all types, statuses and map spots, echoes from several guardians, 15 min of sensor history; `db:setup` stays re-runnable; verify a fresh `docker compose down -v && npm run db:setup`
 - [ ] 8.2 [BE] Pass `TYPESAFE_API_KEY` through `docker-compose.yml`, update the root README (env vars, demo accounts); verify `docker compose --profile full up --build` serves the full app
-- [ ] 8.3 [FE] Mobile pass: every page at 375 px (no horizontal scroll, 44 px tap targets, bottom nav, keyboard does not cover inputs); verify on a real phone over the LAN
+- [x] 8.3 [FE] Mobile pass: every page at 375 px (no horizontal scroll, 44 px tap targets, bottom nav, keyboard does not cover inputs); verify on a real phone over the LAN (scripted pass at 375 px on all 11 pages: no horizontal scroll, no visible target under 44 px; real-phone check still to do with the team)
 - [ ] 8.4 [FE] Rehearse the pitch demo script end to end in two browsers (defender phone + commander desktop): report -> AI groups/types/assigns -> live gauge/map -> runbook -> fix -> leaderboard -> lockdown -> PDF; verify it runs twice without errors
 
 ## Workflow follow-up

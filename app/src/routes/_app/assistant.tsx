@@ -111,7 +111,7 @@ function OraclePage() {
                 type="button"
                 disabled={pending}
                 onClick={() => void ask(s)}
-                className="h-9 shrink-0 rounded-full border border-line px-3.5 text-sm whitespace-nowrap text-fg-muted transition-colors hover:border-gold hover:text-fg disabled:opacity-50"
+                className="h-11 shrink-0 rounded-full border border-line px-3.5 text-sm lg:h-9 whitespace-nowrap text-fg-muted transition-colors hover:border-gold hover:text-fg disabled:opacity-50"
               >
                 {s}
               </button>

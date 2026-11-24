@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Radar, Search, SearchX } from 'lucide-react'
+import { Radar, Search, SearchX, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { GlitchTypeBadge, StatusBadge } from '#/components/glitches/GlitchBadges.tsx'
 import { QuestCard } from '#/components/glitches/QuestLog.tsx'
@@ -121,6 +121,13 @@ function QuestLogPage() {
 function Filters({ search }: { search: GlitchQuery }) {
   const navigate = useNavigate({ from: '/glitches/' })
   const [text, setText] = useState(search.q ?? '')
+  const [more, setMore] = useState(false)
+  const activeCount =
+    (search.status?.length ?? 0) +
+    (search.type?.length ?? 0) +
+    (search.from ? 1 : 0) +
+    (search.to ? 1 : 0) +
+    (search.sort && search.sort !== 'newest' ? 1 : 0)
 
   const update = (patch: Partial<GlitchQuery>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true })
@@ -149,31 +156,46 @@ function Filters({ search }: { search: GlitchQuery }) {
             className="pointer-events-none absolute bottom-3.5 left-3.5 size-4 text-fg-faint"
           />
         </div>
-        <Input
-          label="From"
-          type="date"
-          value={search.from ?? ''}
-          onChange={(e) => update({ from: e.target.value || undefined })}
-        />
-        <Input
-          label="To"
-          type="date"
-          value={search.to ?? ''}
-          onChange={(e) => update({ to: e.target.value || undefined })}
-        />
-        <Select
-          label="Sort"
-          value={search.sort ?? 'newest'}
-          onChange={(e) => update({ sort: e.target.value as GlitchQuery['sort'] })}
+        {/* Phones show only the search until the guardian asks for the rest. */}
+        <button
+          type="button"
+          aria-expanded={more}
+          aria-controls="glitch-filters"
+          onClick={() => setMore((v) => !v)}
+          className="label-caps flex h-11 items-center justify-center gap-2 rounded-lg border border-line text-fg-muted hover:border-line-strong hover:text-fg lg:hidden"
         >
-          {GLITCH_SORTS.map((sort) => (
-            <option key={sort} value={sort}>
-              {SORT_LABEL[sort]}
-            </option>
-          ))}
-        </Select>
+          <SlidersHorizontal aria-hidden className="size-4" />
+          {more ? 'Hide filters' : activeCount > 0 ? `Filters (${activeCount})` : 'Filters'}
+        </button>
+        <div id="glitch-filters" className={cx(more ? 'contents' : 'hidden', 'lg:contents')}>
+          <Input
+            label="From"
+            type="date"
+            value={search.from ?? ''}
+            onChange={(e) => update({ from: e.target.value || undefined })}
+          />
+          <Input
+            label="To"
+            type="date"
+            value={search.to ?? ''}
+            onChange={(e) => update({ to: e.target.value || undefined })}
+          />
+          <Select
+            label="Sort"
+            value={search.sort ?? 'newest'}
+            onChange={(e) => update({ sort: e.target.value as GlitchQuery['sort'] })}
+          >
+            {GLITCH_SORTS.map((sort) => (
+              <option key={sort} value={sort}>
+                {SORT_LABEL[sort]}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
-      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:gap-8">
+      <div
+        className={cx(more ? 'flex' : 'hidden', 'mt-4 flex-col gap-3 lg:flex lg:flex-row lg:gap-8')}
+      >
         <ChipGroup
           label="Stage"
           options={GLITCH_STATUSES}
@@ -236,7 +258,7 @@ function ChipGroup<TValue extends string>({
                 : undefined
             }
             className={cx(
-              'inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors',
+              'inline-flex h-11 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors lg:h-9',
               on ? 'font-bold' : 'border-line text-fg-muted hover:border-line-strong hover:text-fg',
             )}
           >

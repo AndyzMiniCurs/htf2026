@@ -61,7 +61,7 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
   return (
     <header className="print:hidden! sticky top-0 z-30 border-b border-line bg-[color-mix(in_oklab,var(--ground)_82%,transparent)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
-        <Link to="/" className="flex shrink-0 items-center gap-3 rounded-lg">
+        <Link to="/" className="flex min-h-11 shrink-0 items-center gap-3 rounded-lg">
           <Crest className="size-10 drop-shadow-[0_4px_10px_rgb(165_43_217/0.5)] lg:size-12" />
           <span className="flex flex-col">
             <span className="title-gothic text-xl sm:text-2xl lg:text-[1.75rem]">

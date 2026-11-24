@@ -126,7 +126,7 @@ function BackToLog() {
   return (
     <Link
       to="/glitches"
-      className="inline-flex w-fit items-center gap-2 rounded-lg text-fg-muted hover:text-fg"
+      className="inline-flex min-h-11 w-fit items-center gap-2 rounded-lg text-fg-muted hover:text-fg"
     >
       <ArrowLeft aria-hidden className="size-4" />
       Quest log
