@@ -1,10 +1,8 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { AppShell } from '#/components/layout/AppShell.tsx'
 import { ToastProvider } from '#/components/ui/Toast.tsx'
 import { getMe } from '#/lib/auth.functions.ts'
-import { getDashboard } from '#/lib/monitoring.functions.ts'
 
 import appCss from '../styles.css?url'
 import type { ReactNode } from 'react'
@@ -22,24 +20,15 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
-  loader: async () => {
-    const [me, dashboard] = await Promise.all([getMe(), getDashboard()])
-    return { me, dashboard }
-  },
+  // Who is signed in, for every route below; null on the login screen.
+  beforeLoad: async () => ({ me: await getMe() }),
   shellComponent: RootDocument,
-  component: AppLayout,
-})
-
-function AppLayout() {
-  const { me, dashboard } = Route.useLoaderData()
-  return (
+  component: () => (
     <ToastProvider>
-      <AppShell me={me} magicLevel={dashboard.magicLevel}>
-        <Outlet />
-      </AppShell>
+      <Outlet />
     </ToastProvider>
-  )
-}
+  ),
+})
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (

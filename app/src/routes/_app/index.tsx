@@ -9,7 +9,7 @@ import { GLITCH_STATUSES } from '#/lib/glitch.ts'
 import { getDashboard } from '#/lib/monitoring.functions.ts'
 import type { GlitchListItem, GlitchStatus } from '#/lib/glitch.ts'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_app/')({
   loader: () => getDashboard(),
   component: OverviewPage,
 })

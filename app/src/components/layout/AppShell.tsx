@@ -3,6 +3,7 @@ import { Ellipsis, Megaphone } from 'lucide-react'
 import { cx } from '#/components/ui/cx.ts'
 import { Button } from '#/components/ui/Button.tsx'
 import { Crest } from './Crest.tsx'
+import { GuardianMenu } from './GuardianMenu.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
 import { MagicVial } from './MagicVial.tsx'
 import { navItems } from './nav-items.ts'
@@ -70,7 +71,7 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
               Report an echo
             </Button>
           </div>
-          {me && <GuardianChip me={me} />}
+          {me && <GuardianMenu me={me} />}
         </div>
       </div>
       <div className="px-4 pb-3 md:hidden">
@@ -89,34 +90,6 @@ function LivePulse() {
       </span>
       Live
     </span>
-  )
-}
-
-/** The guardian's portrait: their initial set in the gothic face on a crest-coloured tile. */
-function GuardianChip({ me }: { me: Guardian }) {
-  const commander = me.role === 'commander'
-  return (
-    <div className="flex items-center gap-2.5">
-      <span className="hidden text-right leading-tight xl:block">
-        <span className="block font-bold text-fg">{me.codename}</span>
-        <span
-          className={cx('label-caps text-[0.65rem]', commander ? 'text-pink' : 'text-fg-faint')}
-        >
-          {me.role}
-        </span>
-      </span>
-      <span
-        aria-label={`${me.codename}, ${me.role}`}
-        className={cx(
-          'title-gothic grid size-11 place-items-center rounded-xl border-2 text-2xl',
-          commander
-            ? 'border-pink bg-[linear-gradient(160deg,var(--curse),var(--royal-deep))]'
-            : 'border-royal-hi bg-[linear-gradient(160deg,var(--royal),var(--royal-deep))]',
-        )}
-      >
-        {me.codename.charAt(0)}
-      </span>
-    </div>
   )
 }
 

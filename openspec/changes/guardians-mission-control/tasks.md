@@ -11,8 +11,8 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 1.3 [BE] Add stub server functions for every row of the D12 table, returning data from `lib/fixtures.ts`, so FE can build every screen; verify each stub returns its fixture when called from a route loader
 - [x] 1.4 [BE] Check the real Jev API (endpoint, payload, auth) with one curl call, then write `server/ai/classifier.ts` (port), `jev.classifier.ts` (fetch, 3 s timeout) and `null.classifier.ts`; verify a unit test with a mocked `fetch` covers success, timeout -> `null` and missing key -> null classifier
 - [ ] 1.5 [FE] Add quality tooling: `vitest`, ESLint (`@tanstack/eslint-config`), Prettier, scripts `typecheck`/`lint`/`format`/`test`, and add typecheck + lint + test steps to `.github/workflows/build.yml`; verify all four scripts pass locally
-- [ ] 1.6 [FE] Build the mobile-first app shell: bottom nav below 1024 px and the starter `Sidebar` from 1024 px, both driven by one `navItems` list, plus a page container with safe-area padding; verify at 375 px and 1440 px
-- [ ] 1.7 [FE] Add UI primitives in `components/ui`: Button, Input, Textarea, Select, Badge, Dialog, Toast, EmptyState; plus `StatusBadge` and `GlitchTypeBadge` (lucide icon + color per `GlitchType`) in `components/glitches`; verify they render in light and dark mode
+- [x] 1.6 [FE] Build the mobile-first app shell: bottom nav below 1024 px and the starter `Sidebar` from 1024 px, both driven by one `navItems` list, plus a page container with safe-area padding; verify at 375 px and 1440 px
+- [x] 1.7 [FE] Add UI primitives in `components/ui`: Button, Input, Textarea, Select, Badge, Dialog, Toast, EmptyState; plus `StatusBadge` and `GlitchTypeBadge` (lucide icon + color per `GlitchType`) in `components/glitches`; verify they render in light and dark mode
 
 ## 2. Base: login and roles
 
@@ -21,8 +21,8 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 2.3 [BE] Add `requireGuardian` / `requireCommander` middleware to every server function; verify tests: anonymous call -> `UNAUTHORIZED`, defender on a commander-only function -> `FORBIDDEN`
 - [x] 2.4 [BE] Implement the guardians service (`listGuardians`, `createGuardian`, `setGuardianRole`) including the last-commander rule; verify tests for duplicate codename and for demoting the last commander
 - [x] 2.5 [BE] Seed demo guardians (one commander, three defenders) with passwords listed in the root README; verify login works for each after `npm run db:setup`
-- [ ] 2.6 [FE] Build the `/login` page (mobile-first form, inline validation, generic error message); verify a wrong password shows the error and a correct one lands on the dashboard
-- [ ] 2.7 [FE] Add the auth guard in the root route `beforeLoad` (redirect to `/login`) and a user menu with codename, role and logout; verify an anonymous visit to `/glitches` redirects to `/login`
+- [x] 2.6 [FE] Build the `/login` page (mobile-first form, inline validation, generic error message); verify a wrong password shows the error and a correct one lands on the dashboard
+- [x] 2.7 [FE] Add the auth guard in the root route `beforeLoad` (redirect to `/login`) and a user menu with codename, role and logout; verify an anonymous visit to `/glitches` redirects to `/login`
 - [ ] 2.8 [FE] Build the `/guardians` page (commander only): list, create form, role switch; hide it from defenders in nav; verify a defender opening `/guardians` sees a forbidden state
 
 ## 3. Base: echoes become glitches, glitch list
