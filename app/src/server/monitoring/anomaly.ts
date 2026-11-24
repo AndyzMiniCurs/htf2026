@@ -4,15 +4,16 @@ export type Anomaly =
   | { kind: 'drop'; from: number; to: number; percent: number }
   | { kind: 'deviation'; value: number; mean: number; sigmas: number }
 
+// Exported so the Oracle's forecast projects onto exactly the lines this detector uses.
 const MINUTE = 60_000
-const DROP_WINDOW_MS = 5 * MINUTE
-const DROP_RATIO = 0.4
-const DEVIATION_WINDOW_MS = 15 * MINUTE
-const SIGMAS = 3
+export const DROP_WINDOW_MS = 5 * MINUTE
+export const DROP_RATIO = 0.4
+export const DEVIATION_WINDOW_MS = 15 * MINUTE
+export const SIGMAS = 3
 /** Below this many points a standard deviation says nothing. */
-const MIN_POINTS = 10
+export const MIN_POINTS = 10
 /** 3σ of a very calm signal is tiny; also require a real-world jump so sensor noise never pages. */
-const MIN_ABSOLUTE_DEVIATION = 8
+export const MIN_ABSOLUTE_DEVIATION = 8
 
 const round = (n: number) => Math.round(n * 10) / 10
 
