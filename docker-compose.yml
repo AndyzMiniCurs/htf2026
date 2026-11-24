@@ -30,6 +30,10 @@ services:
   app:
     build: ./app
     profiles: ["full"] # dev runs the app locally with `npm run dev`; `docker compose --profile full up` runs everything
+    # AI keys (TYPESAFE_API_KEY, OPENROUTER_API_KEY) come from the same file `npm run dev` reads.
+    env_file:
+      - path: ./app/.env
+        required: false
     environment:
       DATABASE_URL: postgresql://htf:htf@db:5432/htf
     ports:

@@ -30,6 +30,20 @@ Everything in Docker: `docker compose --profile full up --build`. A one-shot `mi
 `db:init` before the app starts, so a fresh machine needs no extra step. Ports can be moved with
 `DB_PORT` / `APP_PORT`, e.g. `APP_PORT=3300 docker compose --profile full up --build`.
 
+### Environment variables
+
+Put them in `app/.env` (gitignored). `npm run dev` loads it, and `docker compose --profile full`
+passes it to the app container.
+
+| Variable | What |
+|----------|------|
+| `TYPESAFE_API_KEY` | Jev (TypeSafe) classifier for all AI features. Wins when both keys are set. |
+| `OPENROUTER_API_KEY` | Fallback classifier via OpenRouter (`openai/gpt-4o-mini`) when there is no TypeSafe key. |
+| `DATABASE_URL` | Only to point somewhere else than the compose Postgres (`postgresql://htf:htf@localhost:5432/htf`). |
+
+Without an AI key everything still works without AI: each echo becomes a new `unknown` glitch,
+assigned to the least-loaded defender, and the Oracle only answers questions naming a glitch id.
+
 ### Demo accounts
 
 Created by `npm run db:init` on an empty database; `npm run db:setup` resets them.
