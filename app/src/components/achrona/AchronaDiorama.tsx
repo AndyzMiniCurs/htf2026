@@ -26,7 +26,8 @@ export function AchronaDiorama(props: Omit<AchronaSceneProps, 'reducedMotion' | 
   const lowPower = useIsPhone()
   const fallback = <DioramaPlaceholder />
   return (
-    <div className="relative h-full w-full">
+    // Achrona is always seen by night: its labels keep the night palette in the day theme too.
+    <div data-theme="dark" className="relative h-full w-full">
       <ClientOnly fallback={fallback}>
         <SceneBoundary fallback={fallback}>
           <Suspense fallback={fallback}>

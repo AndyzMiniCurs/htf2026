@@ -836,6 +836,27 @@ html[data-desync='heavy'] {
   }
 }
 
+/* The magic vial's glint: crosses the liquid, rests, crosses again. */
+.vial-glint {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
+  transform: translateX(-100%);
+  animation: vial-glint 4s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  will-change: transform;
+}
+@keyframes vial-glint {
+  0% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(300%);
+  }
+}
+
 /* Day and night: the new sky washes in as a circle from where the guardian tapped. */
 ::view-transition-old(root),
 ::view-transition-new(root) {

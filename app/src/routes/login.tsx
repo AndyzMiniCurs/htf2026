@@ -88,7 +88,8 @@ function LoginPage() {
           heading="Enter Achrona"
           className="w-full bg-[color-mix(in_oklab,var(--panel)_88%,transparent)] backdrop-blur-md"
         >
-          <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+          {/* POST, so a submit before the page is interactive never puts the password in the URL. */}
+          <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
             <Input
               label="Codename"
               name="codename"

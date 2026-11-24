@@ -96,6 +96,8 @@ export function WarTable({ glitches, rifts, selectedId, onSelect, focus }: WarTa
   return (
     <div
       ref={viewport}
+      // The war table is a night chart: HUD, markers and cards keep the night palette by day.
+      data-theme="dark"
       className="war-table relative aspect-square w-full overflow-hidden select-none lg:aspect-auto lg:h-[max(30rem,calc(100dvh-15rem))]"
       onPointerMove={trackPointer}
       onClick={(event) => {

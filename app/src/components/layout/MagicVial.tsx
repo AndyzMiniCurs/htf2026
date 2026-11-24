@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { CountUp } from '#/components/ui/CountUp.tsx'
 import { cx } from '#/components/ui/cx.ts'
 
@@ -17,25 +16,18 @@ export function MagicVial({ level, compact }: { level: number; compact?: boolean
         aria-valuenow={pct}
         className="relative h-4 flex-1 overflow-hidden rounded-full border border-line-strong bg-field shadow-[inset_0_2px_6px_rgb(0_0_0/0.5)]"
       >
-        <motion.div
-          className="absolute inset-y-0 left-0 rounded-full"
+        <div
+          className="absolute inset-y-0 left-0 overflow-hidden rounded-full transition-[width] duration-1000 ease-out-expo"
           style={{
+            width: `${pct}%`,
             background: low
               ? 'linear-gradient(90deg, #7a1a0c, var(--ember), #ffb08a)'
               : 'linear-gradient(90deg, var(--royal-deep), var(--royal-hi) 45%, var(--curse-hi) 85%, var(--pink))',
           }}
-          initial={false}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Hidden by CSS, not by a hook, so server and client render the same markup. */}
-          <motion.span
-            aria-hidden
-            className="absolute inset-y-0 w-16 motion-reduce:hidden bg-[linear-gradient(90deg,transparent,rgb(255_255_255/0.55),transparent)]"
-            animate={{ left: ['-20%', '110%'] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.2 }}
-          />
-        </motion.div>
+          {/* A glint along the liquid, clipped to it; a transform, so a busy page never stalls it. */}
+          <span aria-hidden className="vial-glint motion-reduce:hidden" />
+        </div>
         {/* Quarter ticks, like the notches on a potion flask. */}
         <div aria-hidden className="absolute inset-0 grid grid-cols-4">
           <span className="border-r border-white/15" />
