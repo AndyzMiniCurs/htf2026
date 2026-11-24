@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { AppError } from '#/lib/errors.ts'
-import { fixtureGlitchDetail, fixtureGlitches, fixtureGuardians } from '#/lib/fixtures.ts'
+import { fixtureGlitchDetail } from '#/lib/fixtures.ts'
 import {
   assignGlitchInput,
   glitchIdInput,
@@ -12,12 +11,6 @@ import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
 import * as glitches from '#/server/glitches/glitches.service.ts'
 import type { GlitchDetail, GlitchListItem, RunbookStep } from '#/lib/glitch.ts'
-
-function fixtureItem(glitchId: string): GlitchListItem {
-  const item = fixtureGlitches.find((g) => g.glitchId === glitchId)
-  if (!item) throw new AppError('NOT_FOUND', `Glitch ${glitchId} not found`)
-  return item
-}
 
 export const getGlitches = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
@@ -44,15 +37,16 @@ export const reopenGlitch = createServerFn({ method: 'POST' })
 export const assignGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(assignGlitchInput))
-  .handler(async ({ data }): Promise<GlitchListItem> => ({
-    ...fixtureItem(data.glitchId),
-    assignee: fixtureGuardians.find((g) => g.guardianId === data.guardianId) ?? null,
-  }))
+  .handler(async ({ data }): Promise<GlitchListItem> =>
+    glitches.assignGlitch(data.glitchId, data.guardianId),
+  )
 
 export const mergeGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(mergeGlitchInput))
-  .handler(async (): Promise<void> => {})
+  .handler(async ({ data }): Promise<void> =>
+    glitches.mergeGlitch(data.glitchId, data.intoGlitchId),
+  )
 
 export const setRunbookStep = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])

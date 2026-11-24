@@ -38,7 +38,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 ## 4. Workflow
 
 - [x] 4.1 [BE] Write `server/glitches/status.ts` (pure, forward one step, reopen only from `FIXED`), then `advanceStatus` and `reopenGlitch` with permission rules and `fixed_at`/`fixed_by`; verify unit tests for every allowed and rejected transition
-- [ ] 4.2 [BE] Implement `assignGlitch`, `addGlitchUpdate`, `moveEcho` and `mergeGlitch`; verify tests: merge moves all echoes and hides the source glitch, and moving an echo out creates a new `LEAKED` glitch
+- [x] 4.2 [BE] Implement `assignGlitch`, `addGlitchUpdate`, `moveEcho` and `mergeGlitch`; verify tests: merge moves all echoes and hides the source glitch, and moving an echo out creates a new `LEAKED` glitch
 - [x] 4.3 [FE] Add detail-page actions: advance status, reopen (C), assign dropdown (C), add update form (assignee); buttons appear only when allowed; verify as defender and as commander
 - [x] 4.4 [FE] Add merge-glitch and move-echo controls (C) on the detail page; verify the merged glitch disappears from the list
 - [x] 4.5 [FE] Write the `useShortcuts` hook (`j`/`k`/`Enter`/`n`/`?`, ignored inside inputs) and a shortcut help dialog; verify that typing "j" in search does not navigate

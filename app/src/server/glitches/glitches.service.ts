@@ -1,7 +1,8 @@
 import { AppError } from '#/lib/errors.ts'
 import { publish } from '../events/bus.ts'
+import { findGuardianById } from '../guardians/guardians.repository.ts'
 import * as repo from './glitches.repository.ts'
-import { assertCanAdvance, canReopen, nextStatus } from './status.ts'
+import { assertAssigneeOrCommander, canReopen, nextStatus } from './status.ts'
 import type { GlitchDetail, GlitchListItem, GlitchQuery } from '#/lib/glitch.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
@@ -15,7 +16,8 @@ export async function getGlitch(glitchId: string): Promise<GlitchDetail> {
   return glitch
 }
 
-async function loadState(glitchId: string) {
+/** The glitch's state; NOT_FOUND if missing, CONFLICT if it was merged away. */
+export async function requireActiveGlitch(glitchId: string) {
   const state = await repo.findGlitchState(glitchId)
   if (!state) throw new AppError('NOT_FOUND', `Glitch ${glitchId} not found`)
   if (state.mergedInto) {
@@ -32,8 +34,8 @@ async function listItem(glitchId: string): Promise<GlitchListItem> {
 
 /** One step forward; the assigned defender or any commander. */
 export async function advanceStatus(actor: Guardian, glitchId: string): Promise<GlitchListItem> {
-  const state = await loadState(glitchId)
-  assertCanAdvance(actor, state.assignedGuardianId)
+  const state = await requireActiveGlitch(glitchId)
+  assertAssigneeOrCommander(actor, state.assignedGuardianId)
   const to = nextStatus(state.status)
   if (!to) throw new AppError('CONFLICT', `${glitchId} is already FIXED`)
   // Leaderboard credit goes to the assignee at the moment of the fix (spec); unassigned = nobody.
@@ -48,7 +50,7 @@ export async function advanceStatus(actor: Guardian, glitchId: string): Promise<
 
 /** FIXED → LEAKED; commander only (enforced by the server function's middleware). */
 export async function reopenGlitch(glitchId: string): Promise<GlitchListItem> {
-  const state = await loadState(glitchId)
+  const state = await requireActiveGlitch(glitchId)
   if (!canReopen(state.status)) {
     throw new AppError(
       'CONFLICT',
@@ -60,4 +62,31 @@ export async function reopenGlitch(glitchId: string): Promise<GlitchListItem> {
   }
   publish({ type: 'glitch.updated', glitchId })
   return listItem(glitchId)
+}
+
+/** Commander only (middleware). Glitches go to defenders; null clears the assignment. */
+export async function assignGlitch(
+  glitchId: string,
+  guardianId: number | null,
+): Promise<GlitchListItem> {
+  await requireActiveGlitch(glitchId)
+  if (guardianId !== null) {
+    const guardian = await findGuardianById(guardianId)
+    if (!guardian) throw new AppError('NOT_FOUND', 'Guardian not found')
+    if (guardian.role !== 'defender') {
+      throw new AppError('VALIDATION', 'Glitches can only be assigned to defenders')
+    }
+  }
+  await repo.setAssignee(glitchId, guardianId)
+  publish({ type: 'glitch.updated', glitchId })
+  return listItem(glitchId)
+}
+
+/** Commander only (middleware). Every echo moves over; the merged glitch leaves the list. */
+export async function mergeGlitch(glitchId: string, intoGlitchId: string): Promise<void> {
+  await requireActiveGlitch(glitchId)
+  await requireActiveGlitch(intoGlitchId)
+  await repo.mergeInto(glitchId, intoGlitchId)
+  publish({ type: 'glitch.updated', glitchId })
+  publish({ type: 'glitch.updated', glitchId: intoGlitchId })
 }

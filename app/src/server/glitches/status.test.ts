@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { assertCanAdvance, canReopen, nextStatus } from './status.ts'
+import { assertAssigneeOrCommander, canReopen, nextStatus } from './status.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
 const nova: Guardian = { guardianId: 2, codename: 'Nova', role: 'defender' }
@@ -31,18 +31,18 @@ describe('canReopen', () => {
   })
 })
 
-describe('assertCanAdvance', () => {
+describe('assertAssigneeOrCommander', () => {
   it('lets the assigned defender and any commander through', () => {
-    expect(() => assertCanAdvance(nova, nova.guardianId)).not.toThrow()
-    expect(() => assertCanAdvance(aegis, nova.guardianId)).not.toThrow()
-    expect(() => assertCanAdvance(aegis, null)).not.toThrow()
+    expect(() => assertAssigneeOrCommander(nova, nova.guardianId)).not.toThrow()
+    expect(() => assertAssigneeOrCommander(aegis, nova.guardianId)).not.toThrow()
+    expect(() => assertAssigneeOrCommander(aegis, null)).not.toThrow()
   })
 
   it('rejects a defender who is not assigned with FORBIDDEN', () => {
-    expect(() => assertCanAdvance(orion, nova.guardianId)).toThrow(
+    expect(() => assertAssigneeOrCommander(orion, nova.guardianId)).toThrow(
       expect.objectContaining({ code: 'FORBIDDEN' }),
     )
-    expect(() => assertCanAdvance(orion, null)).toThrow(
+    expect(() => assertAssigneeOrCommander(orion, null)).toThrow(
       expect.objectContaining({ code: 'FORBIDDEN' }),
     )
   })

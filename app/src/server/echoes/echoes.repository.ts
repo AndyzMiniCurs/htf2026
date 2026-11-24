@@ -67,3 +67,68 @@ export async function findEchoImage(
     .where(eq(echoImages.echoId, echoId))
   return rows.at(0) ?? null
 }
+
+/** Adds an echo to an existing glitch (progress update); returns its id. */
+export async function insertEcho(glitchId: string, echo: Omit<NewEcho, 'image'>): Promise<number> {
+  const rows = await db
+    .insert(echoes)
+    .values({
+      glitchId,
+      description: echo.description,
+      timestamp: echo.timestamp,
+      reportingGuardianId: echo.reportingGuardianId,
+      locationX: echo.location?.x ?? null,
+      locationY: echo.location?.y ?? null,
+    })
+    .returning({ echoId: echoes.echoId })
+  const row = rows.at(0)
+  if (!row) throw new Error('Insert returned no echo')
+  return row.echoId
+}
+
+export async function findEcho(echoId: number) {
+  const rows = await db
+    .select({
+      echoId: echoes.echoId,
+      glitchId: echoes.glitchId,
+      description: echoes.description,
+      timestamp: echoes.timestamp,
+      locationX: echoes.locationX,
+      locationY: echoes.locationY,
+    })
+    .from(echoes)
+    .where(eq(echoes.echoId, echoId))
+  return rows.at(0) ?? null
+}
+
+/** Re-files an echo under another glitch; a manual move is never "grouped by AI". */
+export async function moveEcho(echoId: number, glitchId: string): Promise<void> {
+  await db.update(echoes).set({ glitchId, groupedByAi: false }).where(eq(echoes.echoId, echoId))
+}
+
+/** Splits an echo out into a new `LEAKED` glitch built from it, in one transaction. */
+export async function moveEchoToNewGlitch(echo: {
+  echoId: number
+  description: string
+  timestamp: string
+  locationX: number | null
+  locationY: number | null
+}): Promise<string> {
+  return db.transaction(async (tx) => {
+    const glitchId = await nextGlitchId(tx)
+    await tx.insert(glitches).values({
+      glitchId,
+      status: 'LEAKED',
+      description: echo.description,
+      timestamp: echo.timestamp,
+      locationX: echo.locationX,
+      locationY: echo.locationY,
+      source: 'echo',
+    })
+    await tx
+      .update(echoes)
+      .set({ glitchId, groupedByAi: false })
+      .where(eq(echoes.echoId, echo.echoId))
+    return glitchId
+  })
+}

@@ -13,8 +13,11 @@ export function canReopen(current: GlitchStatus): boolean {
   return current === 'FIXED'
 }
 
-/** The assigned defender or any commander may move a glitch forward. */
-export function assertCanAdvance(guardian: Guardian, assignedGuardianId: number | null): void {
+/** Advancing the status and posting updates belong to the assigned defender or any commander. */
+export function assertAssigneeOrCommander(
+  guardian: Guardian,
+  assignedGuardianId: number | null,
+): void {
   if (guardian.role === 'commander' || guardian.guardianId === assignedGuardianId) return
-  throw new AppError('FORBIDDEN', 'Only the assigned defender or a commander can change the status')
+  throw new AppError('FORBIDDEN', 'Only the assigned defender or a commander can do this')
 }

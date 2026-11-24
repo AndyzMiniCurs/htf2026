@@ -198,3 +198,21 @@ export async function countByStatus(): Promise<Record<GlitchStatus, number>> {
   for (const row of rows) counts[row.status] = row.count
   return counts
 }
+
+export async function setAssignee(glitchId: string, guardianId: number | null): Promise<void> {
+  await db
+    .update(glitches)
+    .set({ assignedGuardianId: guardianId })
+    .where(eq(glitches.glitchId, glitchId))
+}
+
+/** Moves every echo of `glitchId` to `intoGlitchId` and marks it merged, in one transaction. */
+export async function mergeInto(glitchId: string, intoGlitchId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    await tx.update(echoes).set({ glitchId: intoGlitchId }).where(eq(echoes.glitchId, glitchId))
+    await tx
+      .update(glitches)
+      .set({ mergedInto: intoGlitchId })
+      .where(eq(glitches.glitchId, glitchId))
+  })
+}
