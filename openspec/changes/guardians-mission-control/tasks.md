@@ -75,7 +75,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 7.1 [BE] Implement notification prefs (`getNotificationPrefs`/`setNotificationPrefs`, defaults all on) and emit `notification` events on assign, status change of own echo's glitch, and lockdown, respecting prefs; verify tests for an on and an off preference
 - [ ] 7.2 [BE] Write `server/monitoring/badges.ts` (pure, the four badges from the spec), the real `getLeaderboard` and `getReport` (C); verify unit tests for each badge rule
 - [ ] 7.3 [FE] Show in-app notification toasts, request browser Notification permission, and add a `/settings` page with the three notification toggles; verify an assignment notifies the assignee only
-- [ ] 7.4 [FE] Add the speech-to-text mic button (`useSpeech`, Web Speech API, hidden when unsupported) on the echo form; verify on Chrome Android and that it is hidden on Firefox
+- [x] 7.4 [FE] Add the speech-to-text mic button (`useSpeech`, Web Speech API, hidden when unsupported) on the echo form; verify on Chrome Android and that it is hidden on Firefox (verified with a stubbed recogniser and with the API removed; still to try on a real phone)
 - [x] 7.5 [FE] Build `/leaderboard` with ranking and badge icons; verify the order matches fixes
 - [x] 7.6 [FE] Build `/council-report` (C) with print CSS and a "Save as PDF" button (`window.print()`); verify the print preview has no nav and fits A4
 - [ ] 7.7 [FE] Add offline support: `public/sw.js` shell cache, `manifest.webmanifest` (installable on phones), `useOnline` badge, server actions disabled offline; verify in DevTools offline mode

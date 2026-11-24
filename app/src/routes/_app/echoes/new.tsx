@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import { ImagePlus, MapPinned, X } from 'lucide-react'
+import { ImagePlus, MapPinned, Mic, MicOff, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { AchronaMap } from '#/components/achrona/AchronaMap.tsx'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
@@ -14,6 +14,7 @@ import {
   ECHO_IMAGE_MIMES,
 } from '#/lib/echo.ts'
 import { reportEcho } from '#/lib/echoes.functions.ts'
+import { useSpeech } from '#/hooks/useSpeech.ts'
 import { getErrorCode } from '#/lib/errors.ts'
 import type { EchoImageMime } from '#/lib/echo.ts'
 import type { Location } from '#/lib/glitch.ts'
@@ -40,6 +41,15 @@ function ReportEchoPage() {
   const router = useRouter()
   const toast = useToast()
   const [description, setDescription] = useState('')
+  // Words still being recognised, shown after the text but not yet part of it.
+  const [interim, setInterim] = useState('')
+  const speech = useSpeech((text, final) => {
+    if (!final) return setInterim(text)
+    setInterim('')
+    setDescription((d) =>
+      (d.trim() ? `${d.trimEnd()} ${text}` : text).slice(0, ECHO_DESCRIPTION_MAX),
+    )
+  })
   const [location, setLocation] = useState<Location | null>(null)
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -117,7 +127,7 @@ function ReportEchoPage() {
             <Textarea
               label="Description"
               name="description"
-              value={description}
+              value={interim ? `${description} ${interim}`.trimStart() : description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={ECHO_DESCRIPTION_MAX}
               rows={6}
@@ -126,6 +136,39 @@ function ReportEchoPage() {
               error={errors.description}
               required
             />
+            {speech.supported && (
+              <div className="-mt-2 flex flex-wrap items-center gap-3">
+                <Button
+                  variant={speech.listening ? 'danger' : 'ghost'}
+                  size="sm"
+                  aria-pressed={speech.listening}
+                  icon={
+                    speech.listening ? (
+                      <MicOff aria-hidden className="size-4" />
+                    ) : (
+                      <Mic aria-hidden className="size-4" />
+                    )
+                  }
+                  onClick={speech.listening ? speech.stop : speech.start}
+                >
+                  {speech.listening ? 'Stop dictating' : 'Dictate'}
+                </Button>
+                {speech.listening && (
+                  <span
+                    className="flex items-center gap-2 text-sm text-fg-muted"
+                    aria-live="polite"
+                  >
+                    <span className="size-2 rounded-full bg-ember motion-safe:animate-pulse" />
+                    Listening… speak your echo
+                  </span>
+                )}
+                {speech.error && (
+                  <span role="alert" className="text-sm text-ember">
+                    {speech.error}
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-col gap-2">
               <span className="label-caps text-fg-muted">Photo (optional)</span>
