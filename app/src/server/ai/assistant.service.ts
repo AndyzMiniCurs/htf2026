@@ -1,6 +1,6 @@
 import { AppError } from '#/lib/errors.ts'
 import { getGlitch } from '../glitches/glitches.service.ts'
-import { getDashboard } from '../monitoring/monitoring.service.ts'
+import { getDashboard, getForesight } from '../monitoring/monitoring.service.ts'
 import { composeAnswer, findGlitchId, pickIntent } from './assistant.ts'
 import { getClassifier } from './classifier.ts'
 import type { AssistantAnswer } from '#/lib/assistant.ts'
@@ -18,5 +18,6 @@ export async function askAssistant(question: string): Promise<AssistantAnswer> {
         })
       : null,
   ])
-  return composeAnswer(intent, { dashboard, glitchId, glitch })
+  const foresight = intent === 'foresight' ? await getForesight() : undefined
+  return composeAnswer(intent, { dashboard, glitchId, glitch, foresight })
 }

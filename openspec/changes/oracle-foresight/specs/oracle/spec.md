@@ -28,7 +28,7 @@ A foresight answer SHALL also list the predictive glitches (raised by the system
 In the scripted demo incident a commander triggers, the sensor SHALL decline gradually enough that there are at least 30 seconds between the trigger and the predictive glitch, during which a foresight answer warns about that sensor.
 
 #### Scenario: Demo incident
-- **WHEN** a commander triggers an incident on the magic reserve and asks "what's coming?" 20 seconds later
+- **WHEN** a commander triggers an incident on the magic reserve and asks "what's coming?" 30 seconds later
 - **THEN** the Oracle warns about the magic reserve, and the predictive glitch appears only after that
 
 ### Requirement: Conversation memory

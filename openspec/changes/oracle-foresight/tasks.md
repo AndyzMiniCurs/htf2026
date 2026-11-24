@@ -11,8 +11,8 @@ How: `design.md` (D1-D8). Behaviour: `specs/oracle/spec.md`.
 ## 2. Foresight (pitch beat)
 
 - [x] 2.1 [BE] Write `server/monitoring/forecast.ts` (pure, D1), reusing the detector's exported constants from `anomaly.ts`; verify unit tests with crafted series: flat noise → steady, a 30/min slide → heading with an ETA within 10% of the true crossing, a rising spike → deviation line, an ETA beyond 10 min → steady
-- [ ] 2.2 [BE] Slow the scripted incident (D2, `PULL.incident`); verify with the dev server: trigger an incident on the magic reserve, and the predictive glitch appears between 30 and 90 s later (time it twice)
-- [ ] 2.3 [BE] Add `getForesight()` to the monitoring service and the `foresight` intent + template + no-AI keyword fallback (D3, D4); verify a template test per case (heading, steady, already raised) and, live, that "what's coming?" 20 s after a trigger warns about the magic reserve before its glitch appears
+- [x] 2.2 [BE] Slow the scripted incident (D2, `PULL.incident`); verify with the dev server: trigger an incident on the magic reserve, and the predictive glitch appears between 30 and 90 s later (time it twice)
+- [x] 2.3 [BE] Add `getForesight()` to the monitoring service and the `foresight` intent + template + no-AI keyword fallback (D3, D4); verify a template test per case (heading, steady, already raised) and, live, that "what's coming?" 20 s after a trigger warns about the magic reserve before its glitch appears
 
 ## 3. Memory
 

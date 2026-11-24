@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { composeAnswer, findGlitchId, pickIntent } from './assistant.ts'
 import { nullClassifier } from './null.classifier.ts'
 import type { AssistantData } from './assistant.ts'
+import type { SensorForesight } from '../monitoring/monitoring.service.ts'
 import type { GlitchDetail, GlitchListItem } from '#/lib/glitch.ts'
 import type { Dashboard } from '#/lib/monitoring.ts'
 
@@ -144,5 +145,72 @@ describe('composeAnswer', () => {
     const missing = composeAnswer('glitch-status', about(null, 'GL-9999'))
     expect(missing.text).toBe("I can't find GL-9999.")
     expect(missing.suggestions.length).toBeGreaterThan(0)
+  })
+})
+
+describe('foresight', () => {
+  const sensor = (over: Partial<SensorForesight>): SensorForesight => ({
+    sensorId: 'magic-reserve',
+    label: 'Magic reserve',
+    unit: '%',
+    glitchType: 'magic-drain',
+    openPrediction: null,
+    forecast: { status: 'steady', value: 82 },
+    ...over,
+  })
+  const ask = (sensors: Array<SensorForesight>) =>
+    composeAnswer('foresight', { ...none, foresight: sensors })
+
+  it('warns about a sensor heading for an alarm, soonest first', () => {
+    const a = ask([
+      sensor({
+        sensorId: 'ley-flux',
+        label: 'Ley-line flux',
+        unit: 'Thm',
+        forecast: {
+          status: 'heading',
+          value: 60,
+          ratePerMin: -4,
+          etaSeconds: 300,
+          rule: 'deviation',
+        },
+      }),
+      sensor({
+        forecast: {
+          status: 'heading',
+          value: 78,
+          ratePerMin: -9.2,
+          etaSeconds: 25,
+          rule: 'deviation',
+        },
+      }),
+    ])
+    expect(a.text).toMatch(
+      /^I foresee trouble\. Magic reserve is falling 9\.2 %\/min\. At this rate it trips the 3σ alarm in about 25 s and I will raise a magic-drain glitch\. Ley-line flux/,
+    )
+    expect(a.text).toContain('about 5 min')
+  })
+
+  it('says the realm is steady with the current readings', () => {
+    expect(ask([sensor({})]).text).toBe(
+      'The sensors look steady: Magic reserve 82 %. No new glitch in sight.',
+    )
+  })
+
+  it('names predictive glitches already raised instead of forecasting them again', () => {
+    const a = ask([
+      sensor({
+        openPrediction: 'GL-0150',
+        forecast: { status: 'heading', value: 40, ratePerMin: -9, etaSeconds: 10, rule: 'drop' },
+      }),
+    ])
+    expect(a.text).toBe(
+      'The sensors look steady: Magic reserve 40 %. No new glitch in sight. Already raised from sensor data: GL-0150.',
+    )
+    expect(a.glitchIds).toEqual(['GL-0150'])
+  })
+
+  it('is reached without AI by its keywords', async () => {
+    expect(await pickIntent(nullClassifier, "what's coming?")).toBe('foresight')
   })
 })

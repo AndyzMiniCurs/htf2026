@@ -31,6 +31,11 @@
 
 Why linear and not something smarter: the demo signal is a smooth slide, a line explains itself on stage ("falling 12 per minute"), and it is testable with crafted series. Alternative: exponential fit. Rejected because it adds code and nobody would see the difference.
 
+### Tuned values (simulated 200 runs per sensor, then checked live)
+- Forecast: 45 s trend window, |rate| ≥ 3/min, and the value already ≥ 2 units from its 15-minute mean in the trend's direction. This gives about 0.7% false warnings on quiet sensors and a warning in ~95% of incidents when asked 30 s after the trigger.
+- Simulator: normal pull 0.35 (was 0.15, which wandered too much for a clean trend). The incident level steps 0.45 per tick toward 45% of baseline, the value follows it with pull 0.5, and the incident noise is ±0.4. The glitch comes 42–78 s after the trigger (median 60 s).
+- Live: the portal incident was warned at 33 s and its glitch raised at 63 s. The ETA in the answer runs long early in a slide (the trend window still holds pre-incident points), hence "about".
+
 ### D2. Slower demo incident
 `PULL.incident` drops from 0.25 to about 0.012, so a triggered sensor slides at roughly 30–40 units/min at first and trips the 8-unit deviation rule about 45–60 s after the trigger. That leaves a ≥30 s window in which a foresight answer warns (spec: Warning comes before the glitch). The real-world rules are unchanged. Only the scripted incident is slower. The exact value is tuned against the verify step in the tasks.
 

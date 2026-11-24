@@ -7,7 +7,12 @@ import { notifyLockdown } from '../notifications/notifications.service.ts'
 import { badgesFor } from './badges.ts'
 import { magicLevel } from './magic.ts'
 import * as repo from './monitoring.repository.ts'
-import { ensureSensorSimulator, triggerIncident as startIncident } from './sensor-simulator.ts'
+import { forecastSensor } from './forecast.ts'
+import {
+  SENSOR_CONFIG,
+  ensureSensorSimulator,
+  triggerIncident as startIncident,
+} from './sensor-simulator.ts'
 import * as sensorRepo from './sensors.repository.ts'
 import type { GlitchType } from '#/lib/glitch.ts'
 import type {
@@ -18,6 +23,18 @@ import type {
   SensorSeries,
 } from '#/lib/monitoring.ts'
 import type { Fix } from './badges.ts'
+import type { Forecast } from './forecast.ts'
+
+export type SensorForesight = {
+  sensorId: SensorId
+  label: string
+  unit: string
+  /** The kind of glitch this sensor's alarm raises. */
+  glitchType: GlitchType
+  /** The sensor's predictive glitch that is still open; the detector stays quiet meanwhile. */
+  openPrediction: string | null
+  forecast: Forecast | null
+}
 
 const RECENTLY_FIXED = 5
 
@@ -54,6 +71,27 @@ export async function getSensorSeries(minutes: number): Promise<Array<SensorSeri
       .filter((r) => r.sensorId === sensorId)
       .map(({ timestamp, value }) => ({ timestamp, value })),
   }))
+}
+
+/** Where each sensor is heading (design D3), judged on the same readings the detector sees. */
+export async function getForesight(): Promise<Array<SensorForesight>> {
+  ensureSensorSimulator()
+  const readings = await sensorRepo.readingsSince(new Date(Date.now() - 15 * 60_000).toISOString())
+  return Promise.all(
+    SENSOR_IDS.map(async (sensorId) => {
+      const latest = await sensorRepo.findLatestPrediction(sensorId)
+      const since = latest?.timestamp ?? ''
+      return {
+        sensorId,
+        ...SENSORS[sensorId],
+        glitchType: SENSOR_CONFIG[sensorId].glitchType,
+        openPrediction: latest?.open ? latest.glitchId : null,
+        forecast: forecastSensor(
+          readings.filter((r) => r.sensorId === sensorId && r.timestamp > since),
+        ),
+      }
+    }),
+  )
 }
 
 /** Commander-only demo button (enforced by the server function's middleware). */

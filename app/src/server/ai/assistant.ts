@@ -3,6 +3,7 @@ import type { Classifier } from './classifier.ts'
 import type { AssistantAnswer, Intent } from '#/lib/assistant.ts'
 import type { GlitchDetail, GlitchListItem } from '#/lib/glitch.ts'
 import type { Dashboard } from '#/lib/monitoring.ts'
+import type { SensorForesight } from '../monitoring/monitoring.service.ts'
 
 const INTENT_HINTS: Record<Intent, string> = {
   'active-summary': 'an overview of what is happening right now, the active incidents',
@@ -19,6 +20,8 @@ const INTENT_HINTS: Record<Intent, string> = {
 }
 
 const GLITCH_ID = /\bGL-\d{4,}\b/i
+/** Without AI these still reach the foresight answer (spec: Low-cost AI fails open). */
+const FORESIGHT_WORDS = /\b(coming|foresee|predict\w*|future|soon|next)\b/i
 
 export function findGlitchId(question: string): string | null {
   return question.match(GLITCH_ID)?.[0].toUpperCase() ?? null
@@ -34,6 +37,7 @@ export async function pickIntent(classifier: Classifier, question: string): Prom
     )
   )?.at(0)
   if (top) return INTENTS[options.indexOf(top.option)] ?? 'unknown'
+  if (FORESIGHT_WORDS.test(question)) return 'foresight'
   return findGlitchId(question) ? 'glitch-status' : 'unknown'
 }
 
@@ -42,6 +46,8 @@ export type AssistantData = {
   /** The id named in the question, and the glitch if it exists. */
   glitchId: string | null
   glitch: GlitchDetail | null
+  /** Filled for the foresight intent. */
+  foresight?: Array<SensorForesight>
 }
 
 // shortcut: intents still being built answer as unknown, removed once each has its template.
@@ -51,6 +57,7 @@ const ANSWERED = new Set<Intent>([
   'glitch-assignee',
   'magic-level',
   'glitch-runbook',
+  'foresight',
 ])
 
 const isOpen = (g: GlitchListItem) => g.status !== 'FIXED'
@@ -98,6 +105,8 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
     )
   }
 
+  if (intent === 'foresight') return answer(...foresightText(data.foresight ?? []))
+
   if (intent === 'magic-level') {
     const [worstType, worstCount] =
       Object.entries(dashboard.byType).sort(([, a], [, b]) => b - a)[0] ?? []
@@ -139,4 +148,31 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
       (last ? ` Last echo: ${JSON.stringify(last.description)}.` : ''),
     [glitchId],
   )
+}
+
+const fmt = (n: number) => String(Math.round(n * 10) / 10)
+const inTime = (s: number) => (s < 90 ? `about ${s} s` : `about ${Math.round(s / 60)} min`)
+
+/** The foresight answer: what is heading for an alarm, soonest first, then what is already raised. */
+function foresightText(sensors: Array<SensorForesight>): [string, Array<string>] {
+  const heading = sensors
+    .flatMap((s) =>
+      s.forecast?.status === 'heading' && !s.openPrediction ? [{ ...s, f: s.forecast }] : [],
+    )
+    .sort((a, b) => a.f.etaSeconds - b.f.etaSeconds)
+  const raised = sensors.flatMap((s) => (s.openPrediction ? [s.openPrediction] : []))
+  const warnings = heading.map(
+    (s) =>
+      `${s.label} is ${s.f.ratePerMin < 0 ? 'falling' : 'rising'} ${fmt(Math.abs(s.f.ratePerMin))} ${s.unit}/min. ` +
+      `At this rate it trips the ${s.f.rule === 'drop' ? '40% drop' : '3σ'} alarm in ${inTime(s.f.etaSeconds)} and I will raise a ${s.glitchType} glitch.`,
+  )
+  const already = raised.length ? ` Already raised from sensor data: ${raised.join(', ')}.` : ''
+  if (warnings.length) return [`I foresee trouble. ${warnings.join(' ')}${already}`, raised]
+  const readings = sensors
+    .flatMap((s) => (s.forecast ? [`${s.label} ${fmt(s.forecast.value)} ${s.unit}`] : []))
+    .join(', ')
+  return [
+    `The sensors look steady${readings ? `: ${readings}` : ''}. No new glitch in sight.${already}`,
+    raised,
+  ]
 }

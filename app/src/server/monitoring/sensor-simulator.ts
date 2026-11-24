@@ -22,12 +22,23 @@ const WINDOW_MS = 15 * 60_000
 const RETENTION_MS = 60 * 60_000
 /** During an incident the sensor heads for this share of its baseline. */
 const INCIDENT_LEVEL = 0.45
-const PULL = { normal: 0.15, incident: 0.25 }
+const PULL = { normal: 0.35, incident: 0.5 }
+// The incident level steps down this much per tick and the value follows it closely, so the slide
+// trips the deviation rule after a predictable ~45-60 s and the Oracle can warn first (D2).
+const INCIDENT_STEP = 0.45
 const NOISE = 1.2
+/** A scripted incident slides smoothly, so its timing (and the Oracle's warning) is predictable. */
+const INCIDENT_NOISE = 0.4
 
 /** One random-walk step: pulled toward `target`, plus bounded noise, kept within 0..100. */
-export function nextValue(current: number, target: number, pull: number, random: number): number {
-  const value = current + (target - current) * pull + (random * 2 - 1) * NOISE
+export function nextValue(
+  current: number,
+  target: number,
+  pull: number,
+  random: number,
+  noise = NOISE,
+): number {
+  const value = current + (target - current) * pull + (random * 2 - 1) * noise
   return Math.round(Math.min(100, Math.max(0, value)) * 10) / 10
 }
 
@@ -57,8 +68,8 @@ export function newAnomaly(
 
 type SimulatorState = {
   values: Record<SensorId, number>
-  /** Sensors pushed down by `triggerIncident`, with the predicted glitch once it exists. */
-  incidents: Map<SensorId, string | null>
+  /** Sensors pushed down by `triggerIncident`: the sliding level, and the predicted glitch once it exists. */
+  incidents: Map<SensorId, { level: number; glitchId: string | null }>
   busy: boolean
   ticks: number
 }
@@ -92,7 +103,9 @@ export function ensureSensorSimulator(): void {
 export function triggerIncident(sensorId: SensorId): void {
   ensureSensorSimulator()
   const state = simulator()
-  if (state && !state.incidents.has(sensorId)) state.incidents.set(sensorId, null)
+  if (state && !state.incidents.has(sensorId)) {
+    state.incidents.set(sensorId, { level: state.values[sensorId], glitchId: null })
+  }
 }
 
 async function tick(state: SimulatorState): Promise<void> {
@@ -102,13 +115,17 @@ async function tick(state: SimulatorState): Promise<void> {
     const now = Date.now()
     const timestamp = new Date(now).toISOString()
     const readings = SENSOR_IDS.map((sensorId) => {
-      const incident = state.incidents.has(sensorId)
+      const incident = state.incidents.get(sensorId)
       const { baseline } = SENSOR_CONFIG[sensorId]
+      if (incident) {
+        incident.level = Math.max(baseline * INCIDENT_LEVEL, incident.level - INCIDENT_STEP)
+      }
       state.values[sensorId] = nextValue(
         state.values[sensorId],
-        incident ? baseline * INCIDENT_LEVEL : baseline,
+        incident ? incident.level : baseline,
         incident ? PULL.incident : PULL.normal,
         Math.random(),
+        incident ? INCIDENT_NOISE : NOISE,
       )
       return { sensorId, value: state.values[sensorId], timestamp }
     })
@@ -140,7 +157,7 @@ async function checkSensor(
 ): Promise<void> {
   const latest = await repo.findLatestPrediction(sensorId)
   // The incident's glitch was resolved: the sensor heals and drifts back to normal.
-  const incidentGlitch = state.incidents.get(sensorId)
+  const incidentGlitch = state.incidents.get(sensorId)?.glitchId
   if (incidentGlitch && !latest?.open) state.incidents.delete(sensorId)
   const anomaly = newAnomaly(readings, latest)
   if (!anomaly) return
@@ -150,5 +167,6 @@ async function checkSensor(
     type: SENSOR_CONFIG[sensorId].glitchType,
     sensorId,
   })
-  if (state.incidents.has(sensorId)) state.incidents.set(sensorId, glitchId)
+  const incident = state.incidents.get(sensorId)
+  if (incident) incident.glitchId = glitchId
 }

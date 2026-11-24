@@ -20,10 +20,11 @@ export type Forecast =
     }
 
 const TREND_WINDOW_MS = 45_000
-/** The simulator's noise is ±1.2 per 3 s tick; a real slide is far steeper than this. */
+/** Tuned by simulation (D1): about 0.7% false warnings on quiet sensors, ~95% warned 30 s into an incident. */
 const MIN_RATE_PER_MIN = 3
 const HORIZON_SECONDS = 10 * 60
 const MIN_TREND_POINTS = 5
+const MIN_MOVE = 2
 
 const round = (n: number) => Math.round(n * 10) / 10
 
@@ -63,6 +64,8 @@ export function forecastSensor(readings: Array<Reading>): Forecast | null {
   if (history.length >= MIN_POINTS) {
     const mean = history.reduce((s, r) => s + r.value, 0) / history.length
     const std = Math.sqrt(history.reduce((s, r) => s + (r.value - mean) ** 2, 0) / history.length)
+    // A real slide has already left the mean; a quiet sensor's wobble has not (see D1).
+    if ((latest.value - mean) * Math.sign(ratePerMin) < MIN_MOVE) return steady
     const band = Math.max(MIN_ABSOLUTE_DEVIATION, SIGMAS * std)
     lines.push({ at: ratePerMin < 0 ? mean - band : mean + band, rule: 'deviation' })
   }
