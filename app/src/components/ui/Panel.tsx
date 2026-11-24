@@ -8,10 +8,20 @@ type PanelProps = ComponentProps<'section'> & {
   actions?: ReactNode
   /** Drop the inner padding, for tables and media that run edge to edge. */
   flush?: boolean
+  /** Classes for the body under the header, e.g. to make it a flex column that fills the panel. */
+  bodyClassName?: string
 }
 
 /** The game window: a stone panel in a thin frame with a crystal cube on each corner. */
-export function Panel({ heading, actions, flush, className, children, ...props }: PanelProps) {
+export function Panel({
+  heading,
+  actions,
+  flush,
+  bodyClassName,
+  className,
+  children,
+  ...props
+}: PanelProps) {
   return (
     <section
       className={cx(
@@ -28,7 +38,7 @@ export function Panel({ heading, actions, flush, className, children, ...props }
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={flush ? undefined : 'p-5'}>{children}</div>
+      <div className={cx(!flush && 'p-5', bodyClassName)}>{children}</div>
     </section>
   )
 }

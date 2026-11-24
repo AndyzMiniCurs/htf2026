@@ -67,7 +67,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 6.7 [BE] Implement `askAssistant`: Jev intent + glitch id regex + templated answers from repository data, `unknown` -> suggestions; verify a test per intent
 - [ ] 6.8 [FE] Show the "grouped by AI" marker on echoes, type icons everywhere, and hide AI-only controls when AI is off; verify with and without `TYPESAFE_API_KEY`
 - [ ] 6.9 [FE] Show the runbook checklist on the detail page (tick steps live); verify ticking persists after reload
-- [ ] 6.10 [FE] Build the `/assistant` chat screen: message list, input, suggestion chips, links to mentioned glitches, mobile keyboard-safe layout; verify each intent from the spec
+- [x] 6.10 [FE] Build the `/assistant` chat screen: message list, input, suggestion chips, links to mentioned glitches, mobile keyboard-safe layout; verify each intent from the spec (UI verified on desktop and phone against the stub; intents become real with 6.7)
 - [ ] 6.11 [FE] Add client-side image moderation with `nsfwjs` before upload (lazy-loaded model, clear rejection message); verify a safe image uploads and the model loads only on the report page
 
 ## 7. Engagement and reporting
