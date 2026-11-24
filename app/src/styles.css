@@ -486,7 +486,8 @@ html {
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0 calc(var(--paper-line) - 1px),
-    color-mix(in oklab, var(--gold) 14%, transparent) calc(var(--paper-line) - 1px) var(--paper-line)
+    color-mix(in oklab, var(--gold) 14%, transparent) calc(var(--paper-line) - 1px)
+      var(--paper-line)
   );
   background-attachment: local;
 }
