@@ -11,6 +11,7 @@ import type {
   GlitchQuery,
   GlitchStatus,
   Location,
+  RunbookStep,
 } from '#/lib/glitch.ts'
 
 const assignee = alias(guardians, 'assignee')
@@ -215,4 +216,59 @@ export async function mergeInto(glitchId: string, intoGlitchId: string): Promise
       .set({ mergedInto: intoGlitchId })
       .where(eq(glitches.glitchId, glitchId))
   })
+}
+
+/** What a runbook is built from. */
+export async function findRunbookSource(glitchId: string) {
+  const rows = await db
+    .select({
+      type: glitches.type,
+      description: glitches.description,
+      locationX: glitches.locationX,
+      locationY: glitches.locationY,
+      sensorId: glitches.sensorId,
+    })
+    .from(glitches)
+    .where(eq(glitches.glitchId, glitchId))
+  return rows.at(0) ?? null
+}
+
+/** Stores a runbook only if the glitch has none yet, so concurrent first views keep one. */
+export async function storeRunbookOnce(
+  glitchId: string,
+  steps: Array<RunbookStep>,
+): Promise<Array<RunbookStep>> {
+  await db
+    .update(glitches)
+    .set({ runbook: { steps } })
+    .where(and(eq(glitches.glitchId, glitchId), isNull(glitches.runbook)))
+  const rows = await db
+    .select({ runbook: glitches.runbook })
+    .from(glitches)
+    .where(eq(glitches.glitchId, glitchId))
+  return rows.at(0)?.runbook?.steps ?? steps
+}
+
+/**
+ * Ticks one step in a single statement (no read-modify-write race between two guardians).
+ * Returns the updated steps, or null when the glitch has no step at that index.
+ */
+export async function setRunbookStepDone(
+  glitchId: string,
+  index: number,
+  done: boolean,
+): Promise<Array<RunbookStep> | null> {
+  const rows = await db
+    .update(glitches)
+    .set({
+      runbook: sql`jsonb_set(${glitches.runbook}, ${`{steps,${index},done}`}::text[], to_jsonb(${done}::boolean))`,
+    })
+    .where(
+      and(
+        eq(glitches.glitchId, glitchId),
+        sql`jsonb_array_length(${glitches.runbook} -> 'steps') > ${index}`,
+      ),
+    )
+    .returning({ runbook: glitches.runbook })
+  return rows.at(0)?.runbook?.steps ?? null
 }

@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { fixtureGlitchDetail } from '#/lib/fixtures.ts'
 import {
   assignGlitchInput,
   glitchIdInput,
@@ -51,7 +50,6 @@ export const mergeGlitch = createServerFn({ method: 'POST' })
 export const setRunbookStep = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .validator(validate(setRunbookStepInput))
-  .handler(async ({ data }): Promise<Array<RunbookStep>> => {
-    const runbook = fixtureGlitchDetail(data.glitchId)?.runbook ?? []
-    return runbook.map((step, i) => (i === data.index ? { ...step, done: data.done } : step))
-  })
+  .handler(async ({ data }): Promise<Array<RunbookStep>> =>
+    glitches.setRunbookStep(data.glitchId, data.index, data.done),
+  )

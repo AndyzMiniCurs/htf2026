@@ -1,7 +1,7 @@
 // Stub data for the server functions until each one gets its real service (design D13).
 import type { Dashboard, LeaderboardEntry, NotificationPrefs, Report } from './monitoring.ts'
 import type { AssistantAnswer } from './assistant.ts'
-import type { Echo, GlitchDetail, GlitchListItem } from './glitch.ts'
+import type { GlitchListItem } from './glitch.ts'
 import type { Guardian } from './guardian.ts'
 
 export const fixtureGuardians: Array<Guardian> = [
@@ -11,9 +11,7 @@ export const fixtureGuardians: Array<Guardian> = [
   { guardianId: 4, codename: 'Lyra', role: 'defender' },
 ]
 
-const [aegis, nova, orion, lyra] = fixtureGuardians as [Guardian, Guardian, Guardian, Guardian]
-
-export const fixtureMe: Guardian = aegis
+const [, nova, orion, lyra] = fixtureGuardians as [Guardian, Guardian, Guardian, Guardian]
 
 export const fixtureGlitches: Array<GlitchListItem> = [
   {
@@ -61,59 +59,6 @@ export const fixtureGlitches: Array<GlitchListItem> = [
     source: 'echo',
   },
 ]
-
-export const fixtureEchoes: Array<Echo> = [
-  {
-    echoId: 1,
-    glitchId: 'GL-0142',
-    description: 'Time loop detected near the eastern clock tower',
-    timestamp: '2026-11-10T13:42:00Z',
-    reporter: lyra,
-    location: { x: 72, y: 28 },
-    groupedByAi: false,
-    imageUrl: null,
-  },
-  {
-    echoId: 2,
-    glitchId: 'GL-0142',
-    description: 'The clock tower keeps repeating the same minute',
-    timestamp: '2026-11-10T13:50:00Z',
-    reporter: orion,
-    location: { x: 73, y: 29 },
-    groupedByAi: true,
-    imageUrl: null,
-  },
-]
-
-export function fixtureGlitchDetail(glitchId: string): GlitchDetail | null {
-  const item = fixtureGlitches.find((g) => g.glitchId === glitchId)
-  if (!item) return null
-  const echoes = fixtureEchoes.filter((e) => e.glitchId === glitchId)
-  return {
-    ...item,
-    echoes: echoes.length
-      ? echoes
-      : [
-          {
-            echoId: 100,
-            glitchId,
-            description: item.description,
-            timestamp: item.timestamp,
-            reporter: item.source === 'prediction' ? null : nova,
-            location: item.location,
-            groupedByAi: false,
-            imageUrl: null,
-          },
-        ],
-    runbook: [
-      { text: `Cordon off the area around ${glitchId}`, done: true },
-      { text: 'Measure the local magic flux', done: false },
-      { text: 'Stabilise the anomaly with a containment rune', done: false },
-      { text: 'Confirm with a follow-up echo', done: false },
-    ],
-    mergedInto: null,
-  }
-}
 
 export const fixtureDashboard: Dashboard = {
   magicLevel: 79,

@@ -1,9 +1,13 @@
 import { AppError } from '#/lib/errors.ts'
+import { SENSORS, sensorIdSchema } from '#/lib/monitoring.ts'
+import { getClassifier } from '../ai/classifier.ts'
+import { buildRunbook } from '../ai/runbook.ts'
 import { publish } from '../events/bus.ts'
 import { findGuardianById } from '../guardians/guardians.repository.ts'
 import * as repo from './glitches.repository.ts'
 import { assertAssigneeOrCommander, canReopen, nextStatus } from './status.ts'
-import type { GlitchDetail, GlitchListItem, GlitchQuery } from '#/lib/glitch.ts'
+import type { GlitchDetail, GlitchListItem, GlitchQuery, RunbookStep } from '#/lib/glitch.ts'
+import type { SensorId } from '#/lib/monitoring.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
 export async function getGlitches(query: GlitchQuery): Promise<Array<GlitchListItem>> {
@@ -13,8 +17,45 @@ export async function getGlitches(query: GlitchQuery): Promise<Array<GlitchListI
 export async function getGlitch(glitchId: string): Promise<GlitchDetail> {
   const glitch = await repo.findGlitchDetail(glitchId)
   if (!glitch) throw new AppError('NOT_FOUND', `Glitch ${glitchId} not found`)
+  // Built on first view, after the type is known; stored runbooks are never empty.
+  if (glitch.runbook.length === 0) glitch.runbook = await createRunbook(glitchId)
   return glitch
 }
+
+async function createRunbook(glitchId: string): Promise<Array<RunbookStep>> {
+  const source = await repo.findRunbookSource(glitchId)
+  if (!source) return []
+  const steps = await buildRunbook(
+    {
+      glitchId,
+      type: source.type,
+      description: source.description,
+      location:
+        source.locationX !== null && source.locationY !== null
+          ? { x: source.locationX, y: source.locationY }
+          : null,
+      sensorLabel: isSensorId(source.sensorId) ? SENSORS[source.sensorId].label : null,
+    },
+    getClassifier(),
+  )
+  return repo.storeRunbookOnce(glitchId, steps)
+}
+
+/** Any signed-in guardian may tick a step (spec); the change shows live for everyone. */
+export async function setRunbookStep(
+  glitchId: string,
+  index: number,
+  done: boolean,
+): Promise<Array<RunbookStep>> {
+  await requireActiveGlitch(glitchId)
+  const steps = await repo.setRunbookStepDone(glitchId, index, done)
+  if (!steps) throw new AppError('VALIDATION', `${glitchId} has no runbook step ${index + 1}`)
+  publish({ type: 'glitch.updated', glitchId })
+  return steps
+}
+
+const isSensorId = (value: string | null): value is SensorId =>
+  sensorIdSchema.safeParse(value).success
 
 /** The glitch's state; NOT_FOUND if missing, CONFLICT if it was merged away. */
 export async function requireActiveGlitch(glitchId: string) {
