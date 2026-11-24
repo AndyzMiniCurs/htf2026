@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import { ImagePlus, MapPinned, Mic, MicOff, X } from 'lucide-react'
+import { ImagePlus, LoaderCircle, MapPinned, Mic, MicOff, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { AchronaMap } from '#/components/achrona/AchronaMap.tsx'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
@@ -14,6 +14,7 @@ import {
   ECHO_IMAGE_MIMES,
 } from '#/lib/echo.ts'
 import { reportEcho } from '#/lib/echoes.functions.ts'
+import { moderateImage } from '#/components/echoes/image-moderation.ts'
 import { useSpeech } from '#/hooks/useSpeech.ts'
 import { getErrorCode } from '#/lib/errors.ts'
 import type { EchoImageMime } from '#/lib/echo.ts'
@@ -55,6 +56,7 @@ function ReportEchoPage() {
   const [preview, setPreview] = useState<string | null>(null)
   const [errors, setErrors] = useState<{ description?: string; image?: string; form?: string }>({})
   const [pending, setPending] = useState(false)
+  const [checking, setChecking] = useState(false)
 
   useEffect(() => {
     if (!image) return setPreview(null)
@@ -63,7 +65,7 @@ function ReportEchoPage() {
     return () => URL.revokeObjectURL(url)
   }, [image])
 
-  function chooseImage(file: File | undefined) {
+  async function chooseImage(file: File | undefined) {
     if (!file) return
     if (!ECHO_IMAGE_MIMES.includes(file.type as EchoImageMime)) {
       setErrors((e) => ({ ...e, image: 'Use a JPEG, PNG or WebP image.' }))
@@ -74,6 +76,16 @@ function ReportEchoPage() {
       return
     }
     setErrors((e) => ({ ...e, image: undefined }))
+    setChecking(true)
+    const verdict = await moderateImage(file)
+    setChecking(false)
+    if (verdict === 'explicit') {
+      setErrors((e) => ({
+        ...e,
+        image: 'This photo was flagged as explicit and cannot be attached.',
+      }))
+      return
+    }
     setImage(file)
   }
 
@@ -198,9 +210,15 @@ function ReportEchoPage() {
                     accept={ECHO_IMAGE_MIMES.join(',')}
                     capture="environment"
                     className="sr-only"
-                    onChange={(e) => chooseImage(e.target.files?.[0])}
+                    onChange={(e) => void chooseImage(e.target.files?.[0])}
                   />
                 </label>
+              )}
+              {checking && (
+                <p className="flex items-center gap-2 text-sm text-fg-muted" aria-live="polite">
+                  <LoaderCircle aria-hidden className="size-4 animate-spin" />
+                  Checking the photo…
+                </p>
               )}
               {errors.image && (
                 <p role="alert" className="text-sm font-medium text-ember">
@@ -239,7 +257,13 @@ function ReportEchoPage() {
               {errors.form}
             </p>
           )}
-          <Button type="submit" size="lg" loading={pending} icon={<HornIcon className="size-5" />}>
+          <Button
+            type="submit"
+            size="lg"
+            loading={pending}
+            disabled={checking}
+            icon={<HornIcon className="size-5" />}
+          >
             Send the echo
           </Button>
         </div>
