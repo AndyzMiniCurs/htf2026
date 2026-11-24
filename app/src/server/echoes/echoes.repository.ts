@@ -68,22 +68,30 @@ export async function findEchoImage(
   return rows.at(0) ?? null
 }
 
-/** Adds an echo to an existing glitch (progress update); returns its id. */
-export async function insertEcho(glitchId: string, echo: Omit<NewEcho, 'image'>): Promise<number> {
-  const rows = await db
-    .insert(echoes)
-    .values({
-      glitchId,
-      description: echo.description,
-      timestamp: echo.timestamp,
-      reportingGuardianId: echo.reportingGuardianId,
-      locationX: echo.location?.x ?? null,
-      locationY: echo.location?.y ?? null,
-    })
-    .returning({ echoId: echoes.echoId })
-  const row = rows.at(0)
-  if (!row) throw new Error('Insert returned no echo')
-  return row.echoId
+/** Adds an echo (and its image) to an existing glitch in one transaction; returns its id. */
+export async function insertEcho(
+  glitchId: string,
+  echo: Omit<NewEcho, 'image'> & { image?: NewEcho['image']; groupedByAi?: boolean },
+): Promise<number> {
+  return db.transaction(async (tx) => {
+    const rows = await tx
+      .insert(echoes)
+      .values({
+        glitchId,
+        description: echo.description,
+        timestamp: echo.timestamp,
+        reportingGuardianId: echo.reportingGuardianId,
+        locationX: echo.location?.x ?? null,
+        locationY: echo.location?.y ?? null,
+        groupedByAi: echo.groupedByAi ?? false,
+        hasImage: Boolean(echo.image),
+      })
+      .returning({ echoId: echoes.echoId })
+    const row = rows.at(0)
+    if (!row) throw new Error('Insert returned no echo')
+    if (echo.image) await tx.insert(echoImages).values({ echoId: row.echoId, ...echo.image })
+    return row.echoId
+  })
 }
 
 export async function findEcho(echoId: number) {

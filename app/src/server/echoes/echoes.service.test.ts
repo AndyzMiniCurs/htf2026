@@ -1,9 +1,31 @@
 import { eq, inArray, sql } from 'drizzle-orm'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { db } from '#/db/index.ts'
 import { echoImages, echoes, glitches, guardians } from '#/db/schema.ts'
+import { nullClassifier } from '../ai/null.classifier.ts'
+import { NOT_USEFUL_MESSAGE } from '../ai/triage.ts'
 import { reportEcho } from './echoes.service.ts'
+import type * as ClassifierModule from '../ai/classifier.ts'
+import type { Classifier } from '../ai/classifier.ts'
 import type { Guardian } from '#/lib/guardian.ts'
+
+// The pipeline reads the classifier through getClassifier(); tests swap in fakes per case.
+const ai = vi.hoisted(() => ({ current: undefined as Classifier | undefined }))
+vi.mock('../ai/classifier.ts', async (original) => ({
+  ...(await original<typeof ClassifierModule>()),
+  getClassifier: () => ai.current ?? nullClassifier,
+}))
+
+/** `choose` that gives 0.85 to the option starting with `prefix` and spreads the rest. */
+const picking =
+  (prefix: string): Classifier['choose'] =>
+  async (_q, options) =>
+    options
+      .map((option) => ({
+        option,
+        probability: option.startsWith(prefix) ? 0.85 : 0.15 / (options.length - 1),
+      }))
+      .sort((a, b) => b.probability - a.probability)
 
 // Integration test of the echo pipeline against the compose Postgres; skipped when it is down.
 const reachable = await db.execute(sql`select 1`).then(
@@ -33,6 +55,10 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     const row = rows.at(0)
     if (!row) throw new Error('no guardian')
     reporter = row
+  })
+
+  afterEach(() => {
+    ai.current = undefined
   })
 
   afterAll(async () => {
@@ -115,5 +141,79 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
       }),
     ).rejects.toMatchObject({ code: 'VALIDATION' })
     expect(await count()).toBe(before)
+  })
+
+  it('rejects spam with the spec message when the AI is on, storing nothing', async () => {
+    ai.current = {
+      ...nullClassifier,
+      yesNo: async (q) => (q.startsWith('Is this illegal') ? 0 : 0.05),
+    }
+    const count = () => db.$count(echoes, eq(echoes.reportingGuardianId, reporter.guardianId))
+    const before = await count()
+    await expect(
+      reportEcho(reporter, {
+        description: 'asdfasdf buy cheap potions',
+        location: null,
+        image: null,
+      }),
+    ).rejects.toMatchObject({ code: 'VALIDATION', message: NOT_USEFUL_MESSAGE })
+    expect(await count()).toBe(before)
+  })
+
+  it('types a new glitch with the AI', async () => {
+    ai.current = { ...nullClassifier, choose: picking('time-anomaly') }
+    const result = await reportEcho(reporter, {
+      description: 'Time loop detected near the clock tower',
+      location: null,
+      image: null,
+    })
+    created.push(result.glitchId)
+    const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, result.glitchId))
+    expect(glitch).toMatchObject({ type: 'time-anomaly' })
+  })
+
+  it('groups a duplicate under the open glitch, marked grouped by AI', async () => {
+    const first = await reportEcho(reporter, {
+      description: 'Clock tower time loop',
+      location: null,
+      image: null,
+    })
+    created.push(first.glitchId)
+    ai.current = { ...nullClassifier, choose: picking(`${first.glitchId}:`) }
+
+    const second = await reportEcho(reporter, {
+      description: 'the clock tower keeps repeating the same minute',
+      location: null,
+      image: null,
+    })
+
+    expect(second).toMatchObject({ glitchId: first.glitchId, outcome: 'grouped' })
+    expect(second.echo.groupedByAi).toBe(true)
+    const [echo] = await db.select().from(echoes).where(eq(echoes.echoId, second.echo.echoId))
+    expect(echo).toMatchObject({ glitchId: first.glitchId, groupedByAi: true })
+  })
+
+  it('reopens a recently fixed glitch as LEAKED when a new echo matches it', async () => {
+    const first = await reportEcho(reporter, {
+      description: 'Portal tear at the market',
+      location: null,
+      image: null,
+    })
+    created.push(first.glitchId)
+    await db
+      .update(glitches)
+      .set({ status: 'FIXED', fixedAt: new Date().toISOString() })
+      .where(eq(glitches.glitchId, first.glitchId))
+    ai.current = { ...nullClassifier, choose: picking(`${first.glitchId}:`) }
+
+    const again = await reportEcho(reporter, {
+      description: 'The market portal is back',
+      location: null,
+      image: null,
+    })
+
+    expect(again).toMatchObject({ glitchId: first.glitchId, outcome: 'reopened' })
+    const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, first.glitchId))
+    expect(glitch).toMatchObject({ status: 'LEAKED', fixedAt: null })
   })
 })

@@ -1,6 +1,10 @@
 import { AppError } from '#/lib/errors.ts'
+import { getClassifier } from '../ai/classifier.ts'
+import { classifyType, findMatchingGlitch, moderate } from '../ai/triage.ts'
 import { publish } from '../events/bus.ts'
+import { listMatchCandidates, updateGlitchStatus } from '../glitches/glitches.repository.ts'
 import { requireActiveGlitch } from '../glitches/glitches.service.ts'
+import { notifyStatus } from '../notifications/notifications.service.ts'
 import { assertAssigneeOrCommander } from '../glitches/status.ts'
 import * as repo from './echoes.repository.ts'
 import { readEchoImage } from './image.ts'
@@ -14,36 +18,74 @@ import type { GlitchType, Location } from '#/lib/glitch.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 import type { SensorId } from '#/lib/monitoring.ts'
 
-/** Echo intake (design D7). Without AI every echo creates a new `LEAKED` glitch. */
+const REOPEN_WINDOW_MS = 24 * 60 * 60 * 1000
+// shortcut: only the newest candidates go to the AI, raise or pre-filter by location if the realm grows.
+const MATCH_CANDIDATES = 30
+
+/**
+ * Echo intake (design D7). The AI moderates, matches the echo to an open or recently fixed
+ * glitch, and types it, all at once before anything is stored. Without AI every echo creates
+ * a new `unknown` glitch.
+ */
 export async function reportEcho(
   reporter: Guardian,
   input: ReportEchoInput,
 ): Promise<ReportEchoResult> {
   const image = input.image ? await readEchoImage(input.image) : null
+  const ai = getClassifier()
+  const fixedSince = new Date(Date.now() - REOPEN_WINDOW_MS).toISOString()
+  const candidates = await listMatchCandidates(fixedSince, MATCH_CANDIDATES)
+  const [, matchId, type] = await Promise.all([
+    moderate(ai, input.description),
+    findMatchingGlitch(ai, input.description, candidates),
+    classifyType(ai, input.description),
+  ])
+
   const timestamp = new Date().toISOString()
-  const { glitchId, echoId } = await repo.insertEchoWithNewGlitch({
+  const echo = {
     description: input.description,
     timestamp,
     reportingGuardianId: reporter.guardianId,
     location: input.location,
     image,
-  })
-  publish({ type: 'glitch.created', glitchId })
-  publish({ type: 'echo.created', echoId, glitchId })
-  return {
-    echo: {
-      echoId,
-      glitchId,
-      description: input.description,
-      timestamp,
-      reporter,
-      location: input.location,
-      groupedByAi: false,
-      imageUrl: image ? `/api/images/${echoId}` : null,
-    },
-    glitchId,
-    outcome: 'created',
   }
+  const result = (
+    glitchId: string,
+    echoId: number,
+    outcome: ReportEchoResult['outcome'],
+  ): ReportEchoResult => {
+    publish({ type: 'echo.created', echoId, glitchId })
+    return {
+      echo: {
+        echoId,
+        glitchId,
+        description: input.description,
+        timestamp,
+        reporter,
+        location: input.location,
+        groupedByAi: outcome !== 'created',
+        imageUrl: image ? `/api/images/${echoId}` : null,
+      },
+      glitchId,
+      outcome,
+    }
+  }
+
+  const match = candidates.find((c) => c.glitchId === matchId)
+  if (!match) {
+    const created = await repo.insertEchoWithNewGlitch(echo, { type })
+    publish({ type: 'glitch.created', glitchId: created.glitchId })
+    return result(created.glitchId, created.echoId, 'created')
+  }
+
+  const { glitchId } = match
+  // The echo is stored first, so losing a race with a manual reopen never loses it.
+  const echoId = await repo.insertEcho(glitchId, { ...echo, groupedByAi: true })
+  const reopened =
+    match.status === 'FIXED' && (await updateGlitchStatus(glitchId, 'FIXED', 'LEAKED', null))
+  publish({ type: 'glitch.updated', glitchId })
+  if (reopened) await notifyStatus(glitchId, 'LEAKED', reporter.guardianId)
+  return result(glitchId, echoId, reopened ? 'reopened' : 'grouped')
 }
 
 /** A glitch the system raises itself (sensor anomaly), with a system echo explaining why. */

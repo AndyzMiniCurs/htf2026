@@ -198,6 +198,25 @@ export async function listRecentlyFixed(limit: number): Promise<Array<GlitchList
   return rows.map(toListItem)
 }
 
+/** Glitches a new echo may belong to: open ones and ones fixed since `fixedSince`, newest first. */
+export async function listMatchCandidates(fixedSince: string, limit: number) {
+  return db
+    .select({
+      glitchId: glitches.glitchId,
+      description: glitches.description,
+      status: glitches.status,
+    })
+    .from(glitches)
+    .where(
+      and(
+        isNull(glitches.mergedInto),
+        or(sql`${glitches.status} <> 'FIXED'`, gte(glitches.fixedAt, fixedSince)),
+      ),
+    )
+    .orderBy(desc(glitches.timestamp))
+    .limit(limit)
+}
+
 /** Number of non-merged glitches per status. */
 export async function countByStatus(): Promise<Record<GlitchStatus, number>> {
   const rows = await db
