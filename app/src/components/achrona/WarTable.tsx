@@ -544,12 +544,12 @@ function usePanZoom(
         tweenTo({ k: nk, x: w / 2 - (w / 2 - x) * (nk / k), y: h / 2 - (h / 2 - y) * (nk / k) })
       },
       reset: () => tweenTo({ k: 1, x: 0, y: 0 }),
-      /** Centres chart point (cx, cy) at zoom k. */
-      flyTo: (cx: number, cy: number, k: number, anchorY = 0.5) => {
+      /** Frames chart point (chartX, chartY) at zoom k, at `anchorY` of the viewport's height. */
+      flyTo: (chartX: number, chartY: number, k: number, anchorY = 0.5) => {
         const { w, h } = size()
         const s = sheet()
-        const px = s.left + (cx / 100) * s.side
-        const py = s.top + (cy / 100) * s.side
+        const px = s.left + (chartX / 100) * s.side
+        const py = s.top + (chartY / 100) * s.side
         tweenTo({ k, x: w / 2 - px * k, y: h * anchorY - py * k })
       },
       /** The chart point under a client position, or null off the sheet. */
@@ -558,9 +558,9 @@ function usePanZoom(
         if (!box) return null
         const { k, x, y } = state.current
         const s = sheet()
-        const cx = ((clientX - box.left - x) / k - s.left) / s.side
-        const cy = ((clientY - box.top - y) / k - s.top) / s.side
-        return cx < 0 || cx > 1 || cy < 0 || cy > 1 ? null : { x: cx * 100, y: cy * 100 }
+        const u = ((clientX - box.left - x) / k - s.left) / s.side
+        const v = ((clientY - box.top - y) / k - s.top) / s.side
+        return u < 0 || u > 1 || v < 0 || v > 1 ? null : { x: u * 100, y: v * 100 }
       },
     }
   }, [viewportRef, layerRef, reduce])

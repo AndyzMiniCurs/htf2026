@@ -96,9 +96,9 @@ export function AchronaChart({ rifts }: { rifts?: ReadonlyMap<string, number> })
           const my = (citadel.y + to.y) / 2
           // Bow each line sideways so they read as currents, not spokes.
           const bend = 0.18
-          const cx = mx - (to.y - citadel.y) * bend
-          const cy = my + (to.x - citadel.x) * bend
-          const d = `M${citadel.x} ${citadel.y}Q${cx} ${cy} ${to.x} ${to.y}`
+          const qx = mx - (to.y - citadel.y) * bend
+          const qy = my + (to.x - citadel.x) * bend
+          const d = `M${citadel.x} ${citadel.y}Q${qx} ${qy} ${to.x} ${to.y}`
           const torn = (rifts?.get(district.id) ?? 0) > 0
           return (
             <g key={district.id}>
