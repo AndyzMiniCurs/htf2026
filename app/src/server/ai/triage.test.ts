@@ -29,7 +29,12 @@ const picks =
 
 describe('moderate', () => {
   const spamFilter = fake({
-    yesNo: async (q) => (q.startsWith('Is this illegal') ? 0.05 : q.includes('asdf') ? 0.02 : 0.9),
+    yesNo: async (q) =>
+      q.startsWith('Is this illegal')
+        ? 0.05
+        : q.includes('asdf') === q.includes('junk rather')
+          ? 0.98
+          : 0.02,
   })
 
   it('rejects spam with the spec message', async () => {
@@ -45,7 +50,7 @@ describe('moderate', () => {
   })
 
   it('rejects illegal or abusive content', async () => {
-    const abusive = fake({ yesNo: async (q) => (q.startsWith('Is this illegal') ? 0.95 : 0.9) })
+    const abusive = fake({ yesNo: async (q) => (q.startsWith('Is this illegal') ? 0.95 : 0.05) })
     await expect(moderate(abusive, 'threat')).rejects.toMatchObject({ code: 'VALIDATION' })
   })
 })

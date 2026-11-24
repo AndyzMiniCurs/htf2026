@@ -32,11 +32,15 @@ When an echo is reported, the system SHALL compare it with open glitches and SHA
 - **THEN** a new glitch is created
 
 ### Requirement: Moderation
-Echo descriptions judged useless (spam, gibberish, off-topic) or illegal, and images judged explicit, SHALL be rejected before they are stored, with a message telling the guardian why.
+Echo descriptions the AI is sure are junk (spam, gibberish, a test, text naming no problem) or illegal, and images judged explicit, SHALL be rejected before they are stored, with a message telling the guardian why.
 
 #### Scenario: Spam
 - **WHEN** a guardian submits "asdfasdf buy cheap potions"
-- **THEN** the echo is rejected with "This echo was flagged as not useful"
+- **THEN** the echo is rejected with "This echo was flagged as not useful" and a hint to say what is wrong and where
+
+#### Scenario: Plain report
+- **WHEN** a guardian submits an ordinary observation such as "the lights are off at the archive"
+- **THEN** the echo is accepted
 
 ### Requirement: Auto-close and reopen
 An echo added to a glitch that says the problem is resolved SHALL move the glitch to `FIXED`. A new echo that matches a `FIXED` glitch with probability at least 0.8 SHALL reopen it to `LEAKED` instead of creating a new glitch.

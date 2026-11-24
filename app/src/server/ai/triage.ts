@@ -5,7 +5,8 @@ import type { GlitchType } from '#/lib/glitch.ts'
 
 /** Below this an AI match is not trusted: the echo becomes a new glitch (spec). */
 export const MATCH_THRESHOLD = 0.8
-export const NOT_USEFUL_MESSAGE = 'This echo was flagged as not useful'
+export const NOT_USEFUL_MESSAGE =
+  'This echo was flagged as not useful. Say what is wrong and where, e.g. "Portal flickering at the market".'
 export const ILLEGAL_MESSAGE = 'This echo was flagged as illegal or abusive'
 
 // Without this a general model judges portals and time loops as "not a real city problem".
@@ -14,16 +15,25 @@ const REALM =
 
 const quote = (text: string) => JSON.stringify(text)
 
-/** Throws VALIDATION with the reason; no opinion (null) lets the echo through. */
+/**
+ * Throws VALIDATION with the reason; no opinion (null) lets the echo through. Two questions must
+ * agree before an echo is refused: is it junk, and is it not useful. Each alone wrongly refused
+ * plain reports ("the lights are off at the archive", "magic is low", reports in Romanian).
+ */
 export async function moderate(classifier: Classifier, description: string): Promise<void> {
-  const [useful, abusive] = await Promise.all([
+  const [junk, useful, abusive] = await Promise.all([
+    classifier.yesNo(
+      `${REALM} Is this text junk rather than an incident report: spam, an advert, a test, gibberish, a greeting, or words that name no problem at all? Any plain observation that something is wrong somewhere (lights out, a noise, a broken device, a strange sight) is a report, not junk. ${quote(description)}`,
+    ),
     classifier.yesNo(
       `${REALM} Is this a useful report about a problem in the city? ${quote(description)}`,
     ),
     classifier.yesNo(`Is this illegal or abusive content? ${quote(description)}`),
   ])
   if (abusive !== null && abusive > 0.7) throw new AppError('VALIDATION', ILLEGAL_MESSAGE)
-  if (useful !== null && useful < 0.3) throw new AppError('VALIDATION', NOT_USEFUL_MESSAGE)
+  if (junk !== null && useful !== null && junk > 0.7 && useful < 0.3) {
+    throw new AppError('VALIDATION', NOT_USEFUL_MESSAGE)
+  }
 }
 
 const TYPE_HINTS: Record<GlitchType, string> = {

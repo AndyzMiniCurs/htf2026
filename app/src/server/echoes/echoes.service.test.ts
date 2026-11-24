@@ -146,7 +146,8 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
   it('rejects spam with the spec message when the AI is on, storing nothing', async () => {
     ai.current = {
       ...nullClassifier,
-      yesNo: async (q) => (q.startsWith('Is this illegal') ? 0 : 0.05),
+      yesNo: async (q) =>
+        q.startsWith('Is this illegal') ? 0 : q.includes('junk rather') ? 0.95 : 0.05,
     }
     const count = () => db.$count(echoes, eq(echoes.reportingGuardianId, reporter.guardianId))
     const before = await count()
