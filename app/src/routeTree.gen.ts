@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppGuardiansRouteImport } from './routes/_app/guardians'
+import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
 import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppSensorsRouteImport } from './routes/_app/sensors'
 import { Route as AppEchoesNewRouteImport } from './routes/_app/echoes/new'
@@ -37,6 +38,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppGuardiansRoute = AppGuardiansRouteImport.update({
   id: '/guardians',
   path: '/guardians',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMapRoute = AppMapRouteImport.update({
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/guardians': typeof AppGuardiansRoute
+  '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
   '/echoes/new': typeof AppEchoesNewRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/guardians': typeof AppGuardiansRoute
+  '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
   '/': typeof AppIndexRoute
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/guardians': typeof AppGuardiansRoute
+  '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/map': typeof AppMapRoute
   '/_app/sensors': typeof AppSensorsRoute
   '/_app/': typeof AppIndexRoute
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/guardians'
+    | '/leaderboard'
     | '/map'
     | '/sensors'
     | '/echoes/new'
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/guardians'
+    | '/leaderboard'
     | '/map'
     | '/sensors'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/guardians'
+    | '/_app/leaderboard'
     | '/_app/map'
     | '/_app/sensors'
     | '/_app/'
@@ -176,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/guardians'
       fullPath: '/guardians'
       preLoaderRoute: typeof AppGuardiansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leaderboard': {
+      id: '/_app/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof AppLeaderboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/map': {
@@ -225,6 +244,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppGuardiansRoute: typeof AppGuardiansRoute
+  AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMapRoute: typeof AppMapRoute
   AppSensorsRoute: typeof AppSensorsRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -235,6 +255,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppGuardiansRoute: AppGuardiansRoute,
+  AppLeaderboardRoute: AppLeaderboardRoute,
   AppMapRoute: AppMapRoute,
   AppSensorsRoute: AppSensorsRoute,
   AppIndexRoute: AppIndexRoute,
