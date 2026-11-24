@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '#/db/index.ts'
 import { echoes, echoImages, glitches, glitchSeq } from '#/db/schema.ts'
 import type { EchoImageMime } from '#/lib/echo.ts'
@@ -47,4 +47,12 @@ export async function insertEchoWithNewGlitch(echo: NewEcho): Promise<{ glitchId
     if (echo.image) await tx.insert(echoImages).values({ echoId: row.echoId, ...echo.image })
     return { glitchId, echoId: row.echoId }
   })
+}
+
+export async function findEchoImage(echoId: number): Promise<{ mime: string; bytes: Buffer } | null> {
+  const [row] = await db
+    .select({ mime: echoImages.mime, bytes: echoImages.bytes })
+    .from(echoImages)
+    .where(eq(echoImages.echoId, echoId))
+  return row ?? null
 }

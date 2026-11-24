@@ -29,3 +29,7 @@ export async function reportEcho(reporter: Guardian, input: ReportEchoInput): Pr
     outcome: 'created',
   }
 }
+
+export async function getEchoImage(echoId: number) {
+  return repo.findEchoImage(echoId)
+}
