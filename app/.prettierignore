@@ -3,3 +3,4 @@
 .tanstack
 package-lock.json
 src/routeTree.gen.ts
+.cta.json
