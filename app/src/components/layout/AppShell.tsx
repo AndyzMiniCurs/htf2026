@@ -4,6 +4,7 @@ import { cx } from '#/components/ui/cx.ts'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
+import { LockdownControl } from './LockdownControl.tsx'
 import { useLiveRealm } from './LiveRealm.tsx'
 import { GlobalShortcuts } from './ShortcutHelp.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
@@ -72,9 +73,10 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">
           <LivePulse />
+          {me?.role === 'commander' && <LockdownControl />}
           <Link
             to="/echoes/new"
-            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-colors hover:bg-royal-hi lg:inline-flex"
+            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm whitespace-nowrap text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-colors hover:bg-royal-hi lg:inline-flex"
           >
             <HornIcon className="size-5" />
             Report an echo

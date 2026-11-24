@@ -7,8 +7,17 @@ import type { LiveStatus } from '#/hooks/useLiveEvents.ts'
 import type { LiveEvent, Notification } from '#/lib/live-events.ts'
 import type { ReactNode } from 'react'
 
-type LiveRealm = { status: LiveStatus; lockdown: boolean }
-const LiveRealmContext = createContext<LiveRealm>({ status: 'connecting', lockdown: false })
+type LiveRealm = {
+  status: LiveStatus
+  lockdown: boolean
+  /** For the commander who changed it: their screen switches without waiting for the event. */
+  setLockdownState: (on: boolean) => void
+}
+const LiveRealmContext = createContext<LiveRealm>({
+  status: 'connecting',
+  lockdown: false,
+  setLockdownState: () => {},
+})
 
 const NOTIFICATION_TITLE: Record<Notification['kind'], string> = {
   assigned: 'A glitch is yours',
@@ -65,7 +74,11 @@ export function LiveRealmProvider({
   }
 
   const status = useLiveEvents(onEvent, () => void router.invalidate())
-  return <LiveRealmContext value={{ status, lockdown }}>{children}</LiveRealmContext>
+  return (
+    <LiveRealmContext value={{ status, lockdown, setLockdownState: setLockdown }}>
+      {children}
+    </LiveRealmContext>
+  )
 }
 
 export function useLiveRealm(): LiveRealm {

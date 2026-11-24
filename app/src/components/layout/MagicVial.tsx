@@ -7,7 +7,7 @@ export function MagicVial({ level, compact }: { level: number; compact?: boolean
   const pct = Math.max(0, Math.min(100, Math.round(level)))
   const low = pct < 40
   return (
-    <div className={cx('flex items-center gap-3', compact ? 'w-full' : 'w-[min(26rem,34vw)]')}>
+    <div className={cx('flex items-center gap-3', compact ? 'w-full' : 'w-[min(22rem,22vw)]')}>
       <span className="label-caps hidden text-fg-muted sm:inline">Magic</span>
       <div
         role="meter"
