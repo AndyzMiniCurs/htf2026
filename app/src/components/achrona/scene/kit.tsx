@@ -26,9 +26,8 @@ function nightTint(scene: THREE.Object3D) {
   if (tinted.has(scene)) return
   tinted.add(scene)
   scene.traverse((object) => {
-    const mesh = object as THREE.Mesh
-    if (!mesh.isMesh) return
-    const material = mesh.material as THREE.MeshStandardMaterial
+    if (!(object instanceof THREE.Mesh)) return
+    const material = object.material as THREE.MeshStandardMaterial
     material.color.multiply(new THREE.Color('#9d92c9'))
     material.emissive = new THREE.Color('#2b1f4d')
     material.emissiveMap = material.map

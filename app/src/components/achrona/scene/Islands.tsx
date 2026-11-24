@@ -266,10 +266,10 @@ export function DistantIslands({ reducedMotion }: { reducedMotion: boolean }) {
   const group = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     if (!group.current || reducedMotion) return
+    // One child per FAR_ISLANDS entry, in the same order.
     group.current.children.forEach((child, i) => {
-      const island = FAR_ISLANDS[i]
-      if (island)
-        child.position.y = island.position[1] + Math.sin(clock.getElapsedTime() * 0.3 + i) * 0.6
+      child.position.y =
+        FAR_ISLANDS[i].position[1] + Math.sin(clock.getElapsedTime() * 0.3 + i) * 0.6
     })
   })
   return (
