@@ -17,6 +17,10 @@ export const dashboardSchema = z.object({
   magicLevel: z.number(),
   byStatus: z.record(z.enum(GLITCH_STATUSES), z.number().int()),
   byType: z.record(z.enum(GLITCH_TYPES), z.number().int()),
+  /**
+   * Every open (non-FIXED, non-merged) glitch plus the 5 most recently fixed ones, newest first.
+   * The home page builds its quest log, chronicle and 3D rifts from this, so it must not be cut.
+   */
   recent: z.array(glitchListItemSchema),
   lockdown: z.boolean(),
 })

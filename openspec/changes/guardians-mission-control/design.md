@@ -126,9 +126,9 @@ type RunbookStep = { text: string; done: boolean }
 type GlitchListItem = Glitch & { type: GlitchType; location: Location | null; assignee: Guardian | null; echoCount: number; source: 'echo' | 'prediction' }
 type Echo = { echoId: number; glitchId: string; description: string; timestamp: string; reporter: Guardian | null; location: Location | null; groupedByAi: boolean; imageUrl: string | null }
 type GlitchDetail = GlitchListItem & { echoes: Echo[]; runbook: RunbookStep[]; mergedInto: string | null }
-type GlitchQuery = { q?: string; status?: GlitchStatus[]; type?: GlitchType[]; from?: string; to?: string; sort?: 'newest' | 'oldest' | 'status' }
+type GlitchQuery = { q?: string; status?: GlitchStatus[]; type?: GlitchType[]; from?: string; to?: string /* full ISO instants for local days; bare dates = UTC days */; sort?: 'newest' | 'oldest' | 'status' }
 // lib/monitoring.ts
-type Dashboard = { magicLevel: number; byStatus: Record<GlitchStatus, number>; byType: Record<GlitchType, number>; recent: GlitchListItem[]; lockdown: boolean }
+type Dashboard = { magicLevel: number; byStatus: Record<GlitchStatus, number>; byType: Record<GlitchType, number>; recent: GlitchListItem[] /* all open + 5 latest FIXED, newest first */; lockdown: boolean }
 type SensorId = 'magic-reserve' | 'ley-flux' | 'portal-stability'
 type SensorSeries = { sensorId: SensorId; label: string; unit: string; points: { timestamp: string; value: number }[] }
 type Badge = 'first-fix' | 'stabilizer' | 'specialist' | 'rapid-response'
