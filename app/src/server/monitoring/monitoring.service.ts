@@ -2,12 +2,21 @@ import { GLITCH_TYPES } from '#/lib/glitch.ts'
 import { SENSORS, SENSOR_IDS } from '#/lib/monitoring.ts'
 import { publish } from '../events/bus.ts'
 import * as glitchRepo from '../glitches/glitches.repository.ts'
+import { listGuardians } from '../guardians/guardians.repository.ts'
+import { badgesFor } from './badges.ts'
 import { magicLevel } from './magic.ts'
 import * as repo from './monitoring.repository.ts'
 import { ensureSensorSimulator, triggerIncident as startIncident } from './sensor-simulator.ts'
 import * as sensorRepo from './sensors.repository.ts'
 import type { GlitchType } from '#/lib/glitch.ts'
-import type { Dashboard, SensorId, SensorSeries } from '#/lib/monitoring.ts'
+import type {
+  Dashboard,
+  LeaderboardEntry,
+  Report,
+  SensorId,
+  SensorSeries,
+} from '#/lib/monitoring.ts'
+import type { Fix } from './badges.ts'
 
 const RECENTLY_FIXED = 5
 
@@ -56,4 +65,36 @@ export async function setLockdown(on: boolean): Promise<{ on: boolean }> {
   await repo.setLockdown(on)
   publish({ type: 'lockdown', on })
   return { on }
+}
+
+const REPORT_TOP = 5
+
+/** Every defender, ranked by the fixes credited to them (ties by codename), with badges. */
+export async function getLeaderboard(): Promise<Array<LeaderboardEntry>> {
+  const [roster, credited] = await Promise.all([listGuardians(), glitchRepo.listCreditedFixes()])
+  const fixesBy = new Map<number, Array<Fix>>()
+  for (const row of credited) {
+    if (row.guardianId === null || row.fixedAt === null) continue
+    const list = fixesBy.get(row.guardianId) ?? []
+    list.push({ type: row.type, createdAt: row.createdAt, fixedAt: row.fixedAt })
+    fixesBy.set(row.guardianId, list)
+  }
+  return roster
+    .filter((guardian) => guardian.role === 'defender')
+    .map((guardian) => {
+      const fixes = fixesBy.get(guardian.guardianId) ?? []
+      return { guardian, fixes: fixes.length, badges: badgesFor(fixes) }
+    })
+    .sort((a, b) => b.fixes - a.fixes || a.guardian.codename.localeCompare(b.guardian.codename))
+}
+
+/** Commander only (middleware): the High Council report, printed to PDF by the browser. */
+export async function getReport(): Promise<Report> {
+  const [dashboard, leaderboard] = await Promise.all([getDashboard(), getLeaderboard()])
+  return {
+    generatedAt: new Date().toISOString(),
+    dashboard,
+    open: dashboard.recent.filter((g) => g.status !== 'FIXED'),
+    leaderboard: leaderboard.slice(0, REPORT_TOP),
+  }
 }

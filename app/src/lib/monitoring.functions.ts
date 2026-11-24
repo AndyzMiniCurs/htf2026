@@ -1,5 +1,4 @@
 import { createServerFn } from '@tanstack/react-start'
-import { fixtureLeaderboard, fixtureReport } from '#/lib/fixtures.ts'
 import { sensorSeriesInput, setLockdownInput, triggerIncidentInput } from '#/lib/monitoring.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
@@ -29,8 +28,8 @@ export const triggerIncident = createServerFn({ method: 'POST' })
 
 export const getLeaderboard = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
-  .handler(async (): Promise<Array<LeaderboardEntry>> => fixtureLeaderboard)
+  .handler(async (): Promise<Array<LeaderboardEntry>> => monitoring.getLeaderboard())
 
 export const getReport = createServerFn({ method: 'GET' })
   .middleware([requireCommander])
-  .handler(async (): Promise<Report> => fixtureReport())
+  .handler(async (): Promise<Report> => monitoring.getReport())

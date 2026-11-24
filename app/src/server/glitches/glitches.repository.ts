@@ -1,4 +1,17 @@
-import { and, asc, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '#/db/index.ts'
 import { echoes, glitches, guardians } from '#/db/schema.ts'
@@ -271,4 +284,24 @@ export async function setRunbookStepDone(
     )
     .returning({ runbook: glitches.runbook })
   return rows.at(0)?.runbook?.steps ?? null
+}
+
+/** Every fixed, non-merged glitch with the guardian it is credited to (leaderboard). */
+export async function listCreditedFixes() {
+  return db
+    .select({
+      guardianId: glitches.fixedBy,
+      type: glitches.type,
+      createdAt: glitches.timestamp,
+      fixedAt: glitches.fixedAt,
+    })
+    .from(glitches)
+    .where(
+      and(
+        eq(glitches.status, 'FIXED'),
+        isNull(glitches.mergedInto),
+        isNotNull(glitches.fixedBy),
+        isNotNull(glitches.fixedAt),
+      ),
+    )
 }
