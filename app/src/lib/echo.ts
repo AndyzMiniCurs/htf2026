@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { AppError } from './errors.ts'
-import { echoSchema, glitchIdSchema, locationSchema, type Location } from './glitch.ts'
+import { echoSchema, glitchIdSchema, locationSchema } from './glitch.ts'
+import type { Location } from './glitch.ts'
 
 export const ECHO_DESCRIPTION_MIN = 3
 export const ECHO_DESCRIPTION_MAX = 1000
@@ -48,7 +49,7 @@ export function parseReportEchoForm(data: FormData): ReportEchoInput {
     y: field('y'),
   })
   if (!result.success) {
-    const issue = result.error.issues[0]
+    const issue = result.error.issues.at(0)
     throw new AppError(
       'VALIDATION',
       issue ? `${issue.path.join('.')}: ${issue.message}` : 'Invalid echo',

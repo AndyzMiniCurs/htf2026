@@ -1,8 +1,8 @@
 import { AppError } from '#/lib/errors.ts'
-import type { Guardian, LoginInput } from '#/lib/guardian.ts'
 import { findCredentials } from '../guardians/guardians.repository.ts'
 import { hashPassword, verifyPassword } from './password.ts'
 import { currentGuardian, endSession, startSession } from './session.ts'
+import type { Guardian, LoginInput } from '#/lib/guardian.ts'
 
 // Verified against when the codename is unknown, so both failures take the same time.
 const dummyHash = hashPassword('not-a-real-password')

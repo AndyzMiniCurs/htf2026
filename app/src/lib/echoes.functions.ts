@@ -1,15 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
-import {
-  addGlitchUpdateInput,
-  moveEchoInput,
-  parseReportEchoForm,
-  type AddGlitchUpdateResult,
-  type ReportEchoResult,
-} from '#/lib/echo.ts'
-import { fixtureEchoes, fixtureMe } from '#/lib/fixtures.ts'
+import { addGlitchUpdateInput, moveEchoInput, parseReportEchoForm } from '#/lib/echo.ts'
+import { fixtureMe } from '#/lib/fixtures.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
 import * as echoes from '#/server/echoes/echoes.service.ts'
+import type { AddGlitchUpdateResult, ReportEchoResult } from '#/lib/echo.ts'
 
 export const reportEcho = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
@@ -39,5 +34,5 @@ export const moveEcho = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(moveEchoInput))
   .handler(async ({ data }): Promise<{ glitchId: string }> => ({
-    glitchId: data.toGlitchId ?? fixtureEchoes[0]?.glitchId ?? 'GL-0201',
+    glitchId: data.toGlitchId ?? 'GL-0201',
   }))

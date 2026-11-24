@@ -1,8 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import { loginInput, type Guardian } from '#/lib/guardian.ts'
+import { loginInput } from '#/lib/guardian.ts'
 import { validate } from '#/lib/validate.ts'
 import * as auth from '#/server/auth/auth.service.ts'
 import { requireGuardian } from '#/server/auth/middleware.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 export const login = createServerFn({ method: 'POST' })
   .validator(validate(loginInput))

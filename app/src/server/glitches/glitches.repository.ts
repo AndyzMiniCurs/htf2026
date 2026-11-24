@@ -1,28 +1,10 @@
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gte,
-  ilike,
-  inArray,
-  isNull,
-  lte,
-  or,
-  sql,
-  type SQL,
-} from 'drizzle-orm'
+import { and, asc, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '#/db/index.ts'
 import { echoes, glitches, guardians } from '#/db/schema.ts'
-import {
-  GLITCH_STATUSES,
-  type Echo,
-  type GlitchDetail,
-  type GlitchListItem,
-  type GlitchQuery,
-  type Location,
-} from '#/lib/glitch.ts'
+import { GLITCH_STATUSES } from '#/lib/glitch.ts'
+import type { SQL } from 'drizzle-orm'
+import type { Echo, GlitchDetail, GlitchListItem, GlitchQuery, Location } from '#/lib/glitch.ts'
 
 const assignee = alias(guardians, 'assignee')
 const reporter = alias(guardians, 'reporter')
@@ -84,8 +66,8 @@ const statusOrder = sql`array_position(array[${sql.join(
   sql`, `,
 )}]::text[], ${glitches.status})`
 
-export async function listGlitches(query: GlitchQuery): Promise<GlitchListItem[]> {
-  const conditions: (SQL | undefined)[] = [isNull(glitches.mergedInto)]
+export async function listGlitches(query: GlitchQuery): Promise<Array<GlitchListItem>> {
+  const conditions: Array<SQL | undefined> = [isNull(glitches.mergedInto)]
   if (query.q) {
     const pattern = likePattern(query.q)
     conditions.push(or(ilike(glitches.glitchId, pattern), ilike(glitches.description, pattern)))
@@ -109,12 +91,12 @@ export async function listGlitches(query: GlitchQuery): Promise<GlitchListItem[]
 }
 
 export async function findGlitchListItem(glitchId: string): Promise<GlitchListItem | null> {
-  const [row] = await selectGlitches().where(eq(glitches.glitchId, glitchId))
+  const row = (await selectGlitches().where(eq(glitches.glitchId, glitchId))).at(0)
   return row ? toListItem(row) : null
 }
 
 export async function findGlitchDetail(glitchId: string): Promise<GlitchDetail | null> {
-  const [row] = await selectGlitches().where(eq(glitches.glitchId, glitchId))
+  const row = (await selectGlitches().where(eq(glitches.glitchId, glitchId))).at(0)
   if (!row) return null
   const echoRows = await db
     .select({

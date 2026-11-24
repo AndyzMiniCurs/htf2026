@@ -1,7 +1,7 @@
-import type { ReportEchoInput, ReportEchoResult } from '#/lib/echo.ts'
-import type { Guardian } from '#/lib/guardian.ts'
 import * as repo from './echoes.repository.ts'
 import { readEchoImage } from './image.ts'
+import type { ReportEchoInput, ReportEchoResult } from '#/lib/echo.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 /** Echo intake (design D7). Without AI every echo creates a new `LEAKED` glitch. */
 export async function reportEcho(

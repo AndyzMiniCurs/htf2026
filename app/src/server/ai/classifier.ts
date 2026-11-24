@@ -7,14 +7,14 @@ import { nullClassifier } from './null.classifier.ts'
  */
 export interface Classifier {
   /** Options ranked by probability, highest first. */
-  choose(
+  choose: (
     question: string,
-    options: string[],
-  ): Promise<{ option: string; probability: number }[] | null>
+    options: Array<string>,
+  ) => Promise<Array<{ option: string; probability: number }> | null>
   /** A 0..1 score per item, in the same order as `items`. */
-  score(question: string, items: string[]): Promise<number[] | null>
+  score: (question: string, items: Array<string>) => Promise<Array<number> | null>
   /** P(yes), 0..1. */
-  yesNo(question: string): Promise<number | null>
+  yesNo: (question: string) => Promise<number | null>
 }
 
 export function createClassifier(apiKey = process.env.TYPESAFE_API_KEY): Classifier {

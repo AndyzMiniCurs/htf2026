@@ -22,6 +22,6 @@ export class AppError extends Error {
 /** Errors lose their class crossing the server boundary, so read the code structurally. */
 export function getErrorCode(error: unknown): ErrorCode | null {
   if (typeof error !== 'object' || error === null || !('code' in error)) return null
-  const code = (error as { code: unknown }).code
+  const code = error.code
   return ERROR_CODES.includes(code as ErrorCode) ? (code as ErrorCode) : null
 }

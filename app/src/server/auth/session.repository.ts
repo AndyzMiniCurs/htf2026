@@ -15,7 +15,7 @@ export async function findGuardianBySession(
   tokenHash: string,
   now: string,
 ): Promise<Guardian | null> {
-  const [row] = await db
+  const rows = await db
     .select({
       guardianId: guardians.guardianId,
       codename: guardians.codename,
@@ -24,7 +24,7 @@ export async function findGuardianBySession(
     .from(sessions)
     .innerJoin(guardians, eq(sessions.guardianId, guardians.guardianId))
     .where(and(eq(sessions.tokenHash, tokenHash), gt(sessions.expiresAt, now)))
-  return row ?? null
+  return rows.at(0) ?? null
 }
 
 export async function deleteSession(tokenHash: string) {

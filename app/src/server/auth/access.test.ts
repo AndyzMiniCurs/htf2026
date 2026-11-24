@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { Guardian } from '#/lib/guardian.ts'
 import { assertCommander, assertGuardian } from './access.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 const defender: Guardian = { guardianId: 2, codename: 'Nova', role: 'defender' }
 const commander: Guardian = { guardianId: 1, codename: 'Aegis', role: 'commander' }
