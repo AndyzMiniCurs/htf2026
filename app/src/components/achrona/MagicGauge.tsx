@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'motion/react'
+import { CountUp } from '#/components/ui/CountUp.tsx'
 
 const R = 52
 const ARC = Math.PI * 1.5 * R // a 270° dial
@@ -71,7 +72,7 @@ export function MagicGauge({ level }: { level: number }) {
         <div className="absolute inset-0 grid place-items-center text-center">
           <div>
             <span className="title-gothic block text-5xl tabular" style={{ color }}>
-              {pct}%
+              <CountUp value={pct} />%
             </span>
             <span className="label-caps text-[0.65rem] text-fg-muted">magic left</span>
           </div>

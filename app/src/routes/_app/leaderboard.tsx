@@ -6,6 +6,7 @@ import { Panel } from '#/components/ui/Panel.tsx'
 import { cx } from '#/components/ui/cx.ts'
 import { BADGES } from '#/lib/monitoring.ts'
 import { getLeaderboard } from '#/lib/monitoring.functions.ts'
+import { CountUp } from '#/components/ui/CountUp.tsx'
 import type { Badge, LeaderboardEntry } from '#/lib/monitoring.ts'
 
 export const Route = createFileRoute('/_app/leaderboard')({
@@ -53,7 +54,7 @@ function HallOfFame() {
                 {place === 1 && (
                   <Crown
                     aria-hidden
-                    className="size-8 text-gold drop-shadow-[0_0_10px_var(--gold)]"
+                    className="crown-drop size-8 text-gold drop-shadow-[0_0_10px_var(--gold)]"
                   />
                 )}
                 <span
@@ -69,14 +70,16 @@ function HallOfFame() {
                   {entry.guardian.codename}
                 </span>
                 <span className="text-sm text-fg-muted tabular">
-                  {entry.fixes} {entry.fixes === 1 ? 'rift' : 'rifts'} sealed
+                  <CountUp value={entry.fixes} /> {entry.fixes === 1 ? 'rift' : 'rifts'} sealed
                 </span>
                 <div
                   className={cx(
-                    'flex w-full items-start justify-center rounded-t-xl border-x border-t pt-2',
+                    'pillar-rise flex w-full items-start justify-center rounded-t-xl border-x border-t pt-2',
                     height,
                   )}
                   style={{
+                    // Third rises first, the champion last.
+                    animationDelay: `${(3 - place) * 140 + 120}ms`,
                     borderColor: metal,
                     background: `linear-gradient(180deg, color-mix(in oklab, ${metal} 30%, transparent), transparent)`,
                   }}
@@ -97,8 +100,9 @@ function HallOfFame() {
             {ranked.map((entry, i) => (
               <li
                 key={entry.guardian.guardianId}
+                style={{ animationDelay: `${Math.min(i, 8) * 35 + 150}ms` }}
                 className={cx(
-                  'flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5',
+                  'row-in flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5',
                   entry.guardian.guardianId === me.guardianId &&
                     'bg-panel-hi shadow-[inset_3px_0_0_var(--gold)]',
                 )}
@@ -116,7 +120,10 @@ function HallOfFame() {
                   ))}
                 </span>
                 <span className="w-24 text-right text-fg-muted tabular">
-                  <span className="title-gothic text-xl text-fg">{entry.fixes}</span> sealed
+                  <span className="title-gothic text-xl text-fg">
+                    <CountUp value={entry.fixes} />
+                  </span>{' '}
+                  sealed
                 </span>
               </li>
             ))}

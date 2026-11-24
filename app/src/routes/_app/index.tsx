@@ -11,6 +11,7 @@ import { GLITCH_STATUSES, GLITCH_TYPES } from '#/lib/glitch.ts'
 import { getDashboard } from '#/lib/monitoring.functions.ts'
 import { getGlitches } from '#/lib/glitches.functions.ts'
 import { MagicGauge } from '#/components/achrona/MagicGauge.tsx'
+import { CountUp } from '#/components/ui/CountUp.tsx'
 import type { GlitchListItem, GlitchStatus, GlitchType } from '#/lib/glitch.ts'
 
 export const Route = createFileRoute('/_app/')({
@@ -82,7 +83,9 @@ function StatusTally({ byStatus }: { byStatus: Record<GlitchStatus, number> }) {
         return (
           <li key={status} className="flex items-center gap-1.5" title={label}>
             <Icon aria-hidden className="size-4" style={{ color }} />
-            <span className="title-gothic text-xl tabular">{byStatus[status]}</span>
+            <span className="title-gothic text-xl tabular">
+              <CountUp value={byStatus[status]} />
+            </span>
             <span className="label-caps hidden text-[0.65rem] text-fg-muted xl:inline">
               {label}
             </span>
@@ -130,11 +133,13 @@ function TypeTally({ byType }: { byType: Record<GlitchType, number> }) {
             <span className="truncate text-fg">{label}</span>
             <span className="h-2 overflow-hidden rounded-full bg-field">
               <span
-                className="block h-full rounded-full transition-[width] duration-700 ease-out-expo"
+                className="bar-grow block h-full rounded-full transition-[width] duration-700 ease-out-expo"
                 style={{ width: `${(count / max) * 100}%`, background: color }}
               />
             </span>
-            <span className="title-gothic text-right text-xl tabular">{count}</span>
+            <span className="title-gothic text-right text-xl tabular">
+              <CountUp value={count} />
+            </span>
           </li>
         )
       })}

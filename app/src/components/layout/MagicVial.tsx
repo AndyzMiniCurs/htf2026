@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { CountUp } from '#/components/ui/CountUp.tsx'
 import { cx } from '#/components/ui/cx.ts'
 
 /** Achrona's magic level as a glowing mana vial. Below 40% the liquid turns ember. */
@@ -43,7 +44,7 @@ export function MagicVial({ level, compact }: { level: number; compact?: boolean
         </div>
       </div>
       <span className={cx('title-gothic w-14 text-right text-2xl tabular', low && 'text-ember')}>
-        {pct}%
+        <CountUp value={pct} />%
       </span>
     </div>
   )

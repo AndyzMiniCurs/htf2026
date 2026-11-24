@@ -31,7 +31,7 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
         // A click on the backdrop lands on the dialog element itself.
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl border border-line-strong bg-panel p-0 text-fg shadow-(--shadow) backdrop:bg-[rgb(8_4_14/0.7)] backdrop:backdrop-blur-sm open:animate-[dialog-in_320ms_var(--ease-out-expo)]"
+      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl border border-line-strong bg-panel p-0 text-fg shadow-(--shadow) backdrop:bg-[rgb(8_4_14/0.7)] backdrop:backdrop-blur-sm dialog-motion"
     >
       <header className="flex items-center justify-between gap-3 border-b border-line py-3 pr-2 pl-6">
         <h2 className="title-gothic text-2xl">{title}</h2>

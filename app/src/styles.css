@@ -510,6 +510,85 @@ html {
   }
 }
 
+/* Bars fill from empty when they arrive; later changes ride their width transition. */
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 900ms 150ms var(--ease-out-expo) both;
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Hall of Fame: podium pillars rise out of the floor, then the crown settles on the champion. */
+.pillar-rise {
+  transform-origin: bottom;
+  animation: pillar-rise 700ms var(--ease-out-expo) both;
+}
+@keyframes pillar-rise {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+.crown-drop {
+  animation: crown-drop 600ms 620ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+@keyframes crown-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) rotate(-12deg) scale(0.8);
+  }
+}
+
+/* Rows of a ranking or list arriving as a list (delay set inline, capped by the caller). */
+.row-in {
+  animation: page-rise 420ms var(--ease-out-expo) both;
+}
+
+/* Native dialogs: rise in, and sink out instead of vanishing. */
+.dialog-motion {
+  transition:
+    opacity 180ms ease-out,
+    translate 180ms ease-out,
+    scale 180ms ease-out,
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+  opacity: 0;
+  translate: 0 8px;
+  scale: 0.98;
+}
+.dialog-motion[open] {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  transition-duration: 320ms;
+  transition-timing-function: var(--ease-out-expo);
+}
+@starting-style {
+  .dialog-motion[open] {
+    opacity: 0;
+    translate: 0 14px;
+    scale: 0.97;
+  }
+}
+.dialog-motion::backdrop {
+  transition:
+    opacity 220ms ease-out,
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+  opacity: 0;
+}
+.dialog-motion[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  .dialog-motion[open]::backdrop {
+    opacity: 0;
+  }
+}
+
 /* Day and night: the new sky washes in as a circle from where the guardian tapped. */
 ::view-transition-old(root),
 ::view-transition-new(root) {

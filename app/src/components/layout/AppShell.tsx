@@ -96,10 +96,12 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
           {me?.role === 'commander' && <LockdownControl />}
           <Link
             to="/echoes/new"
-            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm whitespace-nowrap text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-[background-color,transform] duration-200 ease-out-expo hover:bg-royal-hi active:scale-[0.97] lg:inline-flex"
+            aria-label="Report an echo"
+            className="label-caps hidden h-11 min-w-11 items-center justify-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-3 text-sm xl:px-5 whitespace-nowrap text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-[background-color,transform] duration-200 ease-out-expo hover:bg-royal-hi active:scale-[0.97] lg:inline-flex"
           >
             <HornIcon className="size-5" />
-            Report an echo
+            {/* Icon only on small desktops and projectors, where the HUD runs out of room. */}
+            <span className="hidden xl:inline">Report an echo</span>
           </Link>
           {me && <GuardianMenu me={me} />}
         </div>

@@ -11,6 +11,7 @@ import {
   YAxis,
 } from 'recharts'
 import { Panel } from '#/components/ui/Panel.tsx'
+import { CountUp } from '#/components/ui/CountUp.tsx'
 import { steepestDrop } from './drop.ts'
 import type { SensorId, SensorSeries } from '#/lib/monitoring.ts'
 
@@ -43,7 +44,7 @@ export function SensorChart({ series }: { series: SensorSeries }) {
       actions={
         <span className="flex items-baseline gap-1.5">
           <span className="title-gothic text-3xl tabular">
-            {latest ? latest.value.toFixed(1) : '–'}
+            {latest ? <CountUp value={latest.value} decimals={1} /> : '–'}
           </span>
           <span className="text-sm text-fg-muted">{series.unit}</span>
         </span>
