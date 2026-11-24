@@ -4,7 +4,6 @@ import { motion, useReducedMotion } from 'motion/react'
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { Button } from '#/components/ui/Button.tsx'
 import { Panel } from '#/components/ui/Panel.tsx'
-import { cx } from '#/components/ui/cx.ts'
 import { askAssistant } from '#/lib/assistant.functions.ts'
 import { reportEcho } from '#/lib/echoes.functions.ts'
 import { getErrorCode } from '#/lib/errors.ts'
@@ -176,7 +175,7 @@ function OraclePage() {
         className="flex h-[calc(100dvh-25rem)] min-h-[19rem] flex-col lg:h-[calc(100dvh-16rem)]"
         bodyClassName="flex min-h-0 flex-1 flex-col"
       >
-        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6" aria-live="polite">
+        <div className="diary flex-1 overflow-y-auto px-5 py-5 sm:px-8" aria-live="polite">
           {messages.length === 0 && <Welcome />}
           <ol className="flex flex-col gap-4">
             {messages.map((m) => (
@@ -230,14 +229,14 @@ function OraclePage() {
               maxLength={500}
               autoComplete="off"
               enterKeyHint="send"
-              placeholder="Ask the Oracle…"
-              className="h-12 min-w-0 flex-1 rounded-full border border-line bg-field px-5 text-base text-fg transition-[border-color,box-shadow] duration-200 placeholder:text-fg-faint focus:border-royal-hi focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--royal-hi)_35%,transparent)] focus:outline-none"
+              placeholder="Write to the Oracle…"
+              className="diary-hand h-12 min-w-0 flex-1 border-b-2 border-line-strong bg-transparent px-1 text-gold-hi transition-[border-color] duration-200 placeholder:text-fg-faint focus:border-gold focus:outline-none"
             />
             <button
               type="submit"
               aria-label="Ask"
               disabled={pending || !question.trim()}
-              className="grid size-12 shrink-0 place-items-center rounded-full bg-royal text-on-accent transition-[background-color,transform,opacity] duration-200 ease-out-expo hover:bg-royal-hi active:scale-90 disabled:opacity-45"
+              className="grid size-12 shrink-0 place-items-center rounded-full bg-royal text-on-accent transition-[background-color,transform,opacity] hover:bg-royal-hi duration-200 ease-out-expo active:scale-90 disabled:opacity-45"
             >
               <SendHorizontal aria-hidden className="size-5" />
             </button>
@@ -248,17 +247,28 @@ function OraclePage() {
   )
 }
 
+/** The orb sits in a dark, gilt-ringed medallion so it reads as part of the realm's iconography. */
+function OrbMedallion({ className }: { className: string }) {
+  return (
+    <span
+      className={`grid shrink-0 place-items-center rounded-full border-2 border-gold/70 bg-[radial-gradient(circle,var(--ground-2),var(--ground))] shadow-[0_0_32px_-6px_var(--royal-hi),inset_0_0_14px_rgb(0_0_0/0.6)] ${className}`}
+    >
+      <img src="/icons/realm/oracle-orb.webp" alt="" className="h-[72%] w-auto" />
+    </span>
+  )
+}
+
 function Welcome() {
+  const reduce = useReducedMotion()
   return (
     <div className="mx-auto mb-6 flex max-w-md flex-col items-center gap-3 text-center">
-      <img
-        src="/icons/realm/oracle.webp"
-        alt=""
-        width={96}
-        height={96}
-        className="size-24 rounded-2xl shadow-[0_0_40px_-8px_var(--royal-hi)]"
-      />
-      <p className="font-serif text-lg text-fg">
+      <motion.div
+        animate={reduce ? undefined : { y: [0, -6, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <OrbMedallion className="size-36" />
+      </motion.div>
+      <p className="diary-hand text-gold-hi">
         “Ask, guardian. I see every echo, every rift, every guardian at their post.”
       </p>
     </div>
@@ -276,18 +286,15 @@ function Bubble({
 }) {
   if (message.from === 'guardian') {
     return (
-      <p className="ml-auto w-fit max-w-[80%] rounded-2xl rounded-br-sm bg-royal px-4 py-2.5 text-on-accent">
-        {message.text}
+      <p className="diary-hand ml-auto w-fit max-w-[85%] text-right text-royal-hi">
+        <Ink text={message.text} />
       </p>
     )
   }
   if (message.from === 'error') {
     return (
-      <p
-        role="alert"
-        className="w-fit max-w-[80%] rounded-2xl border border-ember/60 bg-ember/10 px-4 py-2.5 text-fg"
-      >
-        {message.text}
+      <p role="alert" className="diary-hand text-ember">
+        <Ink text={message.text} />
       </p>
     )
   }
@@ -301,63 +308,52 @@ function Bubble({
   const { answer, actionState } = message
   const action = answer.action
   return (
-    <div className="flex max-w-[88%] gap-3">
-      <img
-        src="/icons/realm/oracle.webp"
-        alt=""
-        width={36}
-        height={36}
-        className="size-9 shrink-0 rounded-lg"
-      />
-      <div className="flex flex-col gap-1.5">
-        <p
-          className={cx(
-            'w-fit rounded-2xl rounded-tl-sm border px-4 py-2.5 font-serif text-[1.02rem] leading-relaxed text-fg',
-            answer.intent === 'unknown'
-              ? 'border-line bg-ground-2'
-              : 'border-line-strong bg-panel-hi',
-          )}
+    <div className="flex max-w-[92%] flex-col gap-1.5">
+      <p className="diary-hand text-gold-hi">
+        <LinkedText text={answer.text} glitchIds={answer.glitchIds} />
+      </p>
+      {action && actionState !== 'settled' && (
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label="Confirm the Oracle's proposal"
         >
-          <LinkedText text={answer.text} glitchIds={answer.glitchIds} />
-        </p>
-        {action && actionState !== 'settled' && (
-          <div
-            className="flex flex-wrap gap-2"
-            role="group"
-            aria-label="Confirm the Oracle's proposal"
+          <Button
+            variant={action.kind === 'lockdown' ? 'curse' : 'primary'}
+            size="sm"
+            icon={<Check aria-hidden className="size-4" />}
+            loading={actionState === 'running'}
+            onClick={() => onConfirm(message.id, action)}
           >
-            <Button
-              variant={action.kind === 'lockdown' ? 'curse' : 'primary'}
-              size="sm"
-              icon={<Check aria-hidden className="size-4" />}
-              loading={actionState === 'running'}
-              onClick={() => onConfirm(message.id, action)}
-            >
-              Confirm
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={<X aria-hidden className="size-4" />}
-              disabled={actionState === 'running'}
-              onClick={() => onCancel(message.id)}
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
-        <span className="flex items-center gap-1.5 text-xs text-fg-faint">
-          <Brain aria-hidden className="size-3.5 text-curse-hi" />
-          Understood as: {INTENT_LABEL[answer.intent]}
-        </span>
-      </div>
+            Confirm
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<X aria-hidden className="size-4" />}
+            disabled={actionState === 'running'}
+            onClick={() => onCancel(message.id)}
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
+      <span className="flex items-center gap-1.5 text-xs text-fg-faint">
+        <Brain aria-hidden className="size-3.5" />
+        Understood as: {INTENT_LABEL[answer.intent]}
+      </span>
     </div>
   )
 }
 
+/** Writes plain text out in ink, word by word. */
+function Ink({ text }: { text: string }) {
+  return <LinkedText text={text} glitchIds={[]} />
+}
+
 /**
  * Turns the glitch ids the answer names into links to their pages, and lets the answer write
- * itself word by word. The whole text is in the DOM at once, so screen readers get it whole.
+ * itself in ink, word by word. The whole text is in the DOM at once, so screen readers get it whole.
  */
 function LinkedText({ text, glitchIds }: { text: string; glitchIds: Array<string> }) {
   const parts =
@@ -366,11 +362,11 @@ function LinkedText({ text, glitchIds }: { text: string; glitchIds: Array<string
       : text.split(
           new RegExp(`(${glitchIds.map((id) => id.replace(/[-]/g, '\\-')).join('|')})`, 'g'),
         )
-  // Long answers write faster, so none takes more than about 1.4 s to finish.
-  const step = Math.min(28, 1400 / Math.max(1, text.split(/\s+/).length))
+  // Long answers write faster, so none takes more than about 2.4 s to finish.
+  const step = Math.min(90, 2400 / Math.max(1, text.split(/\s+/).length))
   let word = 0
   const reveal = (key: string, children: ReactNode) => (
-    <span key={key} className="word-in" style={{ animationDelay: `${word++ * step}ms` }}>
+    <span key={key} className="ink-in" style={{ animationDelay: `${word++ * step}ms` }}>
       {children}
     </span>
   )
@@ -383,7 +379,7 @@ function LinkedText({ text, glitchIds }: { text: string; glitchIds: Array<string
             <Link
               to="/glitches/$glitchId"
               params={{ glitchId: part }}
-              className="font-gothic font-bold text-gold-hi underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
+              className="underline decoration-gold/50 underline-offset-4 hover:decoration-gold"
             >
               {part}
             </Link>,
@@ -404,23 +400,13 @@ function Thinking() {
   const reduce = useReducedMotion()
   return (
     <div className="flex items-center gap-3" aria-label="The Oracle is reading the records">
-      <img
-        src="/icons/realm/oracle.webp"
-        alt=""
-        width={36}
-        height={36}
-        className="size-9 rounded-lg"
-      />
-      <span className="flex gap-1.5 rounded-2xl border border-line-strong bg-panel-hi px-4 py-3.5">
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            className="size-2 rounded-full bg-royal-hi"
-            animate={reduce ? undefined : { opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
-          />
-        ))}
-      </span>
+      <motion.div
+        animate={reduce ? undefined : { scale: [1, 1.1, 1] }}
+        transition={{ duration: 1.6, repeat: Infinity }}
+      >
+        <OrbMedallion className="size-12" />
+      </motion.div>
+      <span className="diary-hand text-fg-muted">The ink is gathering…</span>
     </div>
   )
 }

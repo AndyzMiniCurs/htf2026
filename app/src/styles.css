@@ -5,6 +5,7 @@
 @import '@fontsource/alegreya-sans/700.css';
 @import '@fontsource/alegreya/400.css';
 @import '@fontsource/alegreya/700.css';
+@import '@fontsource/la-belle-aurore/400.css';
 @import 'tailwindcss';
 
 /* Night is the default world; data-theme="light" is Achrona by day; data-lockdown overrides both. */
@@ -13,6 +14,7 @@
 @theme inline {
   --font-sans: 'Alegreya Sans', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Alegreya', ui-serif, Georgia, serif;
+  --font-hand: 'La Belle Aurore', 'Alegreya', cursive;
   --font-gothic: 'Grenze Gotisch', 'Alegreya', serif;
 
   --color-ground: var(--ground);
@@ -478,14 +480,32 @@ html {
   }
 }
 
-/* Oracle answers write themselves word by word, each word surfacing out of mist. */
-.word-in {
-  animation: word-in 360ms var(--ease-out-expo) both;
+/* The Oracle's diary: handwriting that surfaces as glowing ink on the panel, wiped in left to right. */
+.diary {
+  --paper-line: 2.4rem;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--paper-line) - 1px),
+    color-mix(in oklab, var(--gold) 14%, transparent) calc(var(--paper-line) - 1px) var(--paper-line)
+  );
+  background-attachment: local;
 }
-@keyframes word-in {
+.diary-hand {
+  font-family: var(--font-hand);
+  font-size: 1.45rem;
+  line-height: var(--paper-line);
+}
+.ink-in {
+  display: inline-block;
+  animation: ink-in 520ms var(--ease-out-expo) both;
+}
+@keyframes ink-in {
   from {
-    opacity: 0;
-    filter: blur(3px);
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.4;
+  }
+  to {
+    clip-path: inset(0 -0.3em 0 0);
   }
 }
 
