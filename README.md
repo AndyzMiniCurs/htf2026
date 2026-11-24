@@ -12,6 +12,7 @@ Stack: TypeScript · React · TanStack Start (Router, Query, Table) · PostgreSQ
 | `app/` | TanStack Start app (from the Optis starter) |
 | `openspec/` | Specs and change proposals (OpenSpec) |
 | `docker-compose.yml` | Postgres (+ the app with `--profile full`) |
+| `AGENTS.md` / `CLAUDE.md` | Architecture and workflow rules for us and our coding agents |
 
 ## Run
 
@@ -32,7 +33,8 @@ Everything in Docker: `docker compose --profile full up --build`
 | Backend | `app/src/db/**`, `app/src/lib/*.functions.ts` (server functions) |
 | Frontend | `app/src/routes/**`, `app/src/components/**`, styles |
 
-Contract = shared types in `app/src/lib/<domain>.ts` + server function signatures in `openspec/specs`. Agree on them first, then build in parallel.
+Roel = backend `[BE]`, Andu = frontend `[FE]`. Checklist: [`openspec/changes/guardians-mission-control/tasks.md`](openspec/changes/guardians-mission-control/tasks.md).
+Contract = shared types in `app/src/lib/<domain>.ts` + the server function table in `design.md` (D12). Backend publishes it first (task 1.2-1.3), frontend builds on the stubs.
 
 ## OpenSpec workflow
 

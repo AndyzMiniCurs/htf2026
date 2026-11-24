@@ -37,9 +37,10 @@ Out of scope: email/SMS delivery, native mobile apps, multi-instance deployment 
 
 ## Impact
 
-- `app/src/db/schema.ts`: new tables `guardians`, `echoes`, `sensor_readings`, `notification_prefs`, `app_state`; `glitches` gains `type`, `location`, `assigned_guardian_id`, `runbook`, `merged_into`.
+- `app/src/db/schema.ts`: new tables `guardians`, `sessions`, `echoes`, `echo_images`, `sensor_readings`, `notification_prefs`, `app_state`; `glitches` gains `type`, `location`, `assigned_guardian_id`, `runbook`, `merged_into`.
 - New server layer `app/src/server/**` (repositories, services, AI, event bus) and server functions in `app/src/lib/*.functions.ts`.
-- New routes: `/login`, `/` (dashboard), `/glitches`, `/glitches/$glitchId`, `/report`, `/map`, `/sensors`, `/guardians`, `/leaderboard`, `/assistant`, `/api/events` (SSE).
-- New dependencies: `zod` (input validation), `vitest` (tests), `recharts` (charts), `nsfwjs` + `@tensorflow/tfjs` (image moderation). Jev is called over HTTP with `fetch`, no SDK.
-- New env vars: `SESSION_SECRET`, `TYPESAFE_API_KEY` (AI features switch off cleanly without it).
-- `docker-compose.yml` passes the new env vars to the app.
+- New routes: `/login`, `/` (dashboard), `/glitches`, `/glitches/$glitchId`, `/echoes/new`, `/map`, `/sensors`, `/guardians`, `/leaderboard`, `/assistant`, `/council-report`, `/settings`, `/api/events` (SSE), `/api/images/$echoId`.
+- New dependencies: `zod` (input validation), `vitest` (tests), `eslint` + `prettier` (code quality), `recharts` (charts), `nsfwjs` + `@tensorflow/tfjs` (image moderation). Jev is called over HTTP with `fetch`, no SDK.
+- New env var: `TYPESAFE_API_KEY` (AI features switch off cleanly without it). Sessions are stored in Postgres, so no session secret is needed.
+- `docker-compose.yml` passes `TYPESAFE_API_KEY` to the app.
+- New root `CLAUDE.md` / `AGENTS.md` so every teammate's coding agent follows the same architecture rules.
