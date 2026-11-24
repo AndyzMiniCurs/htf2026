@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - 'feature/**'
+      - 'fix/**'
+      - 'chore/**'
   pull_request:
 
 permissions:
@@ -17,7 +19,8 @@ jobs:
       run:
         working-directory: app
     services:
-      postgres:
+      # Same image as docker-compose.yml, so the integration tests run instead of skipping.
+      db:
         image: postgres:17-alpine
         env:
           POSTGRES_USER: htf
@@ -26,7 +29,9 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U htf -d htf" --health-interval 2s --health-retries 15
+          --health-cmd "pg_isready -U htf -d htf"
+          --health-interval 2s
+          --health-retries 15
     env:
       DATABASE_URL: postgresql://htf:htf@localhost:5432/htf
     steps:
@@ -42,10 +47,13 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run typecheck
-      - name: Push schema
-        run: npm run db:push
+      - name: Lint
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: Database schema
+        run: npm run db:init
       - name: Test
         run: npm test
-      # Lint stays local for now: typescript-eslint crashes on TypeScript 6 in require-await.
       - name: Build
         run: npm run build
