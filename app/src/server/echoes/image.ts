@@ -1,7 +1,8 @@
-import { ECHO_IMAGE_MAX_BYTES, type EchoImageMime } from '#/lib/echo.ts'
+import { ECHO_IMAGE_MAX_BYTES } from '#/lib/echo.ts'
 import { AppError } from '#/lib/errors.ts'
+import type { EchoImageMime } from '#/lib/echo.ts'
 
-const startsWith = (bytes: Uint8Array, signature: number[], offset = 0) =>
+const startsWith = (bytes: Uint8Array, signature: Array<number>, offset = 0) =>
   signature.every((b, i) => bytes[offset + i] === b)
 
 /** The real type from the file's first bytes; the client-sent mime type is not trusted. */

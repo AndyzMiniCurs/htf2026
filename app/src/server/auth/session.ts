@@ -5,8 +5,8 @@ import {
   getRequestProtocol,
   setCookie,
 } from '@tanstack/react-start/server'
-import type { Guardian } from '#/lib/guardian.ts'
 import * as repo from './session.repository.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 export const SESSION_COOKIE = 'htf_session'
 const SESSION_HOURS = 12

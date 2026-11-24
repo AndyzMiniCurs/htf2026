@@ -1,6 +1,7 @@
 import { createSerializationAdapter } from '@tanstack/react-router'
 import { createStart } from '@tanstack/react-start'
-import { AppError, type ErrorCode } from '#/lib/errors.ts'
+import { AppError } from '#/lib/errors.ts'
+import type { ErrorCode } from '#/lib/errors.ts'
 
 // Without this, errors thrown by server functions reach the client as plain Errors without `code`.
 const appErrorAdapter = createSerializationAdapter({

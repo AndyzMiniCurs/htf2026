@@ -85,8 +85,13 @@ export function createJevClassifier({
       )
       const answers = await ask({ question, ...state }, questions)
       if (!answers) return null
-      const scores = items.map((_, i) => noulAnswer.safeParse(answers[`i${i}`]))
-      return scores.every((s) => s.success) ? scores.map((s) => s.data?.noul ?? 0) : null
+      const scores: Array<number> = []
+      for (const [i] of items.entries()) {
+        const answer = noulAnswer.safeParse(answers[`i${i}`])
+        if (!answer.success) return null
+        scores.push(answer.data.noul)
+      }
+      return scores
     },
   }
 }

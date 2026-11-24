@@ -7,13 +7,11 @@ import {
   glitchQuerySchema,
   mergeGlitchInput,
   setRunbookStepInput,
-  type GlitchDetail,
-  type GlitchListItem,
-  type RunbookStep,
 } from '#/lib/glitch.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
 import * as glitches from '#/server/glitches/glitches.service.ts'
+import type { GlitchDetail, GlitchListItem, RunbookStep } from '#/lib/glitch.ts'
 
 function fixtureItem(glitchId: string): GlitchListItem {
   const item = fixtureGlitches.find((g) => g.glitchId === glitchId)
@@ -24,7 +22,7 @@ function fixtureItem(glitchId: string): GlitchListItem {
 export const getGlitches = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
   .validator(validate(glitchQuerySchema))
-  .handler(async ({ data }): Promise<GlitchListItem[]> => glitches.getGlitches(data))
+  .handler(async ({ data }): Promise<Array<GlitchListItem>> => glitches.getGlitches(data))
 
 export const getGlitch = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
@@ -60,7 +58,7 @@ export const mergeGlitch = createServerFn({ method: 'POST' })
 export const setRunbookStep = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .validator(validate(setRunbookStepInput))
-  .handler(async ({ data }): Promise<RunbookStep[]> => {
+  .handler(async ({ data }): Promise<Array<RunbookStep>> => {
     const runbook = fixtureGlitchDetail(data.glitchId)?.runbook ?? []
     return runbook.map((step, i) => (i === data.index ? { ...step, done: data.done } : step))
   })

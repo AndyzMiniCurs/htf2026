@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Guardian } from '#/lib/guardian.ts'
 import * as repo from './guardians.repository.ts'
 import { createGuardian, setGuardianRole } from './guardians.service.ts'
 import { wouldRemoveLastCommander } from './roles.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 vi.mock('./guardians.repository.ts', () => ({
   listGuardians: vi.fn(),
@@ -45,7 +45,7 @@ describe('createGuardian', () => {
     })
 
     expect(created).toEqual({ guardianId: 5, codename: 'Vega', role: 'defender' })
-    const stored = vi.mocked(repo.insertGuardian).mock.calls[0]?.[0]
+    const stored = vi.mocked(repo.insertGuardian).mock.calls.at(0)?.[0]
     expect(stored?.passwordHash).toMatch(/^scrypt\$/)
     expect(JSON.stringify(stored)).not.toContain('vega-2026!')
   })

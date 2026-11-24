@@ -1,9 +1,9 @@
 import { eq, inArray, like, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db } from '#/db/index.ts'
-import { echoes, echoImages, glitches, guardians } from '#/db/schema.ts'
-import type { Guardian } from '#/lib/guardian.ts'
+import { echoImages, echoes, glitches, guardians } from '#/db/schema.ts'
 import { reportEcho } from './echoes.service.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 
 // Integration test of the echo pipeline against the compose Postgres; skipped when it is down.
 const reachable = await db.execute(sql`select 1`).then(
@@ -15,11 +15,11 @@ const png = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 
 
 describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
   let reporter: Guardian
-  const created: string[] = []
+  const created: Array<string> = []
 
   beforeAll(async () => {
     await db.delete(guardians).where(like(guardians.codename, 'echotest-%'))
-    const [row] = await db
+    const rows = await db
       .insert(guardians)
       .values({
         codename: `echotest-${Date.now().toString(36)}`,
@@ -31,6 +31,7 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
         codename: guardians.codename,
         role: guardians.role,
       })
+    const row = rows.at(0)
     if (!row) throw new Error('no guardian')
     reporter = row
   })
@@ -94,10 +95,9 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     created.push(result.glitchId)
 
     expect(result.echo.imageUrl).toBe(`/api/images/${result.echo.echoId}`)
-    const [image] = await db
-      .select()
-      .from(echoImages)
-      .where(eq(echoImages.echoId, result.echo.echoId))
+    const image = (
+      await db.select().from(echoImages).where(eq(echoImages.echoId, result.echo.echoId))
+    ).at(0)
     expect(image?.mime).toBe('image/png')
     expect(Uint8Array.from(image?.bytes ?? [])).toEqual(png)
   })

@@ -11,7 +11,7 @@ const reachable = await db.execute(sql`select 1`).then(
 )
 
 const token = `zq${Date.now().toString(36)}`
-const ids = (items: { glitchId: string }[]) => items.map((g) => g.glitchId)
+const ids = (items: Array<{ glitchId: string }>) => items.map((g) => g.glitchId)
 
 describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
   let guardianId = 0
@@ -23,11 +23,11 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
 
   beforeAll(async () => {
     await cleanup()
-    const [guardian] = await db
+    const inserted = await db
       .insert(guardians)
       .values({ codename: `test-${token}`, role: 'defender', passwordHash: 'x' })
       .returning()
-    guardianId = guardian?.guardianId ?? 0
+    guardianId = inserted.at(0)?.guardianId ?? 0
     await db.insert(glitches).values([
       {
         glitchId: 'GL-9701',

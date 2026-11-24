@@ -1,8 +1,8 @@
 import { AppError } from '#/lib/errors.ts'
-import type { GlitchDetail, GlitchListItem, GlitchQuery } from '#/lib/glitch.ts'
 import * as repo from './glitches.repository.ts'
+import type { GlitchDetail, GlitchListItem, GlitchQuery } from '#/lib/glitch.ts'
 
-export async function getGlitches(query: GlitchQuery): Promise<GlitchListItem[]> {
+export async function getGlitches(query: GlitchQuery): Promise<Array<GlitchListItem>> {
   return repo.listGlitches(query)
 }
 

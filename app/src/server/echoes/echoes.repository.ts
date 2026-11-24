@@ -1,6 +1,6 @@
 import { eq, sql } from 'drizzle-orm'
 import { db } from '#/db/index.ts'
-import { echoes, echoImages, glitches, glitchSeq } from '#/db/schema.ts'
+import { echoImages, echoes, glitchSeq, glitches } from '#/db/schema.ts'
 import type { EchoImageMime } from '#/lib/echo.ts'
 import type { Location } from '#/lib/glitch.ts'
 
@@ -15,7 +15,7 @@ export type NewEcho = {
 /** Next id from `glitch_seq`, formatted `GL-0200`. */
 async function nextGlitchId(tx: Pick<typeof db, 'execute'>): Promise<string> {
   const result = await tx.execute<{ n: string }>(sql`select nextval(${glitchSeq.seqName}) as n`)
-  return `GL-${String(result.rows[0]?.n).padStart(4, '0')}`
+  return `GL-${String(result.rows.at(0)?.n).padStart(4, '0')}`
 }
 
 /** Creates a `LEAKED` glitch from the echo, the echo and its image, all in one transaction. */
@@ -33,7 +33,7 @@ export async function insertEchoWithNewGlitch(
       locationY: echo.location?.y ?? null,
       source: 'echo',
     })
-    const [row] = await tx
+    const rows = await tx
       .insert(echoes)
       .values({
         glitchId,
@@ -45,6 +45,7 @@ export async function insertEchoWithNewGlitch(
         hasImage: echo.image !== null,
       })
       .returning({ echoId: echoes.echoId })
+    const row = rows.at(0)
     if (!row) throw new Error('Insert returned no echo')
     if (echo.image) await tx.insert(echoImages).values({ echoId: row.echoId, ...echo.image })
     return { glitchId, echoId: row.echoId }
@@ -54,9 +55,9 @@ export async function insertEchoWithNewGlitch(
 export async function findEchoImage(
   echoId: number,
 ): Promise<{ mime: string; bytes: Buffer } | null> {
-  const [row] = await db
+  const rows = await db
     .select({ mime: echoImages.mime, bytes: echoImages.bytes })
     .from(echoImages)
     .where(eq(echoImages.echoId, echoId))
-  return row ?? null
+  return rows.at(0) ?? null
 }

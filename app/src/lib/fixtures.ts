@@ -1,18 +1,17 @@
 // Stub data for the server functions until each one gets its real service (design D13).
+import { SENSORS, SENSOR_IDS } from './monitoring.ts'
+import type {
+  Dashboard,
+  LeaderboardEntry,
+  NotificationPrefs,
+  Report,
+  SensorSeries,
+} from './monitoring.ts'
 import type { AssistantAnswer } from './assistant.ts'
 import type { Echo, GlitchDetail, GlitchListItem } from './glitch.ts'
 import type { Guardian } from './guardian.ts'
-import {
-  SENSOR_IDS,
-  SENSORS,
-  type Dashboard,
-  type LeaderboardEntry,
-  type NotificationPrefs,
-  type Report,
-  type SensorSeries,
-} from './monitoring.ts'
 
-export const fixtureGuardians: Guardian[] = [
+export const fixtureGuardians: Array<Guardian> = [
   { guardianId: 1, codename: 'Aegis', role: 'commander' },
   { guardianId: 2, codename: 'Nova', role: 'defender' },
   { guardianId: 3, codename: 'Orion', role: 'defender' },
@@ -23,7 +22,7 @@ const [aegis, nova, orion, lyra] = fixtureGuardians as [Guardian, Guardian, Guar
 
 export const fixtureMe: Guardian = aegis
 
-export const fixtureGlitches: GlitchListItem[] = [
+export const fixtureGlitches: Array<GlitchListItem> = [
   {
     glitchId: 'GL-0142',
     status: 'LEAKED',
@@ -70,7 +69,7 @@ export const fixtureGlitches: GlitchListItem[] = [
   },
 ]
 
-export const fixtureEchoes: Echo[] = [
+export const fixtureEchoes: Array<Echo> = [
   {
     echoId: 1,
     glitchId: 'GL-0142',
@@ -139,7 +138,7 @@ export const fixtureDashboard: Dashboard = {
 }
 
 /** 15 minutes of readings every 3 s, ending now. */
-export function fixtureSensorSeries(minutes = 15): SensorSeries[] {
+export function fixtureSensorSeries(minutes = 15): Array<SensorSeries> {
   const now = Date.now()
   const count = Math.floor((minutes * 60) / 3)
   return SENSOR_IDS.map((sensorId, s) => ({
@@ -152,7 +151,7 @@ export function fixtureSensorSeries(minutes = 15): SensorSeries[] {
   }))
 }
 
-export const fixtureLeaderboard: LeaderboardEntry[] = [
+export const fixtureLeaderboard: Array<LeaderboardEntry> = [
   { guardian: orion, fixes: 5, badges: ['first-fix', 'specialist'] },
   { guardian: nova, fixes: 3, badges: ['first-fix', 'rapid-response'] },
   { guardian: lyra, fixes: 1, badges: ['first-fix'] },

@@ -1,8 +1,8 @@
 import { sql } from 'drizzle-orm'
+import { hashPassword } from '../server/auth/password.ts'
 import { db } from './index.ts'
 import { glitches, guardians } from './schema.ts'
 // Relative import: seed runs under plain node, which doesn't resolve the `#/` alias.
-import { hashPassword } from '../server/auth/password.ts'
 
 /** Demo accounts; the passwords are listed in the root README. */
 const demoGuardians = [
@@ -12,7 +12,7 @@ const demoGuardians = [
   { codename: 'Lyra', role: 'defender', password: 'lyra-2026' },
 ] as const
 
-const rows: (typeof glitches.$inferInsert)[] = [
+const rows: Array<typeof glitches.$inferInsert> = [
   {
     glitchId: 'GL-0142',
     status: 'LEAKED',

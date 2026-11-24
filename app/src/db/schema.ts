@@ -1,5 +1,4 @@
 import {
-  type AnyPgColumn,
   boolean,
   customType,
   index,
@@ -11,9 +10,11 @@ import {
   serial,
   text,
 } from 'drizzle-orm/pg-core'
-// Relative imports: drizzle-kit loads this file and doesn't resolve the `#/` alias.
-import { GLITCH_SOURCES, GLITCH_STATUSES, GLITCH_TYPES, type RunbookStep } from '../lib/glitch.ts'
+import { GLITCH_SOURCES, GLITCH_STATUSES, GLITCH_TYPES } from '../lib/glitch.ts'
 import { ROLES } from '../lib/guardian.ts'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
+// Relative imports: drizzle-kit loads this file and doesn't resolve the `#/` alias.
+import type { RunbookStep } from '../lib/glitch.ts'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })
 
@@ -48,7 +49,7 @@ export const glitches = pgTable('glitches', {
   assignedGuardianId: integer('assigned_guardian_id').references(() => guardians.guardianId, {
     onDelete: 'set null',
   }),
-  runbook: jsonb('runbook').$type<{ steps: RunbookStep[] }>(),
+  runbook: jsonb('runbook').$type<{ steps: Array<RunbookStep> }>(),
   mergedInto: text('merged_into').references((): AnyPgColumn => glitches.glitchId),
   fixedAt: text('fixed_at'),
   fixedBy: integer('fixed_by').references(() => guardians.guardianId, { onDelete: 'set null' }),

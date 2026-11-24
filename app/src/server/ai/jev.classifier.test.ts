@@ -11,7 +11,7 @@ describe('jev classifier', () => {
     const fetchMock = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
       json({ model: 'jev-1.13.0', answers: { q: { type: 'noul', noul: 0.92 } } }),
     )
-    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock as typeof fetch })
+    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock })
 
     expect(await jev.yesNo('Does this update say the problem is solved?')).toBe(0.92)
     const [url, init] = fetchMock.mock.calls[0] ?? []
@@ -28,7 +28,7 @@ describe('jev classifier', () => {
         },
       }),
     )
-    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock as typeof fetch })
+    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock })
 
     expect(await jev.choose('Which kind?', ['portal', 'time-anomaly', 'creature'])).toEqual([
       { option: 'time-anomaly', probability: 0.85 },
@@ -39,7 +39,7 @@ describe('jev classifier', () => {
 
   it('scores every item in one request', async () => {
     const fetchMock = vi.fn(async () => json({ answers: { i0: { noul: 0.2 }, i1: { noul: 0.7 } } }))
-    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock as typeof fetch })
+    const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock })
 
     expect(await jev.score('How relevant?', ['a', 'b'])).toEqual([0.2, 0.7])
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -52,7 +52,7 @@ describe('jev classifier', () => {
           init?.signal?.addEventListener('abort', () => reject(init.signal?.reason)),
         ),
     )
-    const jev = createJevClassifier({ apiKey: 'k', fetch: hanging as typeof fetch, timeoutMs: 20 })
+    const jev = createJevClassifier({ apiKey: 'k', fetch: hanging, timeoutMs: 20 })
 
     expect(await jev.yesNo('anything?')).toBeNull()
     expect(await jev.choose('anything?', ['a'])).toBeNull()
@@ -62,12 +62,11 @@ describe('jev classifier', () => {
   it('returns null on an HTTP error or an unexpected answer shape', async () => {
     const unauthorized = createJevClassifier({
       apiKey: 'bad',
-      fetch: (async () =>
-        json({ detail: { error_type: 'authentication_error' } }, 401)) as typeof fetch,
+      fetch: async () => json({ detail: { error_type: 'authentication_error' } }, 401),
     })
     const malformed = createJevClassifier({
       apiKey: 'k',
-      fetch: (async () => json({ answers: { q: { noul: 'yes' } } })) as typeof fetch,
+      fetch: async () => json({ answers: { q: { noul: 'yes' } } }),
     })
 
     expect(await unauthorized.yesNo('x?')).toBeNull()

@@ -1,12 +1,12 @@
 import { AppError } from '#/lib/errors.ts'
-import type { CreateGuardianInput, Guardian, SetGuardianRoleInput } from '#/lib/guardian.ts'
 import { hashPassword } from '../auth/password.ts'
 import * as repo from './guardians.repository.ts'
 import { wouldRemoveLastCommander } from './roles.ts'
+import type { CreateGuardianInput, Guardian, SetGuardianRoleInput } from '#/lib/guardian.ts'
 
 const UNIQUE_VIOLATION = '23505'
 
-export async function listGuardians(): Promise<Guardian[]> {
+export async function listGuardians(): Promise<Array<Guardian>> {
   return repo.listGuardians()
 }
 
