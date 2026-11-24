@@ -56,7 +56,7 @@ Every server function input is a zod schema from `lib/<domain>.ts`, passed to `.
 Keeps the starter's ISO-text timestamps and `GL-0000` text ids.
 - `guardians(guardian_id serial pk, codename text unique, role text enum, password_hash text)`
 - `sessions(token_hash text pk, guardian_id fk, expires_at text)`
-- `glitches` + `type text enum default 'unknown'`, `location_x real null`, `location_y real null`, `assigned_guardian_id fk null`, `runbook jsonb null` (`{steps: {text, done}[]}`), `merged_into text fk null`, `fixed_at text null`, `fixed_by fk null`, `source text enum('echo','prediction','sensor')`, `sensor_id text null`.
+- `glitches` + `type text enum default 'unknown'`, `location_x real null`, `location_y real null`, `assigned_guardian_id fk null`, `runbook jsonb null` (`{steps: {text, done}[]}`), `merged_into text fk null`, `fixed_at text null`, `fixed_by fk null`, `source text enum('echo','prediction')` (prediction = sensor anomaly), `sensor_id text null`.
 - `echoes(echo_id serial pk, glitch_id fk, description, timestamp, reporting_guardian_id fk null (null = system), location_x/y null, grouped_by_ai bool, has_image bool)`
 - `echo_images(echo_id pk fk, mime text, bytes bytea)`
 - `sensor_readings(id serial pk, sensor_id text, value real, timestamp text)` + index `(sensor_id, timestamp)`

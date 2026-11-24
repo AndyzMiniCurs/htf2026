@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { db } from './index.ts'
 import { glitches } from './schema.ts'
 
@@ -10,7 +11,10 @@ const rows: (typeof glitches.$inferInsert)[] = [
 
 // Wipe and refill so the seed can be re-run safely.
 await db.transaction(async (tx) => {
-  await tx.delete(glitches)
+  await tx.execute(sql`truncate table
+    echo_images, echoes, sessions, notification_prefs, sensor_readings, app_state, glitches, guardians
+    restart identity cascade`)
+  await tx.execute(sql`alter sequence glitch_seq restart with 200`)
   await tx.insert(glitches).values(rows)
 })
 await db.$client.end()

@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "db:seed": "node src/db/seed.ts",
     "db:setup": "npm run db:push && npm run db:seed",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",
@@ -27,7 +28,8 @@
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.20",
