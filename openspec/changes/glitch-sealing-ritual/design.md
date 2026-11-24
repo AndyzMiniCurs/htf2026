@@ -17,7 +17,7 @@ See proposal.md for why. Today `StageActions` in `app/src/components/glitches/Gl
 ## Decisions
 
 ### D1. Pure battle machine (`components/battle/battle.ts`)
-State: `{ health, maxHealth, charge, hits, misses, summoned, startedAt, endedAt, phase: 'fighting' | 'won' }`. Actions: `hit(now)`, `miss()`, `summon(now)`. Constants: `maxHealth = 100`, spell damage `8`, summon damage `35`, charge per hit `20` (full at 100, so 5 hits), so a steady player wins in about 8 to 9 hits plus one summon (15 to 25 s at roughly one hit per second; the 40 s ceiling holds even without summoning, about 13 hits). `summon` is a no-op unless `charge >= 100 && !summoned`. Reaching zero health sets `phase: 'won'` and `endedAt`. Unit tests cover damage, charge, the single summon, and that no action changes state after `won`.
+State: `{ health, maxHealth, charge, hits, misses, summoned, startedAt, endedAt, phase: 'fighting' | 'won' }`. Actions: `hit(now)`, `miss()`, `summon(now)`. Constants: `maxHealth = 100`, spell damage `8`, charge per hit `20` (full at 100, so 5 hits). `summon` is a no-op unless `charge >= 100 && !summoned`, and otherwise takes the remaining health to zero: five hits and Claude win the battle; without Claude it takes 13 hits, inside the 40 s ceiling. `combo`/`bestCombo` count hits in a row; a miss resets `combo`. Reaching zero health sets `phase: 'won'` and `endedAt`. Unit tests cover damage, charge, the single summon, and that no action changes state after `won`.
 Why: the rules are where bugs hide; keeping them out of the render loop makes them testable without WebGL.
 
 ### D2. Arena scene (`components/battle/BattleScene.tsx`, lazy)
@@ -40,6 +40,9 @@ No new or changed endpoints. Used as is:
 | Server function | Input | Output |
 |---|---|---|
 | `advanceStatus` (`lib/glitches.functions.ts`) - assignee or commander | `{ glitchId: string }` | `GlitchListItem` |
+
+### D6. Cinematic rework (after the first playtest)
+The first arena read as low budget, so the scene was rebuilt in `components/battle/scene/`: `Arena` (the world's sky, cloud sea and floating island reused, a procedural rune circle that brightens with Claude's charge, rune stones, a local `Environment` light rig so nothing is fetched at pitch time), `GlitchBeast` + `VoxelDragon` (an original voxel wyrm in a world-space tearing shader, with a corrupted heart and RGB data blocks; it bleaches and implodes on victory), `Spells` (homing bolts with trails, blasts, fragments and damage numbers; a hit counts on impact), `ClaudeFinisher` (Claude drops in, faces the camera, code tokens spiral into the dragon, one beam ends it) and `Cinema` (a directed camera: establishing swoop, fight sway, landing close-up, two-shot, orbit; lens aberration, a glitch burst on the strike, film grain). One timeline (`finisher.ts`) drives the scene, the HTML terminal and the rules. The overlay adds film letterbox bars, a title card, a combo counter, a Claude-orange summon button with charge pips and a Claude Code style terminal. A Minecraft model was requested and declined: no third-party game art is used.
 
 ## Risks / Trade-offs
 

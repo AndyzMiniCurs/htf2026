@@ -18,7 +18,7 @@ When a guardian who may advance a `CONTAINING` glitch chooses "Seal the rift", t
 - **THEN** no seal control and no battle is offered
 
 ### Requirement: Creature per glitch kind
-The battle SHALL show the glitch as a creature whose colour, name and title match the glitch's kind, with the glitch id and a health bar starting full.
+The battle SHALL show the glitch as a creature (an original voxel dragon, corrupted by the Desync) whose colour, name and title match the glitch's kind, with the glitch id and a health bar starting full.
 
 #### Scenario: Portal glitch
 - **WHEN** the battle opens for a `portal` glitch
@@ -36,11 +36,11 @@ Weak-point shards SHALL move around the creature. Hitting a shard SHALL cast a s
 - **THEN** health is unchanged and the miss is counted
 
 ### Requirement: Summon the AI familiar
-When the summon meter is full the guardian SHALL be able to summon the AI familiar, Claude, once per battle; the familiar SHALL strike the creature for heavy damage with its own effect.
+When the summon meter is full the guardian SHALL be able to summon the AI familiar, Claude, once per battle. Claude SHALL drop into the arena, pour a stream of code into the creature while a Claude Code style terminal shows the fix being made, and finish the creature in one strike.
 
 #### Scenario: Summon ready
 - **WHEN** the meter is full and the guardian summons
-- **THEN** the familiar appears, strikes, and health drops by the familiar's damage
+- **THEN** Claude lands, the code stream and terminal play, and the beam takes the creature's remaining health to zero
 
 #### Scenario: Meter not full
 - **WHEN** the meter is not full
@@ -81,3 +81,10 @@ A battle SHALL be winnable within 40 seconds of steady play, so it fits the flow
 #### Scenario: Steady play
 - **WHEN** a guardian hits a shard about once per second
 - **THEN** the creature is defeated within 40 seconds
+
+### Requirement: Combo
+Consecutive hits SHALL build a combo shown in the HUD; a miss SHALL reset it, and the best combo SHALL appear on the victory card.
+
+#### Scenario: Combo broken
+- **WHEN** a guardian lands three spells and then misses
+- **THEN** the HUD combo resets and the victory card later shows a best combo of at least 3

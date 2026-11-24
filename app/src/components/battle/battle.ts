@@ -1,8 +1,7 @@
-/** Tuning for the sealing battle (design D1): about 8-9 hits plus one summon to win. */
+/** Tuning for the sealing battle (design D1): five hits charge Claude, whose strike finishes the glitch. */
 export const BATTLE = {
   maxHealth: 100,
   spellDamage: 8,
-  summonDamage: 35,
   chargePerHit: 20,
   fullCharge: 100,
 } as const
@@ -15,6 +14,9 @@ export type BattleState = {
   charge: number
   hits: number
   misses: number
+  /** Hits in a row since the last miss. */
+  combo: number
+  bestCombo: number
   summoned: boolean
   startedAt: number
   endedAt: number | null
@@ -27,6 +29,8 @@ export function startBattle(now: number): BattleState {
     charge: 0,
     hits: 0,
     misses: 0,
+    combo: 0,
+    bestCombo: 0,
     summoned: false,
     startedAt: now,
     endedAt: null,
@@ -42,27 +46,30 @@ function damage(state: BattleState, amount: number, now: number): BattleState {
 /** A spell that struck a weak point. */
 export function hit(state: BattleState, now: number): BattleState {
   if (state.phase === 'won') return state
+  const combo = state.combo + 1
   const charged = {
     ...state,
     hits: state.hits + 1,
+    combo,
+    bestCombo: Math.max(state.bestCombo, combo),
     charge: Math.min(BATTLE.fullCharge, state.charge + BATTLE.chargePerHit),
   }
   return damage(charged, BATTLE.spellDamage, now)
 }
 
-/** A cast that hit nothing. */
+/** A cast that hit nothing breaks the combo. */
 export function miss(state: BattleState): BattleState {
-  return state.phase === 'won' ? state : { ...state, misses: state.misses + 1 }
+  return state.phase === 'won' ? state : { ...state, misses: state.misses + 1, combo: 0 }
 }
 
 export function canSummon(state: BattleState): boolean {
   return state.phase === 'fighting' && !state.summoned && state.charge >= BATTLE.fullCharge
 }
 
-/** Claude's strike: once per battle, only at full charge. */
+/** Claude's strike: once per battle, only at full charge, and it finishes the glitch in one hit. */
 export function summon(state: BattleState, now: number): BattleState {
   if (!canSummon(state)) return state
-  return damage({ ...state, summoned: true, charge: 0 }, BATTLE.summonDamage, now)
+  return damage({ ...state, summoned: true, charge: 0 }, state.health, now)
 }
 
 /** Seconds from the first frame to victory (or to now while fighting). */

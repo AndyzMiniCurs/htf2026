@@ -10,7 +10,7 @@ const hits = (state: BattleState, n: number) => {
 
 describe('sealing battle', () => {
   it('starts at full health with no charge', () => {
-    expect(startBattle(0)).toMatchObject({ health: 100, charge: 0, phase: 'fighting' })
+    expect(startBattle(0)).toMatchObject({ health: 100, charge: 0, combo: 0, phase: 'fighting' })
   })
 
   it('takes spell damage and charges on each hit', () => {
@@ -22,8 +22,10 @@ describe('sealing battle', () => {
     })
   })
 
-  it('counts misses without damage', () => {
-    expect(miss(startBattle(0))).toMatchObject({ health: 100, misses: 1 })
+  it('counts misses without damage and breaks the combo', () => {
+    const s = miss(hits(startBattle(0), 3))
+    expect(s).toMatchObject({ health: 100 - 3 * BATTLE.spellDamage, misses: 1, combo: 0 })
+    expect(s.bestCombo).toBe(3)
   })
 
   it('refuses to summon before the meter is full', () => {
@@ -32,22 +34,18 @@ describe('sealing battle', () => {
     expect(summon(s, 9000)).toBe(s)
   })
 
-  it('charges fully in five hits and lets Claude strike once', () => {
+  it('charges fully in five hits and lets Claude finish the glitch in one strike', () => {
     const charged = hits(startBattle(0), 5)
     expect(canSummon(charged)).toBe(true)
     const struck = summon(charged, 6000)
-    expect(struck.health).toBe(charged.health - BATTLE.summonDamage)
-    expect(struck.summoned).toBe(true)
-    // Even with a full meter again, Claude comes only once.
-    expect(canSummon(hits(struck, 5))).toBe(false)
+    expect(struck).toMatchObject({ health: 0, phase: 'won', summoned: true, endedAt: 6000 })
   })
 
-  it('is won at zero health and then ignores further actions', () => {
-    const won = summon(hits(startBattle(0), 9), 10_000)
-    expect(won.phase).toBe('won')
-    expect(won.health).toBe(0)
+  it('ignores every action after victory', () => {
+    const won = summon(hits(startBattle(0), 5), 10_000)
     expect(hit(won, 11_000)).toBe(won)
     expect(miss(won)).toBe(won)
+    expect(summon(won, 11_000)).toBe(won)
     expect(elapsedSeconds(won, 99_000)).toBe(10)
   })
 

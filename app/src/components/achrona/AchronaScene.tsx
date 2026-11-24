@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { placeGlitch } from './world.ts'
 import { CameraIntro, CubeDebris, ResponsiveLens } from './scene/Atmosphere.tsx'
 import { Citadel } from './scene/Citadel.tsx'
+import { Dragon } from './scene/Dragon.tsx'
 import { Effects } from './scene/Effects.tsx'
 import { DistantIslands, Districts } from './scene/Islands.tsx'
 import { LIGHT } from './scene/kit.tsx'
@@ -18,6 +19,8 @@ import type { RiftsProps } from './scene/Rifts.tsx'
 export type AchronaSceneProps = RiftsProps & {
   /** Phones get fewer pixels, no shadows and no post-processing. */
   lowPower?: boolean
+  /** The gate shows a dragon circling the citadel; mission control keeps the sky clear. */
+  dragon?: boolean
 }
 
 // A low, wide establishing shot: the citadel a little off-centre, districts receding into haze.
@@ -27,7 +30,7 @@ const FOCUS_DISTANCE = CAMERA_HOME.distanceTo(CAMERA_TARGET)
 
 /** The world of Achrona: the citadel and its districts floating over a sea of cursed cloud. */
 export default function AchronaScene(props: AchronaSceneProps) {
-  const { glitches, reducedMotion, lowPower = false } = props
+  const { glitches, reducedMotion, lowPower = false, dragon = false } = props
   const [core, setCore] = useState<THREE.Mesh | null>(null)
   const [arrived, setArrived] = useState(false)
 
@@ -95,6 +98,7 @@ export default function AchronaScene(props: AchronaSceneProps) {
       <Rifts {...props} />
       <CubeDebris reducedMotion={reducedMotion} />
       <Flock reducedMotion={reducedMotion} />
+      {dragon && <Dragon reducedMotion={reducedMotion} />}
       <SkyLanterns reducedMotion={reducedMotion} />
       <Sparkles
         count={lowPower ? 60 : 140}

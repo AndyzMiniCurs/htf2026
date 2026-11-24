@@ -21,6 +21,12 @@ Legend: **[FE] = Andu**. This change has no backend tasks; it reuses `advanceSta
 
 - [x] 4.1 [FE] Play the battle on the projector resolution (1920x1080) and on a 375 px phone; verify a steady player wins within 40 s, the skip works, and lint, typecheck, tests and build pass
 
+## 5. Cinematic rework
+
+- [x] 5.1 [FE] Make Claude's summon a one-strike finisher and add combos to the rules (D1); verify Vitest covers the finisher and combo reset
+- [x] 5.2 [FE] Rebuild the arena, the voxel dragon, spells and Claude's finisher with a directed camera (D6); verify by filming the battle at 1440, 1920 and 375 px with no page errors
+- [x] 5.3 [FE] Add the title card, letterbox, combo, summon pips and Claude Code terminal to the overlay; verify the terminal lines land in time with the beam
+
 ## Workflow follow-up
 
 - Archive the change after the pitch with `/openspec-archive-change glitch-sealing-ritual`.

@@ -57,6 +57,7 @@ function LoginPage() {
           highlightedId={null}
           onHighlight={() => {}}
           onSelect={() => {}}
+          dragon
         />
       </div>
 
