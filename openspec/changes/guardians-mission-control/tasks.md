@@ -23,7 +23,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 2.5 [BE] Seed demo guardians (one commander, three defenders) with passwords listed in the root README; verify login works for each after `npm run db:setup`
 - [x] 2.6 [FE] Build the `/login` page (mobile-first form, inline validation, generic error message); verify a wrong password shows the error and a correct one lands on the dashboard
 - [x] 2.7 [FE] Add the auth guard in the root route `beforeLoad` (redirect to `/login`) and a user menu with codename, role and logout; verify an anonymous visit to `/glitches` redirects to `/login`
-- [ ] 2.8 [FE] Build the `/guardians` page (commander only): list, create form, role switch; hide it from defenders in nav; verify a defender opening `/guardians` sees a forbidden state
+- [x] 2.8 [FE] Build the `/guardians` page (commander only): list, create form, role switch; hide it from defenders in nav; verify a defender opening `/guardians` sees a forbidden state
 
 ## 3. Base: echoes become glitches, glitch list
 
