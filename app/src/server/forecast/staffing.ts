@@ -88,9 +88,17 @@ export function chooseDefender(mode: PressureMode, candidates: Array<Candidate>)
   if (candidates.length === 0) return null
   const fit = (c: Candidate) => (c.ai === null ? c.skill : 0.7 * c.skill + 0.3 * c.ai)
   if (mode === 'calm') {
-    const free = candidates.filter((c) => c.openCount <= 1)
+    // Free: carrying no more than one quest above the least loaded defender.
+    const lightest = Math.min(...candidates.map((c) => c.openCount))
+    const free = candidates.filter((c) => c.openCount <= lightest + 1)
     const learner = [...free].sort((a, b) => fit(a) - fit(b) || a.openCount - b.openCount).at(0)
-    if (learner) return { ...pickOf(learner), reason: 'training-quest' }
+    const expert = Math.max(...candidates.map(fit))
+    // Only a real learner trains; the best at the kind simply takes it.
+    if (learner)
+      return {
+        ...pickOf(learner),
+        reason: fit(learner) < expert ? 'training-quest' : 'best-available',
+      }
   }
   const best = [...candidates]
     .sort(

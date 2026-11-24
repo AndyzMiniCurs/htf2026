@@ -129,6 +129,23 @@ describe('chooseDefender', () => {
     })
   })
 
+  it('counts a defender as free with at most one quest more than the lightest load', () => {
+    const busyLearner = { ...learner, openCount: 2 }
+    const lightExpert = { ...expert, openCount: 1 }
+    expect(chooseDefender('calm', [lightExpert, busyLearner])).toMatchObject({
+      guardianId: 2,
+      reason: 'training-quest',
+    })
+  })
+
+  it('does not call it training when the only free defender is the expert', () => {
+    const swamped = { ...learner, openCount: 5 }
+    expect(chooseDefender('calm', [expert, swamped])).toMatchObject({
+      guardianId: 1,
+      reason: 'best-available',
+    })
+  })
+
   it('spreads load: a busy expert loses to a free one in steady hours', () => {
     const busy = { ...expert, openCount: 4 }
     const second = { ...learner, skill: 0.6 }

@@ -1,11 +1,21 @@
-import { CloudLightning, FlaskConical, GraduationCap, Moon, Swords, Wind } from 'lucide-react'
+import {
+  ChevronDown,
+  CloudLightning,
+  FlaskConical,
+  GraduationCap,
+  Moon,
+  Swords,
+  Wind,
+} from 'lucide-react'
 import { TYPE_META } from '#/components/glitches/glitch-meta.ts'
 import { cx } from '#/components/ui/cx.ts'
 import { GLITCH_TYPES } from '#/lib/glitch.ts'
 import type { Forecast, PressureMode } from '#/lib/forecast.ts'
+import type { GlitchType } from '#/lib/glitch.ts'
 
 const hour = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' })
 const at = (iso: string) => hour.format(Date.parse(iso))
+const KINDS = GLITCH_TYPES.filter((t) => t !== 'unknown')
 
 const MODE: Record<
   PressureMode,
@@ -24,92 +34,121 @@ const MODE: Record<
     icon: Wind,
   },
   calm: {
-    title: 'A lull',
-    rule: 'New rifts become training quests for the least practised free defender, so the experts rest for the next storm.',
+    title: 'A quiet stretch',
+    rule: 'New rifts become training quests, so the experts rest for the next storm.',
     color: 'var(--verdant)',
     icon: Moon,
   },
 }
 
-/** The forecast in one sentence: what is coming and how the city staffs for it. */
+/** Everything that matters in one card: what is coming, when, and how the city staffs for it. */
 export function Verdict({ forecast }: { forecast: Forecast }) {
   const mode = MODE[forecast.mode]
   const Icon = mode.icon
+  const total = Math.round(forecast.hours.reduce((sum, h) => sum + h.glitches, 0))
+  const lowest = Math.min(forecast.magicNow, ...forecast.hours.map((h) => h.magic))
   return (
     <section
       aria-label="Forecast verdict"
-      className="relative overflow-hidden rounded-xl border bg-panel p-5 shadow-(--shadow) sm:p-6"
+      className="relative overflow-hidden rounded-xl border bg-panel p-5 shadow-(--shadow) sm:p-7"
       style={{
         borderColor: mode.color,
         backgroundImage: `radial-gradient(60rem 18rem at 0% 0%, color-mix(in oklab, ${mode.color} 16%, transparent), transparent 70%)`,
       }}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
         <span
-          className="grid size-14 shrink-0 place-items-center rounded-2xl border-2 bg-field"
+          className="grid size-16 shrink-0 place-items-center rounded-2xl border-2 bg-field"
           style={{ borderColor: mode.color, color: mode.color }}
         >
-          <Icon aria-hidden className="size-7" />
+          <Icon aria-hidden className="size-8" />
         </span>
-        <div className="min-w-0">
-          <p className="label-caps text-[0.68rem]" style={{ color: mode.color }}>
-            Next 3 hours · {forecast.pressureRatio.toFixed(1)}× the usual pressure
+        <div className="min-w-0 flex-1">
+          <h2 className="title-gothic text-4xl sm:text-5xl">{mode.title}</h2>
+          <p className="mt-3 max-w-[60ch] text-lg text-fg">
+            About <strong className="tabular">{total}</strong> new {total === 1 ? 'rift' : 'rifts'}{' '}
+            in the next 12 hours, most of them around{' '}
+            <strong className="tabular">{at(forecast.peak.at)}</strong>.
           </p>
-          <h2 className="title-gothic mt-1 text-3xl sm:text-4xl">{mode.title}</h2>
-          <p className="mt-2 max-w-[70ch] text-fg">
-            The model expects the most rifts around{' '}
-            <strong className="tabular">{at(forecast.peak.at)}</strong> (
-            <span className="tabular">{forecast.peak.glitches.toFixed(1)}</span> in that hour).{' '}
-            {mode.rule}
+          <p className="mt-1 max-w-[60ch] text-fg-muted">{mode.rule}</p>
+          <p
+            className={cx(
+              'mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm',
+              forecast.lockdownAt ? 'border-ember text-ember' : 'border-line-strong text-fg-muted',
+            )}
+          >
+            {forecast.lockdownAt
+              ? `Magic falls under 20% around ${at(forecast.lockdownAt)}: lockdown`
+              : `Magic stays above ${lowest}% at the usual fixing pace`}
           </p>
-          {forecast.lockdownAt && (
-            <p className="mt-2 font-medium text-ember">
-              At the usual fixing pace, magic falls under 20% around {at(forecast.lockdownAt)}: the
-              city would lock itself down.
-            </p>
-          )}
         </div>
       </div>
     </section>
   )
 }
 
-const REASON: Record<
-  NonNullable<Forecast['nextAssignee'][keyof Forecast['nextAssignee']]>['reason'],
-  { label: string; icon: typeof Wind }
-> = {
-  'best-for-storm': { label: 'Best for the storm', icon: Swords },
-  'training-quest': { label: 'Training quest', icon: GraduationCap },
-  'best-available': { label: 'Best available', icon: Wind },
-}
-
-/** Who the next glitch of each kind would go to right now, and why. */
-export function NextAssignees({ forecast }: { forecast: Forecast }) {
+/**
+ * The defenders on watch: what each is best at, and which kinds of new rift would go to them
+ * right now (as a training quest in a lull, as the expert in a storm).
+ */
+export function OnWatch({ forecast }: { forecast: Forecast }) {
   return (
-    <ul className="flex flex-col gap-2">
-      {GLITCH_TYPES.filter((t) => t !== 'unknown').map((type) => {
-        const { label, color, icon: Icon } = TYPE_META[type]
-        const pick = forecast.nextAssignee[type]
-        const reason = pick ? REASON[pick.reason] : null
-        const ReasonIcon = reason?.icon
+    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {forecast.defenders.map((d) => {
+        const strengths = [...KINDS]
+          .filter((t) => d.skills[t].fixes > 0)
+          .sort((a, b) => d.skills[b].skill - d.skills[a].skill)
+          .slice(0, 2)
+        const next = KINDS.filter((t) => forecast.nextAssignee[t]?.guardianId === d.guardianId)
         return (
           <li
-            key={type}
-            className="flex min-h-12 items-center gap-3 rounded-lg border border-line bg-ground-2/60 px-3 py-2"
+            key={d.guardianId}
+            className="flex flex-col gap-4 rounded-xl border border-line bg-panel p-5 shadow-(--shadow)"
           >
-            <Icon aria-hidden className="size-5 shrink-0" style={{ color }} />
-            <span className="min-w-0 flex-1 text-sm text-fg">{label}</span>
-            {pick && reason && ReasonIcon ? (
-              <span className="flex flex-col items-end">
-                <span className="font-bold text-fg">{pick.codename}</span>
-                <span className="inline-flex items-center gap-1 text-xs text-fg-muted">
-                  <ReasonIcon aria-hidden className="size-3.5" />
-                  {reason.label} · {Math.round(pick.skill * 100)}%
+            <div className="flex items-center gap-3">
+              <span className="title-gothic grid size-12 place-items-center rounded-xl border-2 border-royal-hi bg-[linear-gradient(160deg,var(--royal),var(--royal-deep))] text-2xl">
+                {d.codename.charAt(0)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg font-bold text-fg">{d.codename}</span>
+                <span className="text-sm text-fg-faint">
+                  {d.openCount} open {d.openCount === 1 ? 'quest' : 'quests'}
                 </span>
               </span>
-            ) : (
-              <span className="text-sm text-fg-faint">No defender</span>
-            )}
+            </div>
+
+            <div>
+              <p className="label-caps mb-1.5 text-[0.65rem] text-fg-faint">Best at</p>
+              {strengths.length > 0 ? (
+                <ul className="flex flex-col gap-1.5">
+                  {strengths.map((t) => (
+                    <Strength key={t} type={t} skill={d.skills[t].skill} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-fg-muted">No sealed rifts yet</p>
+              )}
+            </div>
+
+            <div className="mt-auto border-t border-line pt-3">
+              <p className="label-caps mb-1.5 flex items-center gap-1.5 text-[0.65rem] text-fg-faint">
+                <Swords aria-hidden className="size-3.5" />
+                {next.length === 0 ? 'Resting' : 'Takes the next'}
+              </p>
+              {next.length > 0 ? (
+                <p className="flex flex-wrap gap-1.5">
+                  {next.map((t) => (
+                    <TypeChip
+                      key={t}
+                      type={t}
+                      training={forecast.nextAssignee[t]?.reason === 'training-quest'}
+                    />
+                  ))}
+                </p>
+              ) : (
+                <p className="text-sm text-fg-muted">Kept free for what comes next.</p>
+              )}
+            </div>
           </li>
         )
       })}
@@ -117,67 +156,137 @@ export function NextAssignees({ forecast }: { forecast: Forecast }) {
   )
 }
 
-/** Each defender's skill per kind of glitch, learned from the fix record. Best per kind ringed. */
-export function SkillMatrix({ forecast }: { forecast: Forecast }) {
-  const types = GLITCH_TYPES.filter((t) => t !== 'unknown')
-  const best = Object.fromEntries(
-    types.map((t) => [t, Math.max(...forecast.defenders.map((d) => d.skills[t].skill))]),
-  ) as Record<(typeof types)[number], number>
+function Strength({ type, skill }: { type: GlitchType; skill: number }) {
+  const { label, color, icon: Icon } = TYPE_META[type]
   return (
-    <div className="-mx-5 overflow-x-auto px-5">
-      <table className="w-full min-w-[34rem] border-separate border-spacing-1 text-sm">
-        <thead>
-          <tr>
-            <th className="text-left font-normal text-fg-faint">
-              <span className="sr-only">Defender</span>
-            </th>
-            {types.map((t) => {
-              const { label, color, icon: Icon } = TYPE_META[t]
-              return (
-                <th key={t} scope="col" className="px-1 pb-1 font-normal text-fg-muted">
-                  <span className="flex flex-col items-center gap-1 text-xs">
-                    <Icon aria-hidden className="size-4" style={{ color }} />
-                    {label}
-                  </span>
-                </th>
-              )
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {forecast.defenders.map((d) => (
-            <tr key={d.guardianId}>
-              <th scope="row" className="pr-2 text-left font-bold whitespace-nowrap text-fg">
-                {d.codename}
-                <span className="block text-xs font-normal text-fg-faint">{d.openCount} open</span>
-              </th>
-              {types.map((t) => {
-                const s = d.skills[t]
-                const top = s.skill === best[t] && s.fixes > 0
-                return (
-                  <td
-                    key={t}
-                    title={`${d.codename}, ${TYPE_META[t].label}: ${s.fixes} fixes, median ${s.medianMinutes} min`}
-                    className={cx(
-                      'rounded-md px-2 py-1.5 text-center tabular',
-                      top && 'outline-2 outline-gold',
-                    )}
-                    style={{
-                      background: `color-mix(in oklab, var(--royal-hi) ${Math.round(s.skill * 70)}%, var(--field))`,
-                    }}
-                  >
-                    <span className="block font-bold text-fg">{Math.round(s.skill * 100)}%</span>
-                    <span className="block text-[0.7rem] text-fg-muted">
-                      {s.fixes ? `${s.fixes} · ${s.medianMinutes}m` : 'new'}
-                    </span>
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <li className="grid grid-cols-[1.25rem_minmax(0,1fr)_2.75rem] items-center gap-2 text-sm">
+      <Icon aria-hidden className="size-4" style={{ color }} />
+      <span className="flex flex-col gap-1">
+        <span className="text-fg">{label}</span>
+        <span className="h-1.5 overflow-hidden rounded-full bg-field">
+          <span
+            className="bar-grow block h-full rounded-full"
+            style={{ width: `${Math.round(skill * 100)}%`, background: color }}
+          />
+        </span>
+      </span>
+      <span className="text-right font-bold text-fg tabular">{Math.round(skill * 100)}%</span>
+    </li>
+  )
+}
+
+/** A kind of rift a defender takes next; a cap marks it as a training quest. */
+function TypeChip({ type, training }: { type: GlitchType; training: boolean }) {
+  const { label, color, icon: Icon } = TYPE_META[type]
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-field px-2.5 py-1 text-xs text-fg">
+      <Icon aria-hidden className="size-3.5" style={{ color }} />
+      {label}
+      {training && (
+        <>
+          <GraduationCap aria-hidden className="size-3.5 text-gold" />
+          <span className="sr-only">(training quest)</span>
+        </>
+      )}
+    </span>
+  )
+}
+
+/**
+ * The evidence, folded away: the model and its track record, when incidents usually come, and
+ * every defender's skill per kind. Open for whoever asks how the forecast knows.
+ */
+export function HowItWorks({ forecast }: { forecast: Forecast }) {
+  const { model } = forecast
+  const better = model.baselineError > 0 ? 1 - model.modelError / model.baselineError : 0
+  return (
+    <details className="group rounded-xl border border-line bg-panel shadow-(--shadow)">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-5 py-3 [&::-webkit-details-marker]:hidden">
+        <FlaskConical aria-hidden className="size-5 shrink-0 text-gold" />
+        <span className="min-w-0 flex-1">
+          <span className="block font-bold text-fg">How the forecast works</span>
+          <span className="text-sm text-fg-muted">
+            A neural network trained on {Math.round(model.trainedHours / 24)} days of
+            {model.synthetic ? ' synthetic' : ''} incidents
+            {better > 0 ? `, ${Math.round(better * 100)}% more accurate than a plain average` : ''}.
+          </span>
+        </span>
+        <ChevronDown
+          aria-hidden
+          className="size-5 shrink-0 text-fg-muted transition-transform duration-200 group-open:rotate-180"
+        />
+      </summary>
+      <div className="grid gap-8 border-t border-line px-5 py-5 lg:grid-cols-2">
+        <section>
+          <h3 className="label-caps mb-3 text-[0.68rem] text-gold">The model</h3>
+          <ModelFacts forecast={forecast} better={better} />
+        </section>
+        <section>
+          <h3 className="label-caps mb-3 text-[0.68rem] text-gold">When the Desync strikes</h3>
+          <Heatmap grid={forecast.heatmap} />
+        </section>
+        <section className="lg:col-span-2">
+          <h3 className="label-caps mb-3 text-[0.68rem] text-gold">Every defender, every kind</h3>
+          <SkillTable forecast={forecast} />
+          <p className="mt-2 text-sm text-fg-muted">
+            Speed against everyone else at that kind, trusted more with more fixes.
+          </p>
+        </section>
+      </div>
+    </details>
+  )
+}
+
+function ModelFacts({ forecast, better }: { forecast: Forecast; better: number }) {
+  const { model } = forecast
+  return (
+    <div className="flex flex-col gap-3 text-sm">
+      <p className="text-fg">
+        {model.kind}. It reads the time of day and week and the last day of activity, and predicts
+        each of the next 12 hours. Tested on the last week, which it never saw while learning.
+      </p>
+      <div className="flex flex-col gap-1.5">
+        <ErrorBar label="Model" value={model.modelError} max={model.baselineError} accent />
+        <ErrorBar label="Average" value={model.baselineError} max={model.baselineError} />
+        <span className="text-fg-muted">
+          Average miss per hour, in rifts.{' '}
+          {better > 0
+            ? `The model misses ${Math.round(better * 100)}% less.`
+            : 'The model is not ahead of the average yet.'}
+        </span>
+      </div>
+      {model.synthetic && (
+        <p className="rounded-lg border border-amber/50 bg-[color-mix(in_oklab,var(--amber)_10%,var(--panel))] px-3 py-2 text-fg-muted">
+          The history is synthetic, generated for this demo with deliberate daily and weekly
+          rhythms, storm days and defender strengths ({model.incidents.toLocaleString()} incidents).
+        </p>
+      )}
     </div>
+  )
+}
+
+function ErrorBar({
+  label,
+  value,
+  max,
+  accent = false,
+}: {
+  label: string
+  value: number
+  max: number
+  accent?: boolean
+}) {
+  return (
+    <span className="grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-2">
+      <span className="text-fg-muted">{label}</span>
+      <span className="h-2 overflow-hidden rounded-full bg-field">
+        <span
+          className={cx('block h-full rounded-full', accent ? 'bg-royal-hi' : 'bg-fg-faint')}
+          style={{ width: `${Math.min(100, (value / Math.max(max, 0.01)) * 100)}%` }}
+        />
+      </span>
+      <span className="text-right font-bold text-fg tabular">{value.toFixed(2)}</span>
+    </span>
   )
 }
 
@@ -185,8 +294,8 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 /** Monday first; the heatmap rows come Sunday first. */
 const DAY_INDEX = [1, 2, 3, 4, 5, 6, 0]
 
-/** When the Desync strikes: average incidents per weekday and hour. Now is ringed in gold. */
-export function Heatmap({ grid }: { grid: Array<Array<number>> }) {
+/** Average incidents per weekday and hour. Now is ringed in gold. */
+function Heatmap({ grid }: { grid: Array<Array<number>> }) {
   const max = Math.max(0.01, ...grid.flat())
   const now = new Date()
   return (
@@ -217,7 +326,7 @@ export function Heatmap({ grid }: { grid: Array<Array<number>> }) {
         <span />
         {Array.from({ length: 24 }, (_, h) => (
           <span key={h} className="text-center text-[0.6rem] text-fg-faint tabular">
-            {h % 3 === 0 ? h : ''}
+            {h % 6 === 0 ? h : ''}
           </span>
         ))}
       </div>
@@ -228,80 +337,45 @@ export function Heatmap({ grid }: { grid: Array<Array<number>> }) {
           className="h-2 w-24 rounded-full"
           style={{ background: 'linear-gradient(90deg, var(--field), var(--curse-hi))' }}
         />
-        {max.toFixed(1)} per hour
+        Busy ({max.toFixed(1)} an hour)
       </div>
     </div>
   )
 }
 
-/** What the forecast stands on, and how much better it does than the plain average. */
-export function ModelCard({ model }: { model: Forecast['model'] }) {
-  const better = model.baselineError > 0 ? 1 - model.modelError / model.baselineError : 0
+function SkillTable({ forecast }: { forecast: Forecast }) {
   return (
-    <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-      <div className="col-span-2">
-        <dt className="label-caps text-[0.65rem] text-fg-faint">Model</dt>
-        <dd className="text-fg">{model.kind}</dd>
-      </div>
-      <div>
-        <dt className="label-caps text-[0.65rem] text-fg-faint">Trained on</dt>
-        <dd className="text-fg tabular">
-          {Math.round(model.trainedHours / 24)} days · {model.incidents.toLocaleString()} incidents
-        </dd>
-      </div>
-      <div>
-        <dt className="label-caps text-[0.65rem] text-fg-faint">Tested on</dt>
-        <dd className="text-fg">the last week, unseen</dd>
-      </div>
-      <div className="col-span-2">
-        <dt className="label-caps text-[0.65rem] text-fg-faint">
-          Error per hour (lower is better)
-        </dt>
-        <dd className="mt-1 flex flex-col gap-1.5">
-          <ErrorBar label="Model" value={model.modelError} max={model.baselineError} accent />
-          <ErrorBar label="Average" value={model.baselineError} max={model.baselineError} />
-          <span className="text-fg-muted">
-            {better > 0
-              ? `${Math.round(better * 100)}% closer than the weekday-and-hour average.`
-              : 'No better than the weekday-and-hour average yet.'}
-          </span>
-        </dd>
-      </div>
-      {model.synthetic && (
-        <p className="col-span-2 flex gap-2 rounded-lg border border-amber/50 bg-[color-mix(in_oklab,var(--amber)_10%,var(--panel))] px-3 py-2 text-fg-muted">
-          <FlaskConical aria-hidden className="mt-0.5 size-4 shrink-0 text-amber" />
-          Trained on synthetic history generated for this demo, with deliberate daily and weekly
-          rhythms, storm days and defender strengths.
-        </p>
-      )}
-    </dl>
-  )
-}
-
-function ErrorBar({
-  label,
-  value,
-  max,
-  accent = false,
-}: {
-  label: string
-  value: number
-  max: number
-  accent?: boolean
-}) {
-  return (
-    <span className="grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-2">
-      <span className="text-fg-muted">{label}</span>
-      <span className="h-2 overflow-hidden rounded-full bg-field">
-        <span
-          className={cx(
-            'bar-grow block h-full rounded-full',
-            accent ? 'bg-royal-hi' : 'bg-fg-faint',
-          )}
-          style={{ width: `${Math.min(100, (value / Math.max(max, 0.01)) * 100)}%` }}
-        />
-      </span>
-      <span className="text-right font-bold text-fg tabular">{value.toFixed(2)}</span>
-    </span>
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[30rem] text-left text-sm tabular">
+        <thead className="text-fg-faint">
+          <tr>
+            <th className="py-1.5 font-normal">Defender</th>
+            {KINDS.map((t) => (
+              <th key={t} className="py-1.5 text-right font-normal">
+                {TYPE_META[t].label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {forecast.defenders.map((d) => (
+            <tr key={d.guardianId} className="border-t border-line/60">
+              <th scope="row" className="py-1.5 font-bold text-fg">
+                {d.codename}
+              </th>
+              {KINDS.map((t) => (
+                <td
+                  key={t}
+                  className="py-1.5 text-right text-fg-muted"
+                  title={`${d.skills[t].fixes} fixes, median ${d.skills[t].medianMinutes} min`}
+                >
+                  {Math.round(d.skills[t].skill * 100)}%
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
