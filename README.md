@@ -9,7 +9,7 @@ Stack: TypeScript · React · TanStack Start (Router, Query, Table) · PostgreSQ
 
 | Path | What |
 |------|------|
-| `app/` | TanStack Start app (frontend + server functions) |
+| `app/` | TanStack Start app (from the Optis starter) |
 | `openspec/` | Specs and change proposals (OpenSpec) |
 | `docker-compose.yml` | Postgres (+ the app with `--profile full`) |
 
@@ -19,7 +19,7 @@ Stack: TypeScript · React · TanStack Start (Router, Query, Table) · PostgreSQ
 docker compose up -d db        # Postgres on localhost:5432 (htf/htf/htf)
 cd app
 npm install
-npm run db:push                # push Drizzle schema to the DB
+npm run db:setup               # push Drizzle schema + seed glitches
 npm run dev                    # http://localhost:3000
 ```
 
@@ -29,10 +29,10 @@ Everything in Docker: `docker compose --profile full up --build`
 
 | Owner | Paths |
 |-------|-------|
-| Backend | `app/src/db/**`, `app/src/server/**`, Drizzle migrations |
+| Backend | `app/src/db/**`, `app/src/lib/*.functions.ts` (server functions) |
 | Frontend | `app/src/routes/**`, `app/src/components/**`, styles |
 
-Contract = the server function signatures in `openspec/specs`. Agree on them first, then build in parallel.
+Contract = shared types in `app/src/lib/<domain>.ts` + server function signatures in `openspec/specs`. Agree on them first, then build in parallel.
 
 ## OpenSpec workflow
 

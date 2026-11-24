@@ -1,7 +1,11 @@
-import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, text } from 'drizzle-orm/pg-core'
+// Relative import: drizzle-kit loads this file and doesn't resolve the `#/` alias.
+import { GLITCH_STATUSES } from '../lib/glitch.ts'
 
-export const todos = pgTable('todos', {
-  id: serial().primaryKey(),
-  title: text().notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
+export const glitches = pgTable('glitches', {
+  glitchId: text('glitch_id').primaryKey(),
+  status: text('status', { enum: GLITCH_STATUSES }).notNull(),
+  description: text('description').notNull(),
+  /** ISO 8601, so lexical order is chronological order. */
+  timestamp: text('timestamp').notNull(),
 })

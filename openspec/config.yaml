@@ -5,12 +5,15 @@ context: |
   Goal: realtime mission control dashboard - live key stats, early anomaly detection, operator insights.
   Deadline: demo/pitch at 16:00 the same day. Prefer the smallest thing that demos well.
   Most users open the app on phones (iOS/Android): frontend is mobile-first, desktop second.
-  Stack is fixed: TypeScript, React, PostgreSQL, TanStack (Start, Router, Query, Table), Drizzle ORM.
-  The app lives in app/. Postgres runs from docker-compose.yml at repo root.
+  Stack is fixed: TypeScript, React, PostgreSQL, TanStack Start/Router, Drizzle ORM, Tailwind, lucide-react.
+  The app lives in app/ and is the official Optis starter switched from SQLite to Postgres.
+  Base assignment, optional extensions and judging (Creativity 40%, Functionality 30%, Presentation 30%) are in CHALLENGE.md;
+  the data model (Glitch, Echo, Guardian) is datamodel.png. Postgres runs from docker-compose.yml at repo root.
   Two devs split the work:
-    - backend owner: app/src/db/**, app/src/server/** (server functions, server routes, SSE, anomaly logic), drizzle migrations
+    - backend owner: app/src/db/** (schema, seed), app/src/lib/*.functions.ts (createServerFn server functions)
     - frontend owner: app/src/routes/**, app/src/components/**, styling
-  The contract between them is the server function / API signatures in the specs. Specify those first.
+    - shared contract: app/src/lib/<domain>.ts (types + constants, like lib/glitch.ts). Specify those first.
+  Follow the starter's conventions: `#/` imports, server functions in lib/<domain>.functions.ts, UI in components/ui.
 
 rules:
   proposal:
