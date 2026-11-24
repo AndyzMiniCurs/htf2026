@@ -3,7 +3,15 @@ export type NavItem = {
   /** Painted icon in public/icons/realm (CC0, see SOURCE.txt there). */
   image: string
   /** Set once the route exists; until then the item renders disabled. */
-  to?: '/' | '/glitches' | '/guardians' | '/map' | '/sensors' | '/leaderboard' | '/assistant'
+  to?:
+    | '/'
+    | '/glitches'
+    | '/guardians'
+    | '/map'
+    | '/sensors'
+    | '/leaderboard'
+    | '/assistant'
+    | '/settings'
   /** Shown in the phone hotbar; the rest live behind "More". */
   hotbar?: boolean
   commanderOnly?: boolean
@@ -23,5 +31,5 @@ export const navItems: Array<NavItem> = [
     to: '/guardians',
     commanderOnly: true,
   },
-  { label: 'Settings', image: '/icons/realm/settings.webp' },
+  { label: 'Settings', image: '/icons/realm/settings.webp', to: '/settings' },
 ]

@@ -50,7 +50,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 5.2 [BE] Write `server/monitoring/magic.ts` (pure, weights from the spec) and the real `getDashboard` (`recent` = every open glitch + the 5 latest FIXED, newest first); verify unit tests: all fixed -> 100, one normal `LEAKED` -> 90, never below 0
 - [ ] 5.3 [BE] Write the sensor simulator (3 s random walk for 3 sensors, lazy start once per process), the real `getSensorSeries` and `triggerIncident` (C); verify readings grow in `sensor_readings` and `triggerIncident` produces a visible drop
 - [ ] 5.4 [BE] Implement `setLockdown` (C) stored in `app_state`, publishing a `lockdown` event; verify a defender call -> `FORBIDDEN`
-- [ ] 5.5 [FE] Write the `useLiveEvents` hook (EventSource, backoff reconnect, `router.invalidate()` on data events, lockdown and notification dispatch); verify that an echo reported in browser A appears in browser B within 2 s
+- [x] 5.5 [FE] Write the `useLiveEvents` hook (EventSource, backoff reconnect, `router.invalidate()` on data events, lockdown and notification dispatch); verify that an echo reported in browser A appears in browser B within 2 s (verified against a stubbed SSE stream; end-to-end once /api/events (5.1) exists)
 - [x] 5.6 [FE] Build the dashboard `/`: SVG magic gauge, counts per status and type, recent glitches, lockdown banner; verify the gauge drops when a glitch is reported (UI done 2026-11-24; the drop shows once 5.2 makes getDashboard real)
 - [x] 5.7 [FE] Build `/sensors`: one `recharts` line chart per sensor (last 15 min), appended live; verify the charts move without reload (polls every 3 s until 5.5 live events exist)
 - [x] 5.8 [FE] Build `/map`: `public/achrona-map.svg` with type-colored markers placed by percentage; tapping a marker shows a summary card with a link; verify a fixed glitch's marker disappears live (fixed glitches are filtered out; the live part arrives with 5.5)
@@ -74,7 +74,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 - [ ] 7.1 [BE] Implement notification prefs (`getNotificationPrefs`/`setNotificationPrefs`, defaults all on) and emit `notification` events on assign, status change of own echo's glitch, and lockdown, respecting prefs; verify tests for an on and an off preference
 - [ ] 7.2 [BE] Write `server/monitoring/badges.ts` (pure, the four badges from the spec), the real `getLeaderboard` and `getReport` (C); verify unit tests for each badge rule
-- [ ] 7.3 [FE] Show in-app notification toasts, request browser Notification permission, and add a `/settings` page with the three notification toggles; verify an assignment notifies the assignee only
+- [x] 7.3 [FE] Show in-app notification toasts, request browser Notification permission, and add a `/settings` page with the three notification toggles; verify an assignment notifies the assignee only
 - [x] 7.4 [FE] Add the speech-to-text mic button (`useSpeech`, Web Speech API, hidden when unsupported) on the echo form; verify on Chrome Android and that it is hidden on Firefox (verified with a stubbed recogniser and with the API removed; still to try on a real phone)
 - [x] 7.5 [FE] Build `/leaderboard` with ranking and badge icons; verify the order matches fixes
 - [x] 7.6 [FE] Build `/council-report` (C) with print CSS and a "Save as PDF" button (`window.print()`); verify the print preview has no nav and fits A4

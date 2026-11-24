@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { ShieldAlert } from 'lucide-react'
 import { AchronaDiorama } from '#/components/achrona/AchronaDiorama.tsx'
+import { useLiveRealm } from '#/components/layout/LiveRealm.tsx'
 import { QuestLog, QuestLogHeading } from '#/components/glitches/QuestLog.tsx'
 import { STATUS_META, TYPE_META } from '#/components/glitches/glitch-meta.ts'
 import { Panel } from '#/components/ui/Panel.tsx'
@@ -23,13 +24,14 @@ export const Route = createFileRoute('/_app/')({
 
 function OverviewPage() {
   const { dashboard, glitches } = Route.useLoaderData()
+  const { lockdown } = useLiveRealm()
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
   const open = glitches.filter((g) => g.status !== 'FIXED')
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_27rem]">
       <h1 className="sr-only">Overview of Achrona</h1>
-      {dashboard.lockdown && <LockdownBanner />}
+      {lockdown && <LockdownBanner />}
       <div className="flex min-w-0 flex-col gap-5">
         <Panel
           flush
