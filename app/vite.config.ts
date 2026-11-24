@@ -1,4 +1,4 @@
-import { defineConfig, type Rolldown } from 'vite'
+import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -6,6 +6,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
+import type { Rolldown } from 'vite'
 
 const IGNORED_SERVER_WARNINGS = new Set([
   'EVAL',
@@ -18,7 +19,8 @@ const IGNORED_SERVER_WARNINGS = new Set([
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
-    devtools(),
+    // Source injection adds data-tsd-source to every JSX element, which three.js objects reject.
+    devtools({ injectSource: { enabled: true, ignore: { files: [/components\/achrona\//] } } }),
     nitro({
       rollupConfig: {
         external: [/^@sentry\//],

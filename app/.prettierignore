@@ -1,0 +1,5 @@
+.output
+.nitro
+.tanstack
+package-lock.json
+src/routeTree.gen.ts

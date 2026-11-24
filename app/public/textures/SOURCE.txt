@@ -1,0 +1,1 @@
+cloud.png from pmndrs/drei-assets (MIT), https://github.com/pmndrs/drei-assets

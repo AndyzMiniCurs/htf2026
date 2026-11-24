@@ -3,3 +3,6 @@
 node_modules
 .DS_Store
 .playwright-mcp/
+.impeccable/review
+.impeccable/mocks
+.impeccable/build

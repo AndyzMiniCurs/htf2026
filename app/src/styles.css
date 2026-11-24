@@ -1,45 +1,213 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-@import "tailwindcss";
+@import '@fontsource/grenze-gotisch/600.css';
+@import '@fontsource/grenze-gotisch/800.css';
+@import '@fontsource/alegreya-sans/400.css';
+@import '@fontsource/alegreya-sans/500.css';
+@import '@fontsource/alegreya-sans/700.css';
+@import '@fontsource/alegreya/700.css';
+@import 'tailwindcss';
+
+/* Night is the default world; data-theme="light" is Achrona by day; data-lockdown overrides both. */
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Alegreya Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Alegreya', ui-serif, Georgia, serif;
+  --font-gothic: 'Grenze Gotisch', 'Alegreya', serif;
 
-  --color-app: var(--app);
-  --color-sidebar: var(--sidebar);
+  --color-ground: var(--ground);
+  --color-ground-2: var(--ground-2);
   --color-panel: var(--panel);
-  --color-card: var(--card);
-  --color-card-strong: var(--card-strong);
+  --color-panel-hi: var(--panel-hi);
+  --color-field: var(--field);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-subtle: var(--subtle);
-  --color-subtle-hover: var(--subtle-hover);
-  --color-accent: var(--accent);
-  --color-accent-from: var(--accent-from);
-  --color-accent-to: var(--accent-to);
-  --color-glow: var(--glow);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-royal: var(--royal);
+  --color-royal-hi: var(--royal-hi);
+  --color-royal-deep: var(--royal-deep);
+  --color-frost: var(--frost);
+  --color-curse: var(--curse);
+  --color-curse-hi: var(--curse-hi);
+  --color-pink: var(--pink);
+  --color-ember: var(--ember);
+  --color-amber: var(--amber);
+  --color-verdant: var(--verdant);
+  --color-on-accent: var(--on-accent);
+
+  --color-status-leaked: var(--ember);
+  --color-status-assessing: var(--amber);
+  --color-status-containing: var(--royal-hi);
+  --color-status-fixed: var(--verdant);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-:root {
-  --app: #ffffff;
-  --sidebar: #1b1340;
-  --panel: #ffffff;
-  --card: #ffffff;
-  --card-strong: #f5f4f2;
-  --line: #eae7e4;
-  --fg: #0c0c14;
-  --muted: #706d6b;
-  --subtle: #f5f4f2;
-  --subtle-hover: #eae7e4;
-  --accent: #6d4aff;
-  --accent-from: #a995ff;
-  --accent-to: #6d4aff;
-  --glow: rgb(109 74 255 / 0.2);
+:root,
+[data-theme='dark'] {
+  --ground: #160f1f;
+  --ground-2: #1c1429;
+  --panel: #211833;
+  --panel-hi: #2b2043;
+  --field: #130d1c;
+  --line: #3a2c58;
+  --line-strong: #5a4486;
+  --fg: #eef0ff;
+  --fg-muted: #bdb7d6;
+  --fg-faint: #948fb0;
+  --royal: #004fe2;
+  --royal-hi: #3b74ff;
+  --royal-deep: #01296a;
+  --frost: #e1e7ff;
+  --curse: #a52bd9;
+  --curse-hi: #c75cf2;
+  --pink: #e292f4;
+  --ember: #f0603f;
+  --amber: #f48d30;
+  --verdant: #3fd18f;
+  --on-accent: #ffffff;
+  --shadow: 0 12px 32px -12px rgb(5 2 12 / 0.7);
+  --title-extrude: #004fe2;
+  --title-extrude-deep: #01296a;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --ground: #e6e3f6;
+  --ground-2: #dcd7f1;
+  --panel: #f7f5ff;
+  --panel-hi: #ffffff;
+  --field: #ffffff;
+  --line: #c9c1e6;
+  --line-strong: #9b8dcf;
+  --fg: #1a1230;
+  --fg-muted: #4a4066;
+  --fg-faint: #625a80;
+  --royal: #0047cc;
+  --royal-hi: #0047cc;
+  --royal-deep: #01296a;
+  --frost: #1a1230;
+  --curse: #8a1fbf;
+  --curse-hi: #8a1fbf;
+  --pink: #a0329b;
+  --ember: #c4381b;
+  --amber: #a85600;
+  --verdant: #127a4b;
+  --shadow: 0 12px 28px -14px rgb(40 20 90 / 0.35);
+  --title-extrude: #7fa4ff;
+  --title-extrude-deep: #0047cc;
   color-scheme: light;
+}
+
+[data-lockdown] {
+  --ground: #1a0709;
+  --ground-2: #220a0d;
+  --panel: #2a0d12;
+  --panel-hi: #37121a;
+  --line: #5e1d27;
+  --line-strong: #8c2a38;
+  --curse: #ff3b4e;
+  --curse-hi: #ff6b78;
+  --title-extrude: #c4101f;
+  --title-extrude-deep: #5c0710;
+  color-scheme: dark;
 }
 
 html,
 body {
-  background-color: var(--app);
+  background-color: var(--ground);
   color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* The HTF night sky: a faint purple bloom over a fine grain. */
+  background-image:
+    radial-gradient(
+      60rem 40rem at 50% -10%,
+      color-mix(in oklab, var(--curse) 22%, transparent),
+      transparent 70%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--curse) 55%, transparent);
+  color: var(--fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--royal-hi);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  caret-color: var(--curse-hi);
+}
+
+a {
+  text-underline-offset: 0.2em;
+}
+
+table,
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* The event's blackletter: frost face on a stacked royal-blue extrusion. */
+  .title-gothic {
+    font-family: var(--font-gothic);
+    font-weight: 800;
+    color: var(--frost);
+    letter-spacing: 0.005em;
+    line-height: 1;
+    text-wrap: balance;
+    text-shadow:
+      0 1px 0 var(--title-extrude),
+      0 2px 0 var(--title-extrude),
+      0 3px 0 var(--title-extrude-deep),
+      0 4px 0 var(--title-extrude-deep),
+      0 10px 18px rgb(0 0 0 / 0.45);
+  }
+
+  .label-caps {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+    filter: blur(4px);
+  }
+}
+
+@keyframes drift {
+  50% {
+    transform: translateY(-14px) rotate(4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
