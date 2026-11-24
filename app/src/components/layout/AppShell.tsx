@@ -37,7 +37,10 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
       <Hud me={me} magicLevel={magicLevel} />
       <div className="flex flex-1">
         <Rail items={items} />
-        <main id="main" className="min-w-0 flex-1 px-4 pt-4 pb-28 sm:px-6 lg:px-8 lg:pt-6 lg:pb-10">
+        <main
+          id="main"
+          className="min-w-0 flex-1 px-4 pt-4 pb-28 sm:px-6 lg:px-8 lg:pt-6 lg:pb-10 print:p-0"
+        >
           {children}
         </main>
       </div>
@@ -48,7 +51,7 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
 
 function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-[color-mix(in_oklab,var(--ground)_82%,transparent)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
+    <header className="print:hidden! sticky top-0 z-30 border-b border-line bg-[color-mix(in_oklab,var(--ground)_82%,transparent)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
         <Link to="/" className="flex shrink-0 items-center gap-3 rounded-lg">
           <Crest className="size-10 drop-shadow-[0_4px_10px_rgb(165_43_217/0.5)] lg:size-12" />
@@ -105,7 +108,7 @@ function Rail({ items }: { items: Array<NavItem> }) {
   return (
     <nav
       aria-label="Main"
-      className="sticky top-20 z-20 hidden h-[calc(100dvh-5rem)] w-22 shrink-0 flex-col items-center gap-2 border-r border-line bg-[color-mix(in_oklab,var(--ground)_70%,transparent)] py-6 backdrop-blur-md lg:flex"
+      className="print:hidden! sticky top-20 z-20 hidden h-[calc(100dvh-5rem)] w-22 shrink-0 flex-col items-center gap-2 border-r border-line bg-[color-mix(in_oklab,var(--ground)_70%,transparent)] py-6 backdrop-blur-md lg:flex"
     >
       {items.map((item) => (
         <NavEntry key={item.label} item={item} className={railItem} iconClass="size-9" tooltip />
@@ -125,7 +128,7 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-[color-mix(in_oklab,var(--ground-2)_92%,transparent)] px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      className="print:hidden! fixed inset-x-0 bottom-0 z-30 border-t border-line bg-[color-mix(in_oklab,var(--ground-2)_92%,transparent)] px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
     >
       <div className="mx-auto flex max-w-lg items-end gap-1 py-1.5">
         {left.map((item) => (

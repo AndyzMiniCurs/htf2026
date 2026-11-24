@@ -3,6 +3,7 @@
 @import '@fontsource/alegreya-sans/400.css';
 @import '@fontsource/alegreya-sans/500.css';
 @import '@fontsource/alegreya-sans/700.css';
+@import '@fontsource/alegreya/400.css';
 @import '@fontsource/alegreya/700.css';
 @import 'tailwindcss';
 
@@ -194,6 +195,18 @@ table,
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000;
+  }
+  @page {
+    size: A4;
+    margin: 16mm;
   }
 }
 

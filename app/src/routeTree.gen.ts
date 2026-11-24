@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppCouncilReportRouteImport } from './routes/_app/council-report'
 import { Route as AppGuardiansRouteImport } from './routes/_app/guardians'
 import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
 import { Route as AppMapRouteImport } from './routes/_app/map'
@@ -33,6 +34,11 @@ const LoginRoute = LoginRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCouncilReportRoute = AppCouncilReportRouteImport.update({
+  id: '/council-report',
+  path: '/council-report',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGuardiansRoute = AppGuardiansRouteImport.update({
@@ -79,6 +85,7 @@ const ApiImagesEchoIdRoute = ApiImagesEchoIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
+  '/council-report': typeof AppCouncilReportRoute
   '/guardians': typeof AppGuardiansRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/council-report': typeof AppCouncilReportRoute
   '/guardians': typeof AppGuardiansRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/council-report': typeof AppCouncilReportRoute
   '/_app/guardians': typeof AppGuardiansRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/map': typeof AppMapRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/council-report'
     | '/guardians'
     | '/leaderboard'
     | '/map'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/council-report'
     | '/guardians'
     | '/leaderboard'
     | '/map'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/login'
+    | '/_app/council-report'
     | '/_app/guardians'
     | '/_app/leaderboard'
     | '/_app/map'
@@ -181,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/council-report': {
+      id: '/_app/council-report'
+      path: '/council-report'
+      fullPath: '/council-report'
+      preLoaderRoute: typeof AppCouncilReportRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/guardians': {
@@ -243,6 +262,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppCouncilReportRoute: typeof AppCouncilReportRoute
   AppGuardiansRoute: typeof AppGuardiansRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMapRoute: typeof AppMapRoute
@@ -254,6 +274,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCouncilReportRoute: AppCouncilReportRoute,
   AppGuardiansRoute: AppGuardiansRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,
   AppMapRoute: AppMapRoute,
