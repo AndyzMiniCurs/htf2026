@@ -7,7 +7,7 @@ const control = cx(
   'w-full rounded-lg border border-line bg-field px-3.5 text-base text-fg',
   'placeholder:text-fg-faint transition-[border-color,box-shadow] duration-200',
   'hover:border-line-strong focus:border-royal-hi focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--royal-hi)_35%,transparent)] focus:outline-none',
-  'aria-invalid:border-ember disabled:opacity-50',
+  'aria-invalid:border-ember aria-invalid:animate-[field-shake_320ms_ease-out] disabled:opacity-50',
 )
 
 type FieldFrameProps = {

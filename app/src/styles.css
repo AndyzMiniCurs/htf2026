@@ -542,6 +542,18 @@ html {
   }
 }
 
+/* A field that refused its input shakes once, like a ward rejecting a spell. */
+@keyframes field-shake {
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
 /* Rows of a ranking or list arriving as a list (delay set inline, capped by the caller). */
 .row-in {
   animation: page-rise 420ms var(--ease-out-expo) both;

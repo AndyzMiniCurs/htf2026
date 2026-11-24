@@ -110,6 +110,8 @@ function ReportEchoPage() {
     try {
       const result = await reportEcho({ data: form })
       toast.show({ tone: 'success', ...OUTCOME_COPY[result.outcome] })
+      // A short double tap in the hand confirms the report landed (Android; iOS has no web vibration).
+      if ('vibrate' in navigator) navigator.vibrate([12, 40, 18])
       await router.invalidate()
       await navigate({ to: '/glitches/$glitchId', params: { glitchId: result.glitchId } })
     } catch (err) {
