@@ -4,7 +4,7 @@ Legend: **[FE] = Andu**. This change has no backend tasks; it reuses `advanceSta
 
 ## 1. Battle rules
 
-- [ ] 1.1 [FE] Write `components/battle/battle.ts` (pure state machine from design D1) and `familiar.ts` (D5); verify Vitest covers spell damage, charge to full in five hits, a single summon, the summon being refused before full charge, victory at zero health, and no change after victory
+- [x] 1.1 [FE] Write `components/battle/battle.ts` (pure state machine from design D1) and `familiar.ts` (D5); verify Vitest covers spell damage, charge to full in five hits, a single summon, the summon being refused before full charge, victory at zero health, and no change after victory
 
 ## 2. Arena
 
