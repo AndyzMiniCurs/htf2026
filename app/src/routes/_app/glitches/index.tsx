@@ -12,6 +12,7 @@ import { RelativeTime } from '#/components/ui/RelativeTime.tsx'
 import { cx } from '#/components/ui/cx.ts'
 import { GLITCH_SORTS, GLITCH_STATUSES, GLITCH_TYPES, glitchQuerySchema } from '#/lib/glitch.ts'
 import { getGlitches } from '#/lib/glitches.functions.ts'
+import { useShortcuts } from '#/hooks/useShortcuts.ts'
 import type { GlitchListItem, GlitchQuery, GlitchStatus, GlitchType } from '#/lib/glitch.ts'
 
 export const Route = createFileRoute('/_app/glitches/')({
@@ -32,6 +33,27 @@ const SORT_LABEL: Record<(typeof GLITCH_SORTS)[number], string> = {
 function QuestLogPage() {
   const glitches = Route.useLoaderData()
   const search = Route.useSearch()
+  const navigate = useNavigate()
+  const [selected, setSelected] = useState(-1)
+  const move = (step: number) => {
+    const next = Math.min(glitches.length - 1, Math.max(0, selected + step))
+    setSelected(next)
+    // Cards (phone) and table rows (desktop) both carry the index; only one set is visible.
+    const rows = document.querySelectorAll<HTMLElement>(`[data-glitch-row="${next}"]`)
+    Array.from(rows)
+      .find((row) => row.offsetParent !== null)
+      ?.scrollIntoView({ block: 'nearest' })
+  }
+  useShortcuts({
+    j: () => move(1),
+    k: () => move(-1),
+    Enter: () => {
+      const glitch = glitches[selected] as GlitchListItem | undefined
+      if (glitch)
+        void navigate({ to: '/glitches/$glitchId', params: { glitchId: glitch.glitchId } })
+    },
+  })
+  const selectedId = glitches[selected]?.glitchId ?? null
   const filtered = Boolean(
     search.q || search.status?.length || search.type?.length || search.from || search.to,
   )
@@ -80,14 +102,14 @@ function QuestLogPage() {
       ) : (
         <>
           <ol className="flex flex-col gap-3 lg:hidden">
-            {glitches.map((g) => (
-              <li key={g.glitchId}>
-                <QuestCard glitch={g} />
+            {glitches.map((g, i) => (
+              <li key={g.glitchId} data-glitch-row={i}>
+                <QuestCard glitch={g} highlighted={g.glitchId === selectedId} />
               </li>
             ))}
           </ol>
           <Panel flush className="hidden overflow-hidden lg:block">
-            <GlitchTable glitches={glitches} />
+            <GlitchTable glitches={glitches} selectedId={selectedId} />
           </Panel>
         </>
       )}
@@ -227,7 +249,13 @@ function ChipGroup<TValue extends string>({
   )
 }
 
-function GlitchTable({ glitches }: { glitches: Array<GlitchListItem> }) {
+function GlitchTable({
+  glitches,
+  selectedId,
+}: {
+  glitches: Array<GlitchListItem>
+  selectedId: string | null
+}) {
   const navigate = useNavigate()
   return (
     <table className="w-full text-left">
@@ -241,14 +269,16 @@ function GlitchTable({ glitches }: { glitches: Array<GlitchListItem> }) {
         </tr>
       </thead>
       <tbody>
-        {glitches.map((g) => (
+        {glitches.map((g, i) => (
           <tr
             key={g.glitchId}
+            data-glitch-row={i}
+            aria-selected={g.glitchId === selectedId}
             // The id link handles keyboard users; the whole row is a larger mouse target.
             onClick={() =>
               navigate({ to: '/glitches/$glitchId', params: { glitchId: g.glitchId } })
             }
-            className="cursor-pointer border-b border-line/70 transition-colors last:border-0 hover:bg-panel-hi"
+            className="cursor-pointer border-b border-line/70 transition-colors last:border-0 hover:bg-panel-hi aria-selected:bg-panel-hi aria-selected:shadow-[inset_3px_0_0_var(--gold)]"
           >
             <td className="px-5 py-3.5 whitespace-nowrap">
               <Link

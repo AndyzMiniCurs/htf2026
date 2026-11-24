@@ -4,6 +4,7 @@ import { cx } from '#/components/ui/cx.ts'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
+import { GlobalShortcuts } from './ShortcutHelp.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
 import { MagicVial } from './MagicVial.tsx'
 import { navItems } from './nav-items.ts'
@@ -26,6 +27,7 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <CurseVeins />
+      <GlobalShortcuts />
       <a
         href="#main"
         className="label-caps sr-only z-50 rounded-full bg-royal px-4 py-2 text-on-accent focus:not-sr-only focus:fixed focus:top-3 focus:left-3"

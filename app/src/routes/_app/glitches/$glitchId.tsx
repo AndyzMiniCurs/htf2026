@@ -7,6 +7,7 @@ import { Badge } from '#/components/ui/Badge.tsx'
 import { EmptyState } from '#/components/ui/EmptyState.tsx'
 import { Panel } from '#/components/ui/Panel.tsx'
 import { RelativeTime } from '#/components/ui/RelativeTime.tsx'
+import { useShortcuts } from '#/hooks/useShortcuts.ts'
 import { getErrorCode } from '#/lib/errors.ts'
 import { getGlitch, getGlitches } from '#/lib/glitches.functions.ts'
 import { listGuardians } from '#/lib/guardians.functions.ts'
@@ -28,15 +29,19 @@ export const Route = createFileRoute('/_app/glitches/$glitchId')({
       if (getErrorCode(err) === 'NOT_FOUND' || getErrorCode(err) === 'VALIDATION') throw notFound()
       throw err
     }
-    // Commanders also need the roster and the other open glitches for assign, merge and move.
-    const commander = context.me.role === 'commander'
-    const [guardians, open] = commander
-      ? await Promise.all([
-          listGuardians(),
-          getGlitches({ data: { status: ['LEAKED', 'ASSESSING', 'CONTAINING'] } }),
-        ])
-      : [[], []]
-    return { glitch, guardians, openGlitches: open }
+    // The list in quest-log order gives j/k their neighbours; commanders also get the roster.
+    const [all, guardians] = await Promise.all([
+      getGlitches({ data: {} }),
+      context.me.role === 'commander' ? listGuardians() : Promise.resolve([]),
+    ])
+    const index = all.findIndex((g) => g.glitchId === glitch.glitchId)
+    return {
+      glitch,
+      guardians,
+      openGlitches: all.filter((g) => g.status !== 'FIXED'),
+      previousId: index > 0 ? all[index - 1].glitchId : null,
+      nextId: index >= 0 && index < all.length - 1 ? all[index + 1].glitchId : null,
+    }
   },
   head: ({ loaderData }) => ({
     meta: [{ title: `${loaderData?.glitch.glitchId ?? 'Glitch'} · Guardians of the Grid` }],
@@ -46,7 +51,13 @@ export const Route = createFileRoute('/_app/glitches/$glitchId')({
 })
 
 function GlitchPage() {
-  const { glitch, guardians, openGlitches } = Route.useLoaderData()
+  const { glitch, guardians, openGlitches, previousId, nextId } = Route.useLoaderData()
+  const navigate = Route.useNavigate()
+  useShortcuts({
+    j: () => nextId && void navigate({ to: '/glitches/$glitchId', params: { glitchId: nextId } }),
+    k: () =>
+      previousId && void navigate({ to: '/glitches/$glitchId', params: { glitchId: previousId } }),
+  })
   const { me } = Route.useRouteContext()
   const permissions = permissionsFor(me, glitch)
   return (

@@ -41,7 +41,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 4.2 [BE] Implement `assignGlitch`, `addGlitchUpdate`, `moveEcho` and `mergeGlitch`; verify tests: merge moves all echoes and hides the source glitch, and moving an echo out creates a new `LEAKED` glitch
 - [ ] 4.3 [FE] Add detail-page actions: advance status, reopen (C), assign dropdown (C), add update form (assignee); buttons appear only when allowed; verify as defender and as commander
 - [ ] 4.4 [FE] Add merge-glitch and move-echo controls (C) on the detail page; verify the merged glitch disappears from the list
-- [ ] 4.5 [FE] Write the `useShortcuts` hook (`j`/`k`/`Enter`/`n`/`?`, ignored inside inputs) and a shortcut help dialog; verify that typing "j" in search does not navigate
+- [x] 4.5 [FE] Write the `useShortcuts` hook (`j`/`k`/`Enter`/`n`/`?`, ignored inside inputs) and a shortcut help dialog; verify that typing "j" in search does not navigate
 - [x] 4.6 [FE] Add the light/dark/system theme toggle with no flash (inline script in `__root.tsx`, `localStorage`); verify a reload in dark mode shows no light flash
 
 ## 5. Real-time monitoring

@@ -45,16 +45,14 @@ await db.transaction(async (tx) => {
     echo_images, echoes, sessions, notification_prefs, sensor_readings, app_state, glitches, guardians
     restart identity cascade`)
   await tx.execute(sql`alter sequence glitch_seq restart with 200`)
-  await tx
-    .insert(guardians)
-    .values(
-      await Promise.all(
-        demoGuardians.map(async ({ password, ...g }) => ({
-          ...g,
-          passwordHash: await hashPassword(password),
-        })),
-      ),
-    )
+  await tx.insert(guardians).values(
+    await Promise.all(
+      demoGuardians.map(async ({ password, ...g }) => ({
+        ...g,
+        passwordHash: await hashPassword(password),
+      })),
+    ),
+  )
   await tx.insert(glitches).values(rows)
 })
 await db.$client.end()
