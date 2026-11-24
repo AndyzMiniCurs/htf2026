@@ -19,7 +19,7 @@ export async function askAssistant(
   const glitchId =
     findGlitchId(question) ??
     history
-      .map((h) => h.glitchIds[0] ?? findGlitchId(h.question))
+      .map((h) => h.glitchIds.at(0) ?? findGlitchId(h.question))
       .filter((id) => id !== null)
       .at(-1) ??
     null
