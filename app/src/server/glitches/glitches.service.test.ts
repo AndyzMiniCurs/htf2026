@@ -4,6 +4,11 @@ import { advanceStatus, reopenGlitch } from './glitches.service.ts'
 import type { GlitchListItem } from '#/lib/glitch.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
+vi.mock('../notifications/notifications.service.ts', () => ({
+  notifyAssigned: vi.fn(),
+  notifyStatus: vi.fn(),
+}))
+
 vi.mock('./glitches.repository.ts', () => ({
   findGlitchState: vi.fn(),
   updateGlitchStatus: vi.fn(),
@@ -83,7 +88,7 @@ describe('reopenGlitch', () => {
   it('clears the fix data when going back to LEAKED', async () => {
     vi.mocked(repo.findGlitchState).mockResolvedValue(state({ status: 'FIXED' }))
 
-    await reopenGlitch('GL-0200')
+    await reopenGlitch(aegis, 'GL-0200')
 
     expect(repo.updateGlitchStatus).toHaveBeenCalledWith('GL-0200', 'FIXED', 'LEAKED', null)
   })

@@ -4,6 +4,7 @@ import { getClassifier } from '../ai/classifier.ts'
 import { buildRunbook } from '../ai/runbook.ts'
 import { publish } from '../events/bus.ts'
 import { findGuardianById } from '../guardians/guardians.repository.ts'
+import { notifyAssigned, notifyStatus } from '../notifications/notifications.service.ts'
 import * as repo from './glitches.repository.ts'
 import { assertAssigneeOrCommander, canReopen, nextStatus } from './status.ts'
 import type { GlitchDetail, GlitchListItem, GlitchQuery, RunbookStep } from '#/lib/glitch.ts'
@@ -86,11 +87,12 @@ export async function advanceStatus(actor: Guardian, glitchId: string): Promise<
     throw new AppError('CONFLICT', `${glitchId} changed in the meantime, reload and try again`)
   }
   publish({ type: 'glitch.updated', glitchId })
+  await notifyStatus(glitchId, to, actor.guardianId)
   return listItem(glitchId)
 }
 
 /** FIXED → LEAKED; commander only (enforced by the server function's middleware). */
-export async function reopenGlitch(glitchId: string): Promise<GlitchListItem> {
+export async function reopenGlitch(actor: Guardian, glitchId: string): Promise<GlitchListItem> {
   const state = await requireActiveGlitch(glitchId)
   if (!canReopen(state.status)) {
     throw new AppError(
@@ -102,6 +104,7 @@ export async function reopenGlitch(glitchId: string): Promise<GlitchListItem> {
     throw new AppError('CONFLICT', `${glitchId} changed in the meantime, reload and try again`)
   }
   publish({ type: 'glitch.updated', glitchId })
+  await notifyStatus(glitchId, 'LEAKED', actor.guardianId)
   return listItem(glitchId)
 }
 
@@ -120,6 +123,7 @@ export async function assignGlitch(
   }
   await repo.setAssignee(glitchId, guardianId)
   publish({ type: 'glitch.updated', glitchId })
+  if (guardianId !== null) await notifyAssigned(glitchId, guardianId)
   return listItem(glitchId)
 }
 

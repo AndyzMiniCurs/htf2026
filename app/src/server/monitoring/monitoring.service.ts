@@ -3,6 +3,7 @@ import { SENSORS, SENSOR_IDS } from '#/lib/monitoring.ts'
 import { publish } from '../events/bus.ts'
 import * as glitchRepo from '../glitches/glitches.repository.ts'
 import { listGuardians } from '../guardians/guardians.repository.ts'
+import { notifyLockdown } from '../notifications/notifications.service.ts'
 import { badgesFor } from './badges.ts'
 import { magicLevel } from './magic.ts'
 import * as repo from './monitoring.repository.ts'
@@ -64,6 +65,7 @@ export function triggerIncident(sensorId: SensorId): void {
 export async function setLockdown(on: boolean): Promise<{ on: boolean }> {
   await repo.setLockdown(on)
   publish({ type: 'lockdown', on })
+  await notifyLockdown(on)
   return { on }
 }
 

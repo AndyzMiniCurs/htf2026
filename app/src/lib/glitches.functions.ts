@@ -31,7 +31,9 @@ export const advanceStatus = createServerFn({ method: 'POST' })
 export const reopenGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(glitchIdInput))
-  .handler(async ({ data }): Promise<GlitchListItem> => glitches.reopenGlitch(data.glitchId))
+  .handler(async ({ data, context }): Promise<GlitchListItem> =>
+    glitches.reopenGlitch(context.guardian, data.glitchId),
+  )
 
 export const assignGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])

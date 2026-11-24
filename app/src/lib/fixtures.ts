@@ -1,12 +1,5 @@
 // Stub data for the server functions until each one gets its real service (design D13).
 import type { AssistantAnswer } from './assistant.ts'
-import type { NotificationPrefs } from './monitoring.ts'
-
-export const fixtureNotificationPrefs: NotificationPrefs = {
-  onAssigned: true,
-  onStatus: true,
-  onLockdown: true,
-}
 
 export const fixtureAssistantAnswer: AssistantAnswer = {
   intent: 'glitch-status',
