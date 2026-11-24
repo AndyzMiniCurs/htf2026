@@ -1,7 +1,10 @@
 import { INTENTS } from '#/lib/assistant.ts'
+import { ECHO_DESCRIPTION_MIN } from '#/lib/echo.ts'
+import { nextStatus } from '../glitches/status.ts'
 import type { Classifier } from './classifier.ts'
-import type { AssistantAnswer, Intent } from '#/lib/assistant.ts'
+import type { AssistantAnswer, Intent, OracleAction } from '#/lib/assistant.ts'
 import type { GlitchDetail, GlitchListItem } from '#/lib/glitch.ts'
+import type { Guardian } from '#/lib/guardian.ts'
 import type { Dashboard } from '#/lib/monitoring.ts'
 import type { SensorForesight } from '../monitoring/monitoring.service.ts'
 
@@ -20,25 +23,46 @@ const INTENT_HINTS: Record<Intent, string> = {
 }
 
 const GLITCH_ID = /\bGL-\d{4,}\b/i
-/** Without AI these still reach the foresight answer (spec: Low-cost AI fails open). */
-const FORESIGHT_WORDS = /\b(coming|foresee|predict\w*|future|soon|next)\b/i
+/** Without an AI opinion (off, or timed out) these keywords still reach the right answer. */
+const KEYWORD_INTENTS: Array<[RegExp, Intent]> = [
+  [/\block\s*down\b|\blockdown\b/i, 'set-lockdown'],
+  [/\b(assign|give|hand)\b/i, 'assign-glitch'],
+  [/\b(advance|next (status|stage|step)|mark .* fixed)\b/i, 'advance-glitch'],
+  [/\b(coming|foresee|predict\w*|future|soon)\b/i, 'foresight'],
+  [/\b(who)\b/i, 'glitch-assignee'],
+  [/\bmagic\b/i, 'magic-level'],
+]
 
 export function findGlitchId(question: string): string | null {
   return question.match(GLITCH_ID)?.[0].toUpperCase() ?? null
 }
 
-/** The AI only picks the intent. Without AI a glitch id still gets its status, anything else is unknown. */
-export async function pickIntent(classifier: Classifier, question: string): Promise<Intent> {
+/**
+ * The AI only picks the intent, seeing the conversation's earlier questions so a short follow-up
+ * makes sense. Without AI a glitch id still gets its status, anything else is unknown.
+ */
+export async function pickIntent(
+  classifier: Classifier,
+  question: string,
+  earlier: Array<string> = [],
+): Promise<Intent> {
+  // "report ..." is unambiguous, and the conversation context must not turn it into a question.
+  if (/^\s*(please\s+)?(report|log|file)\s/i.test(question)) {
+    return 'report-echo'
+  }
   const options = INTENTS.map((intent) => `${intent}: ${INTENT_HINTS[intent]}`)
+  const context = earlier.length ? ` Earlier questions: ${JSON.stringify(earlier)}.` : ''
   const top = (
     await classifier.choose(
-      `What is the operator of a city mission control asking? ${JSON.stringify(question)}`,
+      `What is the operator of a city mission control asking now? ${JSON.stringify(question)}${context}`,
       options,
     )
   )?.at(0)
   if (top) return INTENTS[options.indexOf(top.option)] ?? 'unknown'
-  if (FORESIGHT_WORDS.test(question)) return 'foresight'
-  return findGlitchId(question) ? 'glitch-status' : 'unknown'
+  return (
+    KEYWORD_INTENTS.find(([words]) => words.test(question))?.[1] ??
+    (findGlitchId(question) ? 'glitch-status' : 'unknown')
+  )
 }
 
 export type AssistantData = {
@@ -48,17 +72,16 @@ export type AssistantData = {
   glitch: GlitchDetail | null
   /** Filled for the foresight intent. */
   foresight?: Array<SensorForesight>
+  /** The question as asked, who asks it (actions respect their role) and every guardian. */
+  question: string
+  asker: Guardian
+  guardians: Array<Guardian>
 }
 
-// shortcut: intents still being built answer as unknown, removed once each has its template.
-const ANSWERED = new Set<Intent>([
-  'active-summary',
-  'glitch-status',
-  'glitch-assignee',
-  'magic-level',
-  'glitch-runbook',
-  'foresight',
-])
+const REPORT_PREFIX =
+  /^\s*(please\s+)?(report|log|file)\s+(an?\s+)?((new\s+)?(echo|problem|glitch)\s*)?(that|about|of)?\s*:?\s*/i
+const LOCKDOWN_OFF = /\b(off|end|lift|stop|cancel|disable|deactivate)\b/i
+const LOCKDOWN_ON = /\b(on|start|enable|activate|begin|trigger)\b/i
 
 const isOpen = (g: GlitchListItem) => g.status !== 'FIXED'
 const label = (g: GlitchListItem) => `${g.glitchId} (${g.type}, ${g.status})`
@@ -83,8 +106,13 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
     suggestions: asked === 'unknown' ? suggestions : [],
     action: null,
   })
+  const propose = (text: string, glitchIds: Array<string>, action: OracleAction) => ({
+    ...answer(`${text} Confirm to do it.`, glitchIds),
+    action,
+  })
+  const isCommander = data.asker.role === 'commander'
 
-  if (intent === 'unknown' || !ANSWERED.has(intent)) {
+  if (intent === 'unknown') {
     return answer(
       "I can't answer that yet. I know about active glitches, their status, who handles them, their runbooks and the magic level. Try one of these:",
     )
@@ -117,6 +145,28 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
     return answer(`Magic is at ${dashboard.magicLevel}%.${cause}`)
   }
 
+  if (intent === 'report-echo') {
+    const description = data.question.replace(REPORT_PREFIX, '').trim()
+    if (description.length < ECHO_DESCRIPTION_MIN) {
+      return answer(
+        'What should I report? Describe it, like "report a rift opening at the market".',
+      )
+    }
+    return propose(`Report this echo: "${description}"?`, [], { kind: 'report', description })
+  }
+
+  if (intent === 'set-lockdown') {
+    if (!isCommander) return answer('Only a commander can turn lockdown on or off.')
+    const on = LOCKDOWN_OFF.test(data.question)
+      ? false
+      : LOCKDOWN_ON.test(data.question) || !dashboard.lockdown
+    if (on === dashboard.lockdown) return answer(`Lockdown is already ${on ? 'on' : 'off'}.`)
+    return propose(`Turn lockdown ${on ? 'on' : 'off'} for all of Achrona?`, [], {
+      kind: 'lockdown',
+      on,
+    })
+  }
+
   // The remaining intents are about one glitch.
   if (!glitchId) {
     return answer('Which glitch do you mean? Name its id, like GL-0142.', [], 'unknown')
@@ -129,6 +179,42 @@ export function composeAnswer(intent: Intent, data: AssistantData): AssistantAns
     ])
   }
   const assignee = glitch.assignee ? `assigned to ${glitch.assignee.codename}` : 'not assigned yet'
+
+  if (intent === 'assign-glitch') {
+    if (!isCommander) return answer('Only a commander can assign glitches.', [glitchId])
+    if (glitch.status === 'FIXED') return answer(`${glitchId} is already FIXED.`, [glitchId])
+    const words = data.question.toLowerCase().split(/[^\p{L}\p{N}-]+/u)
+    const defenders = data.guardians.filter((g) => g.role === 'defender')
+    const defender = defenders.find((d) => words.includes(d.codename.toLowerCase()))
+    if (!defender) {
+      const names = defenders.map((d) => d.codename).join(', ')
+      return answer(`Who should take ${glitchId}? Name a defender: ${names}.`, [glitchId])
+    }
+    if (glitch.assignee?.guardianId === defender.guardianId) {
+      return answer(`${glitchId} is already assigned to ${defender.codename}.`, [glitchId])
+    }
+    return propose(`Assign ${glitchId} (${glitch.type}) to ${defender.codename}?`, [glitchId], {
+      kind: 'assign',
+      glitchId,
+      guardianId: defender.guardianId,
+      codename: defender.codename,
+    })
+  }
+
+  if (intent === 'advance-glitch') {
+    const to = nextStatus(glitch.status)
+    if (!to) return answer(`${glitchId} is already FIXED.`, [glitchId])
+    if (!isCommander && glitch.assignee?.guardianId !== data.asker.guardianId) {
+      const who = glitch.assignee?.codename ?? 'its assigned defender'
+      return answer(`Only ${who} or a commander can advance ${glitchId}.`, [glitchId])
+    }
+    return propose(`Move ${glitchId} from ${glitch.status} to ${to}?`, [glitchId], {
+      kind: 'advance',
+      glitchId,
+      from: glitch.status,
+      to,
+    })
+  }
 
   if (intent === 'glitch-assignee') {
     return answer(`${glitchId} is ${assignee}.`, [glitchId])

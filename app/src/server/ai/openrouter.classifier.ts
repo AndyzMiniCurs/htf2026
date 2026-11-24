@@ -4,7 +4,7 @@ import type { Classifier } from './classifier.ts'
 // Fallback for Jev (design D6): a general LLM asked for numbers only, as strict JSON.
 // Any mismatch is parsed as "no opinion", never thrown.
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const OPENROUTER_MODEL = 'openai/gpt-4o-mini' // pinned: thresholds (0.8 etc.) are tuned against one model
+const OPENROUTER_MODEL = 'google/gemini-2.5-flash-lite' // pinned: thresholds (0.8 etc.) are tuned against one model
 
 const SYSTEM_PROMPT =
   'You are a classifier for a city incident system. Reply with JSON only, matching the requested shape. ' +
@@ -35,6 +35,7 @@ export function createOpenRouterClassifier({
         body: JSON.stringify({
           model: OPENROUTER_MODEL,
           temperature: 0,
+          max_tokens: 400, // caps cost per call; a 30-option probability map fits easily
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },

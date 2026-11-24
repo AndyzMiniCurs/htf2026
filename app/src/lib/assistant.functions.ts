@@ -7,4 +7,4 @@ import { requireGuardian } from '#/server/auth/middleware.ts'
 export const askAssistant = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .validator(validate(askAssistantInput))
-  .handler(({ data }) => assistant.askAssistant(data.question))
+  .handler(({ data, context }) => assistant.askAssistant(context.guardian, data))

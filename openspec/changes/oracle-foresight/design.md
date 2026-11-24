@@ -88,6 +88,8 @@ The result shows as an Oracle line ("Done: GL-0142 is now assigned to Orion"), a
 - `max_tokens: 400` on every call (enough for a 30-option probability map).
 - The key's $50 monthly cap at OpenRouter is the hard spend limit.
 
+**Result (live check, 24 Nov):** `gemini-2.5-flash-lite` is pinned. It ran the full live check in 27 s against 48 s for gpt-4o-mini, which also hit two 3 s timeouts, and it is a third cheaper. It gave the same answers on moderation, duplicates, solved, assignment and every Oracle intent. The one difference: it typed "the mana gauge reads zero" as `sensor-fault` instead of `magic-drain`, a defensible reading. The Oracle also gets keyword fallbacks for every action and foresight, so a timeout no longer sends "assign GL-0142 to Orion" to the status answer. "report …" is decided without the AI.
+
 ### Server functions and endpoints touched
 
 | Server function | Input | Output | Change |

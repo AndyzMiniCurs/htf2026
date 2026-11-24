@@ -61,12 +61,55 @@ const detail: GlitchDetail = {
   mergedInto: null,
 }
 
+const aegis = { guardianId: 9, codename: 'Aegis', role: 'commander' as const }
+const orion = { guardianId: 2, codename: 'Orion', role: 'defender' as const }
+const base = { dashboard, question: '', asker: aegis, guardians: [aegis, nova, orion] }
 const about = (glitch: GlitchDetail | null, glitchId = 'GL-0142'): AssistantData => ({
-  dashboard,
+  ...base,
   glitchId,
   glitch,
 })
-const none: AssistantData = { dashboard, glitchId: null, glitch: null }
+const none: AssistantData = { ...base, glitchId: null, glitch: null }
+
+describe('actions', () => {
+  it('proposes assigning by codename, for commanders only', () => {
+    const a = composeAnswer('assign-glitch', { ...about(detail), question: 'give it to orion' })
+    expect(a.action).toEqual({
+      kind: 'assign',
+      glitchId: 'GL-0142',
+      guardianId: 2,
+      codename: 'Orion',
+    })
+    const refused = composeAnswer('assign-glitch', {
+      ...about(detail),
+      question: 'give it to orion',
+      asker: nova,
+    })
+    expect(refused.action).toBeNull()
+  })
+
+  it('proposes a report with the words after "report"', () => {
+    expect(
+      composeAnswer('report-echo', { ...none, question: 'report a purple rift above the fountain' })
+        .action,
+    ).toEqual({
+      kind: 'report',
+      description: 'purple rift above the fountain',
+    })
+  })
+
+  it('proposes lockdown for commanders and advance for the assignee', () => {
+    expect(composeAnswer('set-lockdown', { ...none, question: 'turn on lockdown' }).action).toEqual(
+      { kind: 'lockdown', on: true },
+    )
+    expect(
+      composeAnswer('set-lockdown', { ...none, question: 'turn on lockdown', asker: nova }).action,
+    ).toBeNull()
+    expect(composeAnswer('advance-glitch', { ...about(detail), asker: nova }).action).toMatchObject(
+      { from: 'LEAKED', to: 'ASSESSING' },
+    )
+  })
+})
 
 describe('pickIntent', () => {
   it('takes the intent the AI ranks first', async () => {
@@ -85,7 +128,8 @@ describe('pickIntent', () => {
 
   it('without AI answers a glitch id with its status and anything else as unknown', async () => {
     expect(await pickIntent(nullClassifier, "what's up with gl-0142?")).toBe('glitch-status')
-    expect(await pickIntent(nullClassifier, 'how much magic?')).toBe('unknown')
+    expect(await pickIntent(nullClassifier, 'how much magic?')).toBe('magic-level')
+    expect(await pickIntent(nullClassifier, 'tell me a joke')).toBe('unknown')
   })
 
   it('finds the glitch id in any case', () => {

@@ -38,7 +38,7 @@ passes it to the app container.
 | Variable | What |
 |----------|------|
 | `TYPESAFE_API_KEY` | Jev (TypeSafe) classifier for all AI features. Wins when both keys are set. |
-| `OPENROUTER_API_KEY` | Fallback classifier via OpenRouter (`openai/gpt-4o-mini`) when there is no TypeSafe key. |
+| `OPENROUTER_API_KEY` | Fallback classifier via OpenRouter (`google/gemini-2.5-flash-lite`, a low-cost model) when there is no TypeSafe key. |
 | `DATABASE_URL` | Only to point somewhere else than the compose Postgres (`postgresql://htf:htf@localhost:5432/htf`). |
 
 Without an AI key everything still works without AI: each echo becomes a new `unknown` glitch,
