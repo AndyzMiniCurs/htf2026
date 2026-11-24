@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { Ellipsis } from 'lucide-react'
+import { Ellipsis, WifiOff } from 'lucide-react'
 import { cx } from '#/components/ui/cx.ts'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
+import { useOnline } from '#/hooks/useOnline.ts'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
 import { LockdownControl } from './LockdownControl.tsx'
@@ -25,6 +26,7 @@ type AppShellProps = {
  * a spellbook rail from 1024px; a thumb hotbar with the report seal below it.
  */
 export function AppShell({ me, magicLevel, children }: AppShellProps) {
+  const online = useOnline()
   const items = navItems.filter((item) => !item.commanderOnly || me?.role === 'commander')
   return (
     <div className="flex min-h-dvh flex-col">
@@ -43,7 +45,11 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
           id="main"
           className="min-w-0 flex-1 px-4 pt-4 pb-28 sm:px-6 lg:px-8 lg:pt-6 lg:pb-10 print:p-0"
         >
-          {children}
+          <OfflineNotice />
+          {/* Offline, every form control on the page pauses; links and reading keep working. */}
+          <fieldset disabled={!online} className="contents">
+            {children}
+          </fieldset>
         </main>
       </div>
       <Hotbar items={items} />
@@ -94,7 +100,8 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
 /** The live link to mission control: green while events flow, amber while reconnecting. */
 function LivePulse() {
   const { status } = useLiveRealm()
-  const live = status === 'live'
+  const online = useOnline()
+  const live = online && status === 'live'
   return (
     <span
       role="status"
@@ -107,8 +114,30 @@ function LivePulse() {
         )}
         <span className={cx('relative size-2.5 rounded-full', live ? 'bg-verdant' : 'bg-amber')} />
       </span>
-      {live ? 'Live' : status === 'connecting' ? 'Connecting' : 'Reconnecting'}
+      {!online
+        ? 'Offline'
+        : live
+          ? 'Live'
+          : status === 'connecting'
+            ? 'Connecting'
+            : 'Reconnecting'}
     </span>
+  )
+}
+
+/** Says what still works while the device has no network. */
+function OfflineNotice() {
+  const online = useOnline()
+  if (online) return null
+  return (
+    <p
+      role="status"
+      className="mb-4 flex items-center gap-3 rounded-xl border border-amber/60 bg-[color-mix(in_oklab,var(--amber)_12%,var(--panel))] px-4 py-3 text-fg"
+    >
+      <WifiOff aria-hidden className="size-5 shrink-0 text-amber" />
+      You are offline. Mission control shows what it last loaded; reporting and other actions return
+      when the connection does.
+    </p>
   )
 }
 

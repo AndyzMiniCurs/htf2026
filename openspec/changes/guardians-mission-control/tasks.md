@@ -78,7 +78,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 7.4 [FE] Add the speech-to-text mic button (`useSpeech`, Web Speech API, hidden when unsupported) on the echo form; verify on Chrome Android and that it is hidden on Firefox (verified with a stubbed recogniser and with the API removed; still to try on a real phone)
 - [x] 7.5 [FE] Build `/leaderboard` with ranking and badge icons; verify the order matches fixes
 - [x] 7.6 [FE] Build `/council-report` (C) with print CSS and a "Save as PDF" button (`window.print()`); verify the print preview has no nav and fits A4
-- [ ] 7.7 [FE] Add offline support: `public/sw.js` shell cache, `manifest.webmanifest` (installable on phones), `useOnline` badge, server actions disabled offline; verify in DevTools offline mode
+- [x] 7.7 [FE] Add offline support: `public/sw.js` shell cache, `manifest.webmanifest` (installable on phones), `useOnline` badge, server actions disabled offline; verify in DevTools offline mode
 
 ## 8. Demo readiness (integration)
 
