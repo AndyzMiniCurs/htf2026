@@ -101,7 +101,7 @@ function Filters({ search }: { search: GlitchQuery }) {
   const [text, setText] = useState(search.q ?? '')
 
   const update = (patch: Partial<GlitchQuery>) =>
-    navigate({ search: (prev) => clean({ ...prev, ...patch }), replace: true })
+    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true })
 
   // Typing updates the URL after a short pause instead of on every key.
   useEffect(() => {
@@ -286,13 +286,4 @@ function GlitchTable({ glitches }: { glitches: Array<GlitchListItem> }) {
       </tbody>
     </table>
   )
-}
-
-/** Drops empty values so the URL only carries filters that are set. */
-function clean(query: GlitchQuery): GlitchQuery {
-  return Object.fromEntries(
-    Object.entries(query).filter(
-      ([, v]) => v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0),
-    ),
-  ) as GlitchQuery
 }
