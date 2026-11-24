@@ -11,6 +11,7 @@ import { LockdownControl } from './LockdownControl.tsx'
 import { useLiveRealm } from './LiveRealm.tsx'
 import { GlobalShortcuts } from './ShortcutHelp.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
+import { Desync } from './Desync.tsx'
 import { MagicVial } from './MagicVial.tsx'
 import { navItems } from './nav-items.ts'
 import type { NavItem } from './nav-items.ts'
@@ -20,6 +21,8 @@ import type { ReactNode } from 'react'
 type AppShellProps = {
   me: Guardian | null
   magicLevel: number
+  /** Glitches not yet fixed: how hard the Desync shakes the screen. */
+  openGlitches: number
   children: ReactNode
 }
 
@@ -27,7 +30,7 @@ type AppShellProps = {
  * The game HUD around every page: top bar with crest, magic vial and guardian;
  * a spellbook rail from 1024px; a thumb hotbar with the report seal below it.
  */
-export function AppShell({ me, magicLevel, children }: AppShellProps) {
+export function AppShell({ me, magicLevel, openGlitches, children }: AppShellProps) {
   const online = useOnline()
   const items = navItems.filter((item) => !item.commanderOnly || me?.role === 'commander')
   // The rendered match, not the location: the location changes before the new page is ready.
@@ -35,6 +38,7 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <CurseVeins />
+      <Desync openGlitches={openGlitches} />
       <GlobalShortcuts />
       <a
         href="#main"

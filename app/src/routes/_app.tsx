@@ -18,7 +18,11 @@ function AppLayout() {
   const dashboard = Route.useLoaderData()
   return (
     <LiveRealmProvider initialLockdown={dashboard.lockdown}>
-      <AppShell me={me} magicLevel={dashboard.magicLevel}>
+      <AppShell
+        me={me}
+        magicLevel={dashboard.magicLevel}
+        openGlitches={dashboard.recent.filter((g) => g.status !== 'FIXED').length}
+      >
         <Outlet />
       </AppShell>
     </LiveRealmProvider>

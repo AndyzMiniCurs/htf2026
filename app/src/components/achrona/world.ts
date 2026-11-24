@@ -1,4 +1,4 @@
-import type { GlitchListItem } from '#/lib/glitch.ts'
+import type { GlitchListItem, GlitchStatus } from '#/lib/glitch.ts'
 
 /** One floating island of Achrona. `node` is the mesh name inside FloatingIsland.glb. */
 export type District = {
@@ -109,4 +109,61 @@ export function placeGlitch(glitch: Pick<GlitchListItem, 'glitchId' | 'location'
       district.position[2] + Math.sin(angle) * radius,
     ],
   }
+}
+
+/** Lower is more urgent: a leak outranks an assessment, which outranks containment. */
+const URGENCY: Record<GlitchStatus, number> = { LEAKED: 0, ASSESSING: 1, CONTAINING: 2, FIXED: 3 }
+
+export type PlacedRift<TGlitch> = {
+  glitch: TGlitch
+  position: [number, number, number]
+  scale: number
+}
+export type RiftStorm<TGlitch> = { district: District; rifts: Array<PlacedRift<TGlitch>> }
+
+/**
+ * Open glitches gathered per island, so a crowded island reads as one storm instead of a pile of
+ * overlapping rifts: the most urgent rift leads, the others stand evenly on a ring sized to the
+ * crowd, and they shrink as the island fills.
+ */
+export function gatherRifts<
+  TGlitch extends Pick<GlitchListItem, 'glitchId' | 'location' | 'status'>,
+>(glitches: Array<TGlitch>): Array<RiftStorm<TGlitch>> {
+  const byDistrict = new Map<string, { district: District; glitches: Array<TGlitch> }>()
+  for (const glitch of glitches) {
+    if (glitch.status === 'FIXED') continue
+    const { district } = placeGlitch(glitch)
+    const entry = byDistrict.get(district.id) ?? { district, glitches: [] }
+    entry.glitches.push(glitch)
+    byDistrict.set(district.id, entry)
+  }
+  return [...byDistrict.values()].map(({ district, glitches: group }) => {
+    group.sort(
+      (a, b) => URGENCY[a.status] - URGENCY[b.status] || b.glitchId.localeCompare(a.glitchId),
+    )
+    const n = group.length
+    if (n === 1) {
+      const [only] = group
+      return { district, rifts: [{ glitch: only, position: placeGlitch(only).position, scale: 1 }] }
+    }
+    const citadel = district.id === CITADEL.id
+    const radius = Math.min(citadel ? 7 : 3.2, (citadel ? 5.2 : 1.8) + 0.25 * (n - 2))
+    const scale = n <= 3 ? 1 : Math.max(0.5, 1.6 / Math.sqrt(n))
+    const phase = hash(district.id) * Math.PI * 2
+    return {
+      district,
+      rifts: group.map((glitch, i) => {
+        const angle = phase + (i / n) * Math.PI * 2
+        return {
+          glitch,
+          scale,
+          position: [
+            district.position[0] + Math.cos(angle) * radius,
+            district.position[1],
+            district.position[2] + Math.sin(angle) * radius,
+          ] as [number, number, number],
+        }
+      }),
+    }
+  })
 }
