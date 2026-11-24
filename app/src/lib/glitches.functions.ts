@@ -13,6 +13,7 @@ import {
 } from '#/lib/glitch.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
+import * as glitches from '#/server/glitches/glitches.service.ts'
 
 function fixtureItem(glitchId: string): GlitchListItem {
   const item = fixtureGlitches.find((g) => g.glitchId === glitchId)
@@ -23,16 +24,12 @@ function fixtureItem(glitchId: string): GlitchListItem {
 export const getGlitches = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
   .validator(validate(glitchQuerySchema))
-  .handler(async (): Promise<GlitchListItem[]> => fixtureGlitches)
+  .handler(async ({ data }): Promise<GlitchListItem[]> => glitches.getGlitches(data))
 
 export const getGlitch = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
   .validator(validate(glitchIdInput))
-  .handler(async ({ data }): Promise<GlitchDetail> => {
-    const detail = fixtureGlitchDetail(data.glitchId)
-    if (!detail) throw new AppError('NOT_FOUND', `Glitch ${data.glitchId} not found`)
-    return detail
-  })
+  .handler(async ({ data }): Promise<GlitchDetail> => glitches.getGlitch(data.glitchId))
 
 export const advanceStatus = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])

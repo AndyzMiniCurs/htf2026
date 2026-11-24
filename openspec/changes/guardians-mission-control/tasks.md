@@ -27,7 +27,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 ## 3. Base: echoes become glitches, glitch list
 
-- [ ] 3.1 [BE] Write the glitch repository and the real `getGlitches(GlitchQuery)` and `getGlitch`, excluding merged glitches; verify tests for keyword, status, type, date range and sort
+- [x] 3.1 [BE] Write the glitch repository and the real `getGlitches(GlitchQuery)` and `getGlitch`, excluding merged glitches; verify tests for keyword, status, type, date range and sort
 - [ ] 3.2 [BE] Implement `echo.service.reportEcho` without AI: validation, `GL-` id from the sequence, glitch + echo in one transaction, image stored in `echo_images` after a magic-byte and 5 MB check; verify an integration test against the compose Postgres
 - [ ] 3.3 [BE] Add the `GET /api/images/$echoId` server route (session required, stored mime); verify an anonymous request gets 401 and a signed-in one gets the image
 - [ ] 3.4 [FE] Build the `/echoes/new` form: description with 3-1000 counter, optional map location picker, optional image with preview, submit, then navigate to the glitch; verify on a 375 px phone
