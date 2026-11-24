@@ -1,8 +1,9 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { ArrowLeft, Bot, GitMerge, Radar, ScrollText, Sparkles } from 'lucide-react'
+import { ArrowLeft, Bot, GitMerge, Radar, ScrollText } from 'lucide-react'
 import { AchronaMap } from '#/components/achrona/AchronaMap.tsx'
 import { GlitchTypeBadge, StatusBadge } from '#/components/glitches/GlitchBadges.tsx'
 import { LifecycleStrip } from '#/components/glitches/LifecycleStrip.tsx'
+import { Runbook } from '#/components/glitches/Runbook.tsx'
 import { Badge } from '#/components/ui/Badge.tsx'
 import { EmptyState } from '#/components/ui/EmptyState.tsx'
 import { Panel } from '#/components/ui/Panel.tsx'
@@ -109,7 +110,11 @@ function GlitchPage() {
             )}
           </Panel>
           <Panel heading="Runbook">
-            <Runbook steps={glitch.runbook} />
+            <Runbook
+              glitchId={glitch.glitchId}
+              steps={glitch.runbook}
+              editable={permissions.canWork && glitch.status !== 'FIXED'}
+            />
           </Panel>
         </div>
       </div>
@@ -222,31 +227,6 @@ function EchoTimeline({
               />
             </a>
           )}
-        </li>
-      ))}
-    </ol>
-  )
-}
-
-function Runbook({ steps }: { steps: GlitchDetail['runbook'] }) {
-  if (steps.length === 0) {
-    return (
-      <p className="flex items-start gap-2 text-fg-muted">
-        <Sparkles aria-hidden className="mt-0.5 size-4 shrink-0 text-gold" />
-        The runbook is being written. Steps appear once the glitch type is known.
-      </p>
-    )
-  }
-  return (
-    <ol className="flex flex-col gap-2.5">
-      {steps.map((step, i) => (
-        <li key={i} className="flex gap-3">
-          <span
-            className={`title-gothic grid size-7 shrink-0 place-items-center rounded-full border text-base ${step.done ? 'border-verdant bg-verdant/15 text-verdant' : 'border-line-strong text-fg-muted'}`}
-          >
-            {i + 1}
-          </span>
-          <span className={step.done ? 'text-fg-faint line-through' : 'text-fg'}>{step.text}</span>
         </li>
       ))}
     </ol>

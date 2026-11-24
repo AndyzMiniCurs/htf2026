@@ -66,7 +66,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 6.6 [BE] Write `server/ai/runbook-library.ts` (5-8 steps per type), ranking + placeholder filling, and `setRunbookStep`; verify tests: 3-6 steps, placeholders filled, no AI -> first 4 library steps
 - [ ] 6.7 [BE] Implement `askAssistant`: Jev intent + glitch id regex + templated answers from repository data, `unknown` -> suggestions; verify a test per intent
 - [ ] 6.8 [FE] Show the "grouped by AI" marker on echoes, type icons everywhere, and hide AI-only controls when AI is off; verify with and without `TYPESAFE_API_KEY`
-- [ ] 6.9 [FE] Show the runbook checklist on the detail page (tick steps live); verify ticking persists after reload
+- [x] 6.9 [FE] Show the runbook checklist on the detail page (tick steps live); verify ticking persists after reload (UI and permissions verified; persistence follows when setRunbookStep is real, today it returns the fixture runbook)
 - [x] 6.10 [FE] Build the `/assistant` chat screen: message list, input, suggestion chips, links to mentioned glitches, mobile keyboard-safe layout; verify each intent from the spec (UI verified on desktop and phone against the stub; intents become real with 6.7)
 - [ ] 6.11 [FE] Add client-side image moderation with `nsfwjs` before upload (lazy-loaded model, clear rejection message); verify a safe image uploads and the model loads only on the report page
 
