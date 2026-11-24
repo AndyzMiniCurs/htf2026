@@ -8,8 +8,10 @@ import {
 } from '#/lib/echo.ts'
 import { fixtureEchoes, fixtureMe } from '#/lib/fixtures.ts'
 import { validate } from '#/lib/validate.ts'
+import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
 
 export const reportEcho = createServerFn({ method: 'POST' })
+  .middleware([requireGuardian])
   .validator(parseReportEchoForm)
   .handler(
     async ({ data }): Promise<ReportEchoResult> => ({
@@ -29,6 +31,7 @@ export const reportEcho = createServerFn({ method: 'POST' })
   )
 
 export const addGlitchUpdate = createServerFn({ method: 'POST' })
+  .middleware([requireGuardian])
   .validator(validate(addGlitchUpdateInput))
   .handler(
     async ({ data }): Promise<AddGlitchUpdateResult> => ({
@@ -47,6 +50,7 @@ export const addGlitchUpdate = createServerFn({ method: 'POST' })
   )
 
 export const moveEcho = createServerFn({ method: 'POST' })
+  .middleware([requireCommander])
   .validator(validate(moveEchoInput))
   .handler(
     async ({ data }): Promise<{ glitchId: string }> => ({
