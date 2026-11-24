@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
 import { Route as AppCouncilReportRouteImport } from './routes/_app/council-report'
 import { Route as AppGuardiansRouteImport } from './routes/_app/guardians'
+import { Route as AppLabRouteImport } from './routes/_app/lab'
 import { Route as AppLeaderboardRouteImport } from './routes/_app/leaderboard'
 import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppSensorsRouteImport } from './routes/_app/sensors'
@@ -52,6 +53,11 @@ const AppCouncilReportRoute = AppCouncilReportRouteImport.update({
 const AppGuardiansRoute = AppGuardiansRouteImport.update({
   id: '/guardians',
   path: '/guardians',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLabRoute = AppLabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AppAssistantRoute
   '/council-report': typeof AppCouncilReportRoute
   '/guardians': typeof AppGuardiansRoute
+  '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/assistant': typeof AppAssistantRoute
   '/council-report': typeof AppCouncilReportRoute
   '/guardians': typeof AppGuardiansRoute
+  '/lab': typeof AppLabRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/map': typeof AppMapRoute
   '/sensors': typeof AppSensorsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/_app/assistant': typeof AppAssistantRoute
   '/_app/council-report': typeof AppCouncilReportRoute
   '/_app/guardians': typeof AppGuardiansRoute
+  '/_app/lab': typeof AppLabRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/map': typeof AppMapRoute
   '/_app/sensors': typeof AppSensorsRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/council-report'
     | '/guardians'
+    | '/lab'
     | '/leaderboard'
     | '/map'
     | '/sensors'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/council-report'
     | '/guardians'
+    | '/lab'
     | '/leaderboard'
     | '/map'
     | '/sensors'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/_app/assistant'
     | '/_app/council-report'
     | '/_app/guardians'
+    | '/_app/lab'
     | '/_app/leaderboard'
     | '/_app/map'
     | '/_app/sensors'
@@ -251,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/guardians'
       fullPath: '/guardians'
       preLoaderRoute: typeof AppGuardiansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/lab': {
+      id: '/_app/lab'
+      path: '/lab'
+      fullPath: '/lab'
+      preLoaderRoute: typeof AppLabRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/leaderboard': {
@@ -323,6 +342,7 @@ interface AppRouteChildren {
   AppAssistantRoute: typeof AppAssistantRoute
   AppCouncilReportRoute: typeof AppCouncilReportRoute
   AppGuardiansRoute: typeof AppGuardiansRoute
+  AppLabRoute: typeof AppLabRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMapRoute: typeof AppMapRoute
   AppSensorsRoute: typeof AppSensorsRoute
@@ -337,6 +357,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAssistantRoute: AppAssistantRoute,
   AppCouncilReportRoute: AppCouncilReportRoute,
   AppGuardiansRoute: AppGuardiansRoute,
+  AppLabRoute: AppLabRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,
   AppMapRoute: AppMapRoute,
   AppSensorsRoute: AppSensorsRoute,
