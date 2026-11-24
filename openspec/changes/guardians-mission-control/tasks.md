@@ -16,7 +16,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 ## 2. Base: login and roles
 
-- [ ] 2.1 [BE] Write `server/auth/password.ts` (scrypt hash + timing-safe verify); verify unit tests: correct password ok, wrong password rejected, two hashes of the same password differ
+- [x] 2.1 [BE] Write `server/auth/password.ts` (scrypt hash + timing-safe verify); verify unit tests: correct password ok, wrong password rejected, two hashes of the same password differ
 - [ ] 2.2 [BE] Implement sessions (`server/auth/session.ts`) and the real `login`/`logout`/`getMe`; verify login sets an httpOnly cookie, a wrong codename or password gives the same generic error, and logout clears the session row
 - [ ] 2.3 [BE] Add `requireGuardian` / `requireCommander` middleware to every server function; verify tests: anonymous call -> `UNAUTHORIZED`, defender on a commander-only function -> `FORBIDDEN`
 - [ ] 2.4 [BE] Implement the guardians service (`listGuardians`, `createGuardian`, `setGuardianRole`) including the last-commander rule; verify tests for duplicate codename and for demoting the last commander
