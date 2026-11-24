@@ -1,0 +1,148 @@
+import { describe, expect, it } from 'vitest'
+import { composeAnswer, findGlitchId, pickIntent } from './assistant.ts'
+import { nullClassifier } from './null.classifier.ts'
+import type { AssistantData } from './assistant.ts'
+import type { GlitchDetail, GlitchListItem } from '#/lib/glitch.ts'
+import type { Dashboard } from '#/lib/monitoring.ts'
+
+const nova = { guardianId: 1, codename: 'Nova', role: 'defender' as const }
+
+const item = (over: Partial<GlitchListItem>): GlitchListItem => ({
+  glitchId: 'GL-0142',
+  status: 'LEAKED',
+  type: 'time-anomaly',
+  description: 'Time loop at the clock tower',
+  timestamp: '2026-11-24T10:00:00.000Z',
+  location: null,
+  assignee: nova,
+  echoCount: 2,
+  source: 'echo',
+  ...over,
+})
+
+const dashboard: Dashboard = {
+  magicLevel: 64,
+  byStatus: { LEAKED: 1, ASSESSING: 1, CONTAINING: 0, FIXED: 3 },
+  byType: {
+    'time-anomaly': 1,
+    portal: 1,
+    'magic-drain': 0,
+    'sensor-fault': 0,
+    creature: 0,
+    unknown: 0,
+  },
+  recent: [
+    item({}),
+    item({ glitchId: 'GL-0139', type: 'portal', status: 'ASSESSING', assignee: null }),
+    item({ glitchId: 'GL-0100', status: 'FIXED' }),
+  ],
+  lockdown: false,
+}
+
+const detail: GlitchDetail = {
+  ...item({}),
+  echoes: [
+    {
+      echoId: 7,
+      glitchId: 'GL-0142',
+      description: 'The clock tower keeps repeating the same minute',
+      timestamp: '2026-11-24T10:05:00.000Z',
+      reporter: nova,
+      location: null,
+      groupedByAi: true,
+      imageUrl: null,
+    },
+  ],
+  runbook: [
+    { text: 'Seal the clock tower', done: true },
+    { text: 'Reset the chronometer', done: false },
+  ],
+  mergedInto: null,
+}
+
+const about = (glitch: GlitchDetail | null, glitchId = 'GL-0142'): AssistantData => ({
+  dashboard,
+  glitchId,
+  glitch,
+})
+const none: AssistantData = { dashboard, glitchId: null, glitch: null }
+
+describe('pickIntent', () => {
+  it('takes the intent the AI ranks first', async () => {
+    const ai = {
+      ...nullClassifier,
+      choose: async (_q: string, options: Array<string>) =>
+        options
+          .map((option) => ({
+            option,
+            probability: option.startsWith('magic-level') ? 0.9 : 0.02,
+          }))
+          .sort((a, b) => b.probability - a.probability),
+    }
+    expect(await pickIntent(ai, 'how much magic is left?')).toBe('magic-level')
+  })
+
+  it('without AI answers a glitch id with its status and anything else as unknown', async () => {
+    expect(await pickIntent(nullClassifier, "what's up with gl-0142?")).toBe('glitch-status')
+    expect(await pickIntent(nullClassifier, 'how much magic?')).toBe('unknown')
+  })
+
+  it('finds the glitch id in any case', () => {
+    expect(findGlitchId("what's going on with gl-0142?")).toBe('GL-0142')
+    expect(findGlitchId('nothing here')).toBeNull()
+  })
+})
+
+describe('composeAnswer', () => {
+  it('summarises the active glitches', () => {
+    const a = composeAnswer('active-summary', none)
+    expect(a.text).toBe(
+      '2 open glitches: 1 leaked, 1 assessing, 0 containing. Newest: GL-0142 (time-anomaly, LEAKED), GL-0139 (portal, ASSESSING). Magic is at 64%.',
+    )
+    expect(a.glitchIds).toEqual(['GL-0142', 'GL-0139'])
+  })
+
+  it('answers a glitch status with type, assignee and last echo', () => {
+    expect(composeAnswer('glitch-status', about(detail))).toMatchObject({
+      text: 'GL-0142 is LEAKED (time-anomaly), assigned to Nova. Last echo: "The clock tower keeps repeating the same minute".',
+      glitchIds: ['GL-0142'],
+    })
+  })
+
+  it('says who is assigned', () => {
+    expect(composeAnswer('glitch-assignee', about(detail)).text).toBe(
+      'GL-0142 is assigned to Nova.',
+    )
+    expect(composeAnswer('glitch-assignee', about({ ...detail, assignee: null })).text).toBe(
+      'GL-0142 is not assigned yet.',
+    )
+  })
+
+  it('gives the magic level and its biggest drain', () => {
+    expect(composeAnswer('magic-level', none).text).toBe(
+      'Magic is at 64%. The biggest drain is 1 open time-anomaly glitch.',
+    )
+  })
+
+  it('lists the runbook steps', () => {
+    expect(composeAnswer('glitch-runbook', about(detail)).text).toBe(
+      'Runbook for GL-0142 (time-anomaly): 1. Seal the clock tower (done) 2. Reset the chronometer',
+    )
+  })
+
+  it('says it cannot answer and suggests questions with a real glitch id', () => {
+    const a = composeAnswer('unknown', none)
+    expect(a.text).toMatch(/^I can't answer that/)
+    expect(a.suggestions).toContain('What should I do about GL-0142?')
+  })
+
+  it('asks for an id, or says the glitch is missing, with suggestions', () => {
+    expect(composeAnswer('glitch-status', none)).toMatchObject({
+      intent: 'unknown',
+      text: 'Which glitch do you mean? Name its id, like GL-0142.',
+    })
+    const missing = composeAnswer('glitch-status', about(null, 'GL-9999'))
+    expect(missing.text).toBe("I can't find GL-9999.")
+    expect(missing.suggestions.length).toBeGreaterThan(0)
+  })
+})
