@@ -108,7 +108,7 @@ function QuestLogPage() {
               </li>
             ))}
           </ol>
-          <Panel flush className="hidden overflow-hidden lg:block">
+          <Panel flush className="hidden lg:block">
             <GlitchTable glitches={glitches} selectedId={selectedId} />
           </Panel>
         </>

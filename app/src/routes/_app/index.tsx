@@ -34,12 +34,7 @@ function OverviewPage() {
       <h1 className="sr-only">Overview of Achrona</h1>
       {lockdown && <LockdownBanner />}
       <div className="flex min-w-0 flex-col gap-5">
-        <Panel
-          flush
-          heading="Achrona"
-          actions={<StatusTally byStatus={dashboard.byStatus} />}
-          className="overflow-hidden"
-        >
+        <Panel flush heading="Achrona" actions={<StatusTally byStatus={dashboard.byStatus} />}>
           <div className="relative h-[clamp(20rem,52vh,46rem)] lg:h-[max(26rem,calc(100dvh-27rem))]">
             <AchronaDiorama
               glitches={glitches}
@@ -62,7 +57,8 @@ function OverviewPage() {
 
       <Panel
         heading={<QuestLogHeading count={open.length} />}
-        className="lg:max-h-[calc(100dvh-8.5rem)] lg:overflow-y-auto"
+        className="lg:flex lg:max-h-[calc(100dvh-8.5rem)] lg:flex-col"
+        bodyClassName="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain"
       >
         <QuestLog
           glitches={glitches}

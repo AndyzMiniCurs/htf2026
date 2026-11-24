@@ -38,7 +38,16 @@ export function Panel({
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={cx(!flush && 'p-5', bodyClassName)}>{children}</div>
+      {/* Flush content is clipped here, not on the section, so the corner cubes stay whole. */}
+      <div
+        className={cx(
+          flush ? 'overflow-hidden' : 'p-5',
+          flush && (heading || actions ? 'rounded-b-xl' : 'rounded-xl'),
+          bodyClassName,
+        )}
+      >
+        {children}
+      </div>
     </section>
   )
 }
