@@ -30,8 +30,8 @@ Pointer: r3f `onClick` on shards (hit) and on the arena floor (miss). Keyboard: 
 ### D4. Flow and sealing
 `StageActions` opens `<SealingBattle glitch=… onSealed=… />` (a full-screen native `<dialog>` like `components/ui/Dialog.tsx`) when the current stage is `CONTAINING`; other stages keep the plain button. On `won`, the overlay calls `advanceStatus({ data: { glitchId } })` once (guarded by a ref), shows the victory card on success, and offers retry on failure without leaving the dialog. "Seal without the battle" calls the same function directly. Closing before success calls nothing. After success the dialog's "Back to the glitch" closes it and `router.invalidate()` refreshes the page.
 
-### D5. The familiar's name
-A single exported constant `FAMILIAR = { name: 'the Oracle', title: 'AI familiar' }` in `components/battle/familiar.ts`, so the team can rename it for the pitch in one place. No third-party logos or brand art.
+### D5. The familiar: Claude
+A single exported constant `FAMILIAR = { name: 'Claude', title: 'AI familiar' }` in `components/battle/familiar.ts`; the summon button reads "Summon Claude". The team chose the name as a hackathon pitch joke (the project is not published). The familiar is drawn by us (glowing orb with a trail); no third-party logos or brand art are used.
 
 ### Server functions / HTTP endpoints
 

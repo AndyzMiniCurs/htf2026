@@ -36,7 +36,7 @@ Weak-point shards SHALL move around the creature. Hitting a shard SHALL cast a s
 - **THEN** health is unchanged and the miss is counted
 
 ### Requirement: Summon the AI familiar
-When the summon meter is full the guardian SHALL be able to summon the AI familiar once per battle; the familiar SHALL strike the creature for heavy damage with its own effect.
+When the summon meter is full the guardian SHALL be able to summon the AI familiar, Claude, once per battle; the familiar SHALL strike the creature for heavy damage with its own effect.
 
 #### Scenario: Summon ready
 - **WHEN** the meter is full and the guardian summons
