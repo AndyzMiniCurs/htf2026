@@ -1,6 +1,6 @@
 import { AppError } from '#/lib/errors.ts'
 import { getClassifier } from '../ai/classifier.ts'
-import { classifyType, findMatchingGlitch, moderate } from '../ai/triage.ts'
+import { classifyType, findMatchingGlitch, moderate, saysSolved } from '../ai/triage.ts'
 import { publish } from '../events/bus.ts'
 import { listMatchCandidates, updateGlitchStatus } from '../glitches/glitches.repository.ts'
 import { autoAssign, requireActiveGlitch } from '../glitches/glitches.service.ts'
@@ -117,13 +117,17 @@ export async function getEchoImage(echoId: number) {
   return repo.findEchoImage(echoId)
 }
 
-/** A progress echo on an existing glitch: its assignee or a commander, no duplicate detection. */
+/**
+ * A progress echo on an existing glitch: its assignee or a commander, no duplicate detection.
+ * An update the AI reads as "solved" closes the glitch (auto-close).
+ */
 export async function addGlitchUpdate(
   author: Guardian,
   { glitchId, description }: AddGlitchUpdateInput,
 ): Promise<AddGlitchUpdateResult> {
   const state = await requireActiveGlitch(glitchId)
   assertAssigneeOrCommander(author, state.assignedGuardianId)
+  const solved = state.status !== 'FIXED' && (await saysSolved(getClassifier(), description))
   const timestamp = new Date().toISOString()
   const echoId = await repo.insertEcho(glitchId, {
     description,
@@ -132,6 +136,17 @@ export async function addGlitchUpdate(
     location: null,
   })
   publish({ type: 'echo.created', echoId, glitchId })
+  // Credit goes to the assignee, as with a manual fix; a status race just skips the auto-close.
+  const autoClosed =
+    solved &&
+    (await updateGlitchStatus(glitchId, state.status, 'FIXED', {
+      fixedAt: timestamp,
+      fixedBy: state.assignedGuardianId,
+    }))
+  if (autoClosed) {
+    publish({ type: 'glitch.updated', glitchId })
+    await notifyStatus(glitchId, 'FIXED', author.guardianId)
+  }
   return {
     echo: {
       echoId,
@@ -143,7 +158,7 @@ export async function addGlitchUpdate(
       groupedByAi: false,
       imageUrl: null,
     },
-    autoClosed: false,
+    autoClosed,
   }
 }
 

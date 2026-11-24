@@ -60,7 +60,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 - [x] 6.1 [BE] Add moderation and type classification to `reportEcho` through the classifier port; verify tests with a fake classifier: spam rejected with the spec message, "time loop" -> `time-anomaly`, classifier `null` -> `unknown` and still created
 - [x] 6.2 [BE] Add duplicate grouping (open glitches) and reopen (glitches fixed in the last 24 h) at the 0.8 threshold; verify tests: 0.85 -> grouped with `groupedByAi`, 0.5 -> new glitch, match on a fixed glitch -> reopened `LEAKED`
-- [ ] 6.3 [BE] Add auto-close to `addGlitchUpdate` (P(solved) ≥ 0.8 -> `FIXED`, `autoClosed: true`); verify tests for both outcomes
+- [x] 6.3 [BE] Add auto-close to `addGlitchUpdate` (P(solved) ≥ 0.8 -> `FIXED`, `autoClosed: true`); verify tests for both outcomes
 - [x] 6.4 [BE] Write `server/monitoring/anomaly.ts` (pure: ≥40% drop in 5 min, 3σ over 15 min) and wire predictive glitch creation (one open per sensor, `source: 'prediction'`); verify unit tests with crafted series and that `triggerIncident` creates exactly one glitch
 - [x] 6.5 [BE] Add auto-assign (Jev score × 1/(1 + open load), fallback = least-loaded defender); verify a test where the specialist with the lower load wins
 - [x] 6.6 [BE] Write `server/ai/runbook-library.ts` (5-8 steps per type), ranking + placeholder filling, and `setRunbookStep`; verify tests: 3-6 steps, placeholders filled, no AI -> first 4 library steps

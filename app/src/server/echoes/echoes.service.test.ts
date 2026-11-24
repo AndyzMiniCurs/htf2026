@@ -4,7 +4,7 @@ import { db } from '#/db/index.ts'
 import { echoImages, echoes, glitches, guardians } from '#/db/schema.ts'
 import { nullClassifier } from '../ai/null.classifier.ts'
 import { NOT_USEFUL_MESSAGE } from '../ai/triage.ts'
-import { reportEcho } from './echoes.service.ts'
+import { addGlitchUpdate, reportEcho } from './echoes.service.ts'
 import type * as ClassifierModule from '../ai/classifier.ts'
 import type { Classifier } from '../ai/classifier.ts'
 import type { Guardian } from '#/lib/guardian.ts'
@@ -226,5 +226,30 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     expect(again).toMatchObject({ glitchId: first.glitchId, outcome: 'reopened' })
     const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, first.glitchId))
     expect(glitch).toMatchObject({ status: 'LEAKED', fixedAt: null })
+  })
+
+  it('auto-closes a glitch when an update says it is solved, crediting the assignee', async () => {
+    const { glitchId } = await reportEcho(reporter, {
+      description: 'Portal flicker',
+      location: null,
+      image: null,
+    })
+    created.push(glitchId)
+    await db
+      .update(glitches)
+      .set({ status: 'CONTAINING', assignedGuardianId: reporter.guardianId })
+      .where(eq(glitches.glitchId, glitchId))
+    ai.current = { ...nullClassifier, yesNo: async (q) => (q.includes('all clear') ? 0.9 : 0.4) }
+
+    const stillOpen = await addGlitchUpdate(reporter, { glitchId, description: 'still unstable' })
+    expect(stillOpen.autoClosed).toBe(false)
+    const closed = await addGlitchUpdate(reporter, {
+      glitchId,
+      description: 'all clear, the portal is stable again',
+    })
+
+    expect(closed.autoClosed).toBe(true)
+    const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, glitchId))
+    expect(glitch).toMatchObject({ status: 'FIXED', fixedBy: reporter.guardianId })
   })
 })
