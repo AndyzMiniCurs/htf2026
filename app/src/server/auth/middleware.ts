@@ -2,7 +2,7 @@ import { createMiddleware } from '@tanstack/react-start'
 import { assertCommander, assertGuardian } from './access.ts'
 import { currentGuardian } from './session.ts'
 
-/** Every server function except login/getMe: puts the signed-in guardian on `context.guardian`. */
+/** Every server function except login/getMe/logout: puts the signed-in guardian on `context.guardian`. */
 export const requireGuardian = createMiddleware({ type: 'function' }).server(async ({ next }) =>
   next({ context: { guardian: assertGuardian(await currentGuardian()) } }),
 )
