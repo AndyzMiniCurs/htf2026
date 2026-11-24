@@ -16,6 +16,19 @@ jobs:
     defaults:
       run:
         working-directory: app
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: htf
+          POSTGRES_PASSWORD: htf
+          POSTGRES_DB: htf
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U htf -d htf" --health-interval 2s --health-retries 15
+    env:
+      DATABASE_URL: postgresql://htf:htf@localhost:5432/htf
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -27,5 +40,12 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Push schema
+        run: npm run db:push
+      - name: Test
+        run: npm test
+      # Lint stays local for now: typescript-eslint crashes on TypeScript 6 in require-await.
       - name: Build
         run: npm run build

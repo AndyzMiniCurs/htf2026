@@ -10,7 +10,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 1.2 [BE] Write the contract: zod schemas + inferred types + constants for every type in D12 in `lib/glitch.ts`, `lib/echo.ts`, `lib/guardian.ts`, `lib/monitoring.ts`, `lib/assistant.ts`, `lib/live-events.ts`, plus `AppError` in `lib/errors.ts`; verify `npm run typecheck` passes
 - [x] 1.3 [BE] Add stub server functions for every row of the D12 table, returning data from `lib/fixtures.ts`, so FE can build every screen; verify each stub returns its fixture when called from a route loader
 - [x] 1.4 [BE] Check the real Jev API (endpoint, payload, auth) with one curl call, then write `server/ai/classifier.ts` (port), `jev.classifier.ts` (fetch, 3 s timeout) and `null.classifier.ts`; verify a unit test with a mocked `fetch` covers success, timeout -> `null` and missing key -> null classifier
-- [ ] 1.5 [FE] Add quality tooling: `vitest`, ESLint (`@tanstack/eslint-config`), Prettier, scripts `typecheck`/`lint`/`format`/`test`, and add typecheck + lint + test steps to `.github/workflows/build.yml`; verify all four scripts pass locally
+- [x] 1.5 [FE] Add quality tooling: `vitest`, ESLint (`@tanstack/eslint-config`), Prettier, scripts `typecheck`/`lint`/`format`/`test`, and add typecheck + lint + test steps to `.github/workflows/build.yml`; verify all four scripts pass locally
 - [x] 1.6 [FE] Build the mobile-first app shell: bottom nav below 1024 px and the starter `Sidebar` from 1024 px, both driven by one `navItems` list, plus a page container with safe-area padding; verify at 375 px and 1440 px
 - [x] 1.7 [FE] Add UI primitives in `components/ui`: Button, Input, Textarea, Select, Badge, Dialog, Toast, EmptyState; plus `StatusBadge` and `GlitchTypeBadge` (lucide icon + color per `GlitchType`) in `components/glitches`; verify they render in light and dark mode
 
@@ -42,7 +42,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 4.3 [FE] Add detail-page actions: advance status, reopen (C), assign dropdown (C), add update form (assignee); buttons appear only when allowed; verify as defender and as commander
 - [ ] 4.4 [FE] Add merge-glitch and move-echo controls (C) on the detail page; verify the merged glitch disappears from the list
 - [ ] 4.5 [FE] Write the `useShortcuts` hook (`j`/`k`/`Enter`/`n`/`?`, ignored inside inputs) and a shortcut help dialog; verify that typing "j" in search does not navigate
-- [ ] 4.6 [FE] Add the light/dark/system theme toggle with no flash (inline script in `__root.tsx`, `localStorage`); verify a reload in dark mode shows no light flash
+- [x] 4.6 [FE] Add the light/dark/system theme toggle with no flash (inline script in `__root.tsx`, `localStorage`); verify a reload in dark mode shows no light flash
 
 ## 5. Real-time monitoring
 
