@@ -3,13 +3,24 @@ import { db } from '#/db/index.ts'
 import { guardians, sessions } from '#/db/schema.ts'
 import type { Guardian } from '#/lib/guardian.ts'
 
-export async function insertSession(values: { tokenHash: string; guardianId: number; expiresAt: string }) {
+export async function insertSession(values: {
+  tokenHash: string
+  guardianId: number
+  expiresAt: string
+}) {
   await db.insert(sessions).values(values)
 }
 
-export async function findGuardianBySession(tokenHash: string, now: string): Promise<Guardian | null> {
+export async function findGuardianBySession(
+  tokenHash: string,
+  now: string,
+): Promise<Guardian | null> {
   const [row] = await db
-    .select({ guardianId: guardians.guardianId, codename: guardians.codename, role: guardians.role })
+    .select({
+      guardianId: guardians.guardianId,
+      codename: guardians.codename,
+      role: guardians.role,
+    })
     .from(sessions)
     .innerJoin(guardians, eq(sessions.guardianId, guardians.guardianId))
     .where(and(eq(sessions.tokenHash, tokenHash), gt(sessions.expiresAt, now)))

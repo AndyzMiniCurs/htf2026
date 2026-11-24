@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
-import { Ellipsis, Megaphone } from 'lucide-react'
+import { Ellipsis } from 'lucide-react'
 import { cx } from '#/components/ui/cx.ts'
 import { Button } from '#/components/ui/Button.tsx'
+import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { Crest } from './Crest.tsx'
 import { GuardianMenu } from './GuardianMenu.tsx'
 import { CurseVeins } from './CurseVeins.tsx'
@@ -67,7 +68,7 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
         <div className="ml-auto flex items-center gap-3 md:ml-0">
           <LivePulse />
           <div className="hidden lg:block">
-            <Button size="md" icon={<Megaphone aria-hidden className="size-4" />}>
+            <Button size="md" icon={<HornIcon className="size-5" />}>
               Report an echo
             </Button>
           </div>
@@ -94,9 +95,9 @@ function LivePulse() {
 }
 
 const railItem =
-  'group relative flex size-13 items-center justify-center rounded-xl text-fg-muted transition-colors duration-200 hover:bg-panel-hi hover:text-fg'
+  'group relative flex size-13 items-center justify-center rounded-lg border border-line bg-field/70 text-fg-muted shadow-[inset_0_2px_8px_rgb(0_0_0/0.5)] transition-[color,border-color,box-shadow] duration-200 hover:border-line-strong hover:text-fg'
 
-/** The spellbook rail. Labels appear as tooltips; the active page glows like a lit rune. */
+/** The spellbook rail: one inventory slot per page; the active slot is framed in gold. Labels show as tooltips. */
 function Rail({ items }: { items: Array<NavItem> }) {
   return (
     <nav
@@ -104,14 +105,14 @@ function Rail({ items }: { items: Array<NavItem> }) {
       className="sticky top-20 z-20 hidden h-[calc(100dvh-5rem)] w-22 shrink-0 flex-col items-center gap-2 border-r border-line bg-[color-mix(in_oklab,var(--ground)_70%,transparent)] py-6 backdrop-blur-md lg:flex"
     >
       {items.map((item) => (
-        <NavEntry key={item.label} item={item} className={railItem} iconClass="size-6" tooltip />
+        <NavEntry key={item.label} item={item} className={railItem} iconClass="size-7" tooltip />
       ))}
     </nav>
   )
 }
 
 const hotbarItem =
-  'flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-fg-muted text-[0.7rem] font-medium transition-colors'
+  'flex h-14 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-transparent text-fg-muted text-[0.7rem] font-medium transition-colors'
 
 /** Phone navigation: four hotbar slots and the report seal raised in the middle. */
 function Hotbar({ items }: { items: Array<NavItem> }) {
@@ -129,7 +130,7 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
             key={item.label}
             item={item}
             className={hotbarItem}
-            iconClass="size-6"
+            iconClass="size-7"
             showLabel
           />
         ))}
@@ -137,9 +138,9 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
           <button
             type="button"
             aria-label="Report an echo"
-            className="-mt-7 grid size-16 place-items-center rounded-full border-4 border-ground bg-[radial-gradient(circle_at_35%_30%,var(--pink),var(--curse)_55%,#4a0f72)] text-white shadow-[0_10px_24px_-6px_var(--curse)] transition-transform active:scale-95"
+            className="-mt-7 grid size-16 place-items-center rounded-full border-4 border-ground bg-[radial-gradient(circle_at_35%_30%,var(--gold-hi),var(--gold)_45%,var(--gold-deep))] text-[#2a1a05] shadow-[0_10px_24px_-6px_var(--gold)] transition-transform active:scale-95"
           >
-            <Megaphone aria-hidden className="size-7" />
+            <HornIcon className="size-8" />
           </button>
         </div>
         {right.map((item) => (
@@ -147,7 +148,7 @@ function Hotbar({ items }: { items: Array<NavItem> }) {
             key={item.label}
             item={item}
             className={hotbarItem}
-            iconClass="size-6"
+            iconClass="size-7"
             showLabel
           />
         ))}
@@ -176,7 +177,7 @@ function NavEntry({
   const Icon = item.icon
   const content = (
     <>
-      <Icon aria-hidden className={iconClass} strokeWidth={1.75} />
+      <Icon className={iconClass} />
       {showLabel && <span className="max-w-full truncate">{item.label}</span>}
       {tooltip && (
         <span
@@ -208,7 +209,7 @@ function NavEntry({
       activeOptions={{ exact: true }}
       activeProps={{
         className:
-          'text-fg! bg-[linear-gradient(160deg,color-mix(in_oklab,var(--curse)_45%,transparent),color-mix(in_oklab,var(--royal)_35%,transparent))] shadow-[inset_0_0_0_1px_var(--curse-hi)]',
+          'text-gold-hi! border-gold/80! bg-[radial-gradient(circle_at_50%_35%,color-mix(in_oklab,var(--gold)_24%,transparent),color-mix(in_oklab,var(--gold-deep)_18%,var(--field))_75%)] shadow-[0_0_18px_-4px_var(--gold),inset_0_1px_0_color-mix(in_oklab,var(--gold-hi)_40%,transparent)]',
       }}
     >
       {content}

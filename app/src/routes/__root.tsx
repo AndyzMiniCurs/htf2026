@@ -15,7 +15,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-      { name: 'theme-color', content: '#160f1f' },
+      { name: 'theme-color', content: '#0c0f1a' },
       { title: 'Guardians of the Grid · Achrona mission control' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],

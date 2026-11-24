@@ -67,7 +67,7 @@ export function GuardianMenu({ me }: { me: Guardian }) {
         <span className="hidden text-right leading-tight xl:block">
           <span className="block font-bold text-fg">{me.codename}</span>
           <span
-            className={cx('label-caps text-[0.65rem]', commander ? 'text-pink' : 'text-fg-faint')}
+            className={cx('label-caps text-[0.65rem]', commander ? 'text-gold' : 'text-fg-faint')}
           >
             {me.role}
           </span>
@@ -76,7 +76,7 @@ export function GuardianMenu({ me }: { me: Guardian }) {
           className={cx(
             'title-gothic grid size-11 place-items-center rounded-xl border-2 text-2xl',
             commander
-              ? 'border-pink bg-[linear-gradient(160deg,var(--curse),var(--royal-deep))]'
+              ? 'border-gold bg-[linear-gradient(160deg,var(--gold-deep),var(--royal-deep))]'
               : 'border-royal-hi bg-[linear-gradient(160deg,var(--royal),var(--royal-deep))]',
           )}
         >
@@ -94,7 +94,7 @@ export function GuardianMenu({ me }: { me: Guardian }) {
           <p
             className={cx(
               'label-caps px-3 pb-3 text-[0.65rem]',
-              commander ? 'text-pink' : 'text-fg-faint',
+              commander ? 'text-gold' : 'text-fg-faint',
             )}
           >
             {me.role}

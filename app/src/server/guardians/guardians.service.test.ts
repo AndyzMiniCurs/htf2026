@@ -32,9 +32,17 @@ describe('wouldRemoveLastCommander', () => {
 
 describe('createGuardian', () => {
   it('stores a hash, never the password, and returns the public guardian', async () => {
-    vi.mocked(repo.insertGuardian).mockResolvedValue({ guardianId: 5, codename: 'Vega', role: 'defender' })
+    vi.mocked(repo.insertGuardian).mockResolvedValue({
+      guardianId: 5,
+      codename: 'Vega',
+      role: 'defender',
+    })
 
-    const created = await createGuardian({ codename: 'Vega', password: 'vega-2026!', role: 'defender' })
+    const created = await createGuardian({
+      codename: 'Vega',
+      password: 'vega-2026!',
+      role: 'defender',
+    })
 
     expect(created).toEqual({ guardianId: 5, codename: 'Vega', role: 'defender' })
     const stored = vi.mocked(repo.insertGuardian).mock.calls[0]?.[0]
@@ -47,7 +55,9 @@ describe('createGuardian', () => {
       Object.assign(new Error('Failed query'), { cause: { code: '23505' } }),
     )
 
-    await expect(createGuardian({ codename: 'Nova', password: 'whatever-1', role: 'defender' })).rejects.toMatchObject({
+    await expect(
+      createGuardian({ codename: 'Nova', password: 'whatever-1', role: 'defender' }),
+    ).rejects.toMatchObject({
       code: 'CONFLICT',
       message: 'Codename taken',
     })
@@ -59,7 +69,9 @@ describe('setGuardianRole', () => {
     vi.mocked(repo.findGuardianById).mockResolvedValue(aegis)
     vi.mocked(repo.countCommanders).mockResolvedValue(1)
 
-    await expect(setGuardianRole({ guardianId: 1, role: 'defender' })).rejects.toMatchObject({ code: 'CONFLICT' })
+    await expect(setGuardianRole({ guardianId: 1, role: 'defender' })).rejects.toMatchObject({
+      code: 'CONFLICT',
+    })
     expect(repo.updateGuardianRole).not.toHaveBeenCalled()
   })
 
@@ -68,11 +80,16 @@ describe('setGuardianRole', () => {
     vi.mocked(repo.countCommanders).mockResolvedValue(1)
     vi.mocked(repo.updateGuardianRole).mockResolvedValue({ ...nova, role: 'commander' })
 
-    expect(await setGuardianRole({ guardianId: 2, role: 'commander' })).toEqual({ ...nova, role: 'commander' })
+    expect(await setGuardianRole({ guardianId: 2, role: 'commander' })).toEqual({
+      ...nova,
+      role: 'commander',
+    })
   })
 
   it('reports an unknown guardian as NOT_FOUND', async () => {
     vi.mocked(repo.findGuardianById).mockResolvedValue(null)
-    await expect(setGuardianRole({ guardianId: 9, role: 'commander' })).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await expect(setGuardianRole({ guardianId: 9, role: 'commander' })).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
   })
 })

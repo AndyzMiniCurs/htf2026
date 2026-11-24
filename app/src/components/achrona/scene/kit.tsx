@@ -83,7 +83,7 @@ export function House({
 }
 
 /** The islands pack ships dark daylight textures; lift them with Achrona's violet night glow. */
-export function useNightMaterial(material: THREE.Material, glow = '#7a58c8') {
+export function useNightMaterial(material: THREE.Material, glow = '#5a64b8') {
   return useMemo(() => {
     const night = (material as THREE.MeshStandardMaterial).clone()
     night.color = new THREE.Color('#ffffff')

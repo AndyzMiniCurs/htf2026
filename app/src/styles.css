@@ -35,6 +35,9 @@
   --color-amber: var(--amber);
   --color-verdant: var(--verdant);
   --color-on-accent: var(--on-accent);
+  --color-gold: var(--gold);
+  --color-gold-hi: var(--gold-hi);
+  --color-gold-deep: var(--gold-deep);
 
   --color-status-leaked: var(--ember);
   --color-status-assessing: var(--amber);
@@ -46,16 +49,19 @@
 
 :root,
 [data-theme='dark'] {
-  --ground: #160f1f;
-  --ground-2: #1c1429;
-  --panel: #211833;
-  --panel-hi: #2b2043;
-  --field: #130d1c;
-  --line: #3a2c58;
-  --line-strong: #5a4486;
-  --fg: #eef0ff;
-  --fg-muted: #bdb7d6;
-  --fg-faint: #948fb0;
+  --ground: #0c0f1a;
+  --ground-2: #111522;
+  --panel: #151a29;
+  --panel-hi: #1c2235;
+  --field: #0a0d16;
+  --line: #262e45;
+  --line-strong: #3c4766;
+  --fg: #eef1ff;
+  --fg-muted: #b6bdd4;
+  --fg-faint: #8b93ad;
+  --gold: #e0b66a;
+  --gold-hi: #f3d39a;
+  --gold-deep: #8a6428;
   --royal: #004fe2;
   --royal-hi: #3b74ff;
   --royal-deep: #01296a;
@@ -67,7 +73,7 @@
   --amber: #f48d30;
   --verdant: #3fd18f;
   --on-accent: #ffffff;
-  --shadow: 0 12px 32px -12px rgb(5 2 12 / 0.7);
+  --shadow: 0 12px 32px -12px rgb(2 4 12 / 0.75);
   --title-extrude: #004fe2;
   --title-extrude-deep: #01296a;
   color-scheme: dark;
@@ -95,6 +101,9 @@
   --amber: #a85600;
   --verdant: #127a4b;
   --shadow: 0 12px 28px -14px rgb(40 20 90 / 0.35);
+  --gold: #9a6a14;
+  --gold-hi: #7a520c;
+  --gold-deep: #5c3d08;
   --title-extrude: #7fa4ff;
   --title-extrude-deep: #0047cc;
   color-scheme: light;
@@ -125,11 +134,11 @@ body {
   font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  /* The HTF night sky: a faint purple bloom over a fine grain. */
+  /* Achrona's night sky: a faint royal-blue bloom over a fine grain. */
   background-image:
     radial-gradient(
       60rem 40rem at 50% -10%,
-      color-mix(in oklab, var(--curse) 22%, transparent),
+      color-mix(in oklab, var(--royal) 14%, transparent),
       transparent 70%
     ),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");

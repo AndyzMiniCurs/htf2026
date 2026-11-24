@@ -20,7 +20,11 @@ export type JevOptions = {
   timeoutMs?: number
 }
 
-export function createJevClassifier({ apiKey, fetch: doFetch = fetch, timeoutMs = 3000 }: JevOptions): Classifier {
+export function createJevClassifier({
+  apiKey,
+  fetch: doFetch = fetch,
+  timeoutMs = 3000,
+}: JevOptions): Classifier {
   async function ask(state: Record<string, string>, questions: Record<string, JevQuestion>) {
     try {
       const res = await doFetch(JEV_URL, {
@@ -44,7 +48,10 @@ export function createJevClassifier({ apiKey, fetch: doFetch = fetch, timeoutMs 
 
   return {
     async yesNo(question) {
-      const answers = await ask({ question }, { q: { type: 'noul', instructions: 'Answer `question`.' } })
+      const answers = await ask(
+        { question },
+        { q: { type: 'noul', instructions: 'Answer `question`.' } },
+      )
       const answer = noulAnswer.safeParse(answers?.q)
       return answer.success ? answer.data.noul : null
     },
@@ -55,7 +62,9 @@ export function createJevClassifier({ apiKey, fetch: doFetch = fetch, timeoutMs 
       const criteria = Object.fromEntries(options.map((option, i) => [`o${i}`, option]))
       const answers = await ask(
         { question },
-        { q: { type: 'choice', instructions: 'Pick the option that answers `question`.', criteria } },
+        {
+          q: { type: 'choice', instructions: 'Pick the option that answers `question`.', criteria },
+        },
       )
       const answer = choiceAnswer.safeParse(answers?.q)
       if (!answer.success) return null
@@ -69,7 +78,10 @@ export function createJevClassifier({ apiKey, fetch: doFetch = fetch, timeoutMs 
       // One yes/no per item in a single request: P(yes) is the item's 0..1 score.
       const state = Object.fromEntries(items.map((item, i) => [`item${i}`, item]))
       const questions = Object.fromEntries(
-        items.map((_, i) => [`i${i}`, { type: 'noul' as const, instructions: `${question} Judge \`item${i}\`.` }]),
+        items.map((_, i) => [
+          `i${i}`,
+          { type: 'noul' as const, instructions: `${question} Judge \`item${i}\`.` },
+        ]),
       )
       const answers = await ask({ question, ...state }, questions)
       if (!answers) return null

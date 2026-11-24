@@ -7,7 +7,8 @@ const appErrorAdapter = createSerializationAdapter({
   key: 'app-error',
   test: (value): value is AppError => value instanceof AppError,
   toSerializable: (error) => ({ code: error.code, message: error.message }),
-  fromSerializable: (value: { code: ErrorCode; message: string }) => new AppError(value.code, value.message),
+  fromSerializable: (value: { code: ErrorCode; message: string }) =>
+    new AppError(value.code, value.message),
 })
 
 export const startInstance = createStart(() => ({

@@ -257,7 +257,7 @@ function Rift({
           className="title-gothic whitespace-nowrap rounded-md border px-2.5 py-0.5 text-xl shadow-[0_6px_16px_rgb(0_0_0/0.5)]"
           style={{
             borderColor: color,
-            background: 'rgb(22 15 31 / 0.85)',
+            background: 'rgb(12 15 26 / 0.85)',
             opacity: highlighted ? 1 : 0.9,
           }}
         >

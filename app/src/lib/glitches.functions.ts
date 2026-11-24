@@ -39,19 +39,18 @@ export const advanceStatus = createServerFn({ method: 'POST' })
 export const reopenGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(glitchIdInput))
-  .handler(
-    async ({ data }): Promise<GlitchListItem> => ({ ...fixtureItem(data.glitchId), status: 'LEAKED' }),
-  )
+  .handler(async ({ data }): Promise<GlitchListItem> => ({
+    ...fixtureItem(data.glitchId),
+    status: 'LEAKED',
+  }))
 
 export const assignGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(assignGlitchInput))
-  .handler(
-    async ({ data }): Promise<GlitchListItem> => ({
-      ...fixtureItem(data.glitchId),
-      assignee: fixtureGuardians.find((g) => g.guardianId === data.guardianId) ?? null,
-    }),
-  )
+  .handler(async ({ data }): Promise<GlitchListItem> => ({
+    ...fixtureItem(data.glitchId),
+    assignee: fixtureGuardians.find((g) => g.guardianId === data.guardianId) ?? null,
+  }))
 
 export const mergeGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])

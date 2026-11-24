@@ -1,7 +1,11 @@
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
 import { promisify } from 'node:util'
 
-const scryptAsync = promisify(scrypt) as (password: string, salt: Buffer, keylen: number) => Promise<Buffer>
+const scryptAsync = promisify(scrypt) as (
+  password: string,
+  salt: Buffer,
+  keylen: number,
+) => Promise<Buffer>
 const KEY_LENGTH = 64
 
 /** `scrypt$<salt b64>$<hash b64>`, with a fresh 16-byte salt per password. */

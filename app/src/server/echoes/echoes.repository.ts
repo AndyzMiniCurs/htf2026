@@ -19,7 +19,9 @@ async function nextGlitchId(tx: Pick<typeof db, 'execute'>): Promise<string> {
 }
 
 /** Creates a `LEAKED` glitch from the echo, the echo and its image, all in one transaction. */
-export async function insertEchoWithNewGlitch(echo: NewEcho): Promise<{ glitchId: string; echoId: number }> {
+export async function insertEchoWithNewGlitch(
+  echo: NewEcho,
+): Promise<{ glitchId: string; echoId: number }> {
   return db.transaction(async (tx) => {
     const glitchId = await nextGlitchId(tx)
     await tx.insert(glitches).values({
@@ -49,7 +51,9 @@ export async function insertEchoWithNewGlitch(echo: NewEcho): Promise<{ glitchId
   })
 }
 
-export async function findEchoImage(echoId: number): Promise<{ mime: string; bytes: Buffer } | null> {
+export async function findEchoImage(
+  echoId: number,
+): Promise<{ mime: string; bytes: Buffer } | null> {
   const [row] = await db
     .select({ mime: echoImages.mime, bytes: echoImages.bytes })
     .from(echoImages)

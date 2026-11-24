@@ -29,16 +29,56 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
       .returning()
     guardianId = guardian?.guardianId ?? 0
     await db.insert(glitches).values([
-      { glitchId: 'GL-9701', status: 'LEAKED', type: 'time-anomaly', description: `${token} time loop`, timestamp: '2026-01-01T10:00:00Z', assignedGuardianId: guardianId, locationX: 40, locationY: 60 },
-      { glitchId: 'GL-9702', status: 'FIXED', type: 'portal', description: `${token}-portal flicker`, timestamp: '2026-01-02T10:00:00Z' },
-      { glitchId: 'GL-9703', status: 'ASSESSING', type: 'portal', description: `${token}-portal storm`, timestamp: '2026-01-03T23:30:00Z' },
+      {
+        glitchId: 'GL-9701',
+        status: 'LEAKED',
+        type: 'time-anomaly',
+        description: `${token} time loop`,
+        timestamp: '2026-01-01T10:00:00Z',
+        assignedGuardianId: guardianId,
+        locationX: 40,
+        locationY: 60,
+      },
+      {
+        glitchId: 'GL-9702',
+        status: 'FIXED',
+        type: 'portal',
+        description: `${token}-portal flicker`,
+        timestamp: '2026-01-02T10:00:00Z',
+      },
+      {
+        glitchId: 'GL-9703',
+        status: 'ASSESSING',
+        type: 'portal',
+        description: `${token}-portal storm`,
+        timestamp: '2026-01-03T23:30:00Z',
+      },
     ])
     await db.insert(glitches).values({
-      glitchId: 'GL-9704', status: 'LEAKED', type: 'creature', description: `${token} merged away`, timestamp: '2026-01-04T10:00:00Z', mergedInto: 'GL-9701',
+      glitchId: 'GL-9704',
+      status: 'LEAKED',
+      type: 'creature',
+      description: `${token} merged away`,
+      timestamp: '2026-01-04T10:00:00Z',
+      mergedInto: 'GL-9701',
     })
     await db.insert(echoes).values([
-      { glitchId: 'GL-9701', description: 'second report', timestamp: '2026-01-01T10:05:00Z', reportingGuardianId: guardianId, hasImage: true, groupedByAi: true },
-      { glitchId: 'GL-9701', description: 'first report', timestamp: '2026-01-01T10:00:00Z', reportingGuardianId: guardianId, locationX: 40, locationY: 60 },
+      {
+        glitchId: 'GL-9701',
+        description: 'second report',
+        timestamp: '2026-01-01T10:05:00Z',
+        reportingGuardianId: guardianId,
+        hasImage: true,
+        groupedByAi: true,
+      },
+      {
+        glitchId: 'GL-9701',
+        description: 'first report',
+        timestamp: '2026-01-01T10:00:00Z',
+        reportingGuardianId: guardianId,
+        locationX: 40,
+        locationY: 60,
+      },
       { glitchId: 'GL-9701', description: 'system report', timestamp: '2026-01-01T10:10:00Z' },
     ])
   })
@@ -53,7 +93,10 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
   })
 
   it('searches id and description case-insensitively', async () => {
-    expect(ids(await listGlitches({ q: `${token.toUpperCase()}-PORTAL` }))).toEqual(['GL-9703', 'GL-9702'])
+    expect(ids(await listGlitches({ q: `${token.toUpperCase()}-PORTAL` }))).toEqual([
+      'GL-9703',
+      'GL-9702',
+    ])
     expect(ids(await listGlitches({ q: 'gl-9702' }))).toEqual(['GL-9702'])
   })
 
@@ -63,18 +106,34 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
 
   it('filters on status and type', async () => {
     expect(ids(await listGlitches({ q: token, status: ['LEAKED'] }))).toEqual(['GL-9701'])
-    expect(ids(await listGlitches({ q: token, status: ['LEAKED', 'FIXED'] }))).toEqual(['GL-9702', 'GL-9701'])
+    expect(ids(await listGlitches({ q: token, status: ['LEAKED', 'FIXED'] }))).toEqual([
+      'GL-9702',
+      'GL-9701',
+    ])
     expect(ids(await listGlitches({ q: token, type: ['portal'] }))).toEqual(['GL-9703', 'GL-9702'])
   })
 
   it('filters on a date range where a bare end date covers the whole day', async () => {
-    expect(ids(await listGlitches({ q: token, from: '2026-01-02', to: '2026-01-03' }))).toEqual(['GL-9703', 'GL-9702'])
-    expect(ids(await listGlitches({ q: token, status: ['LEAKED'], to: '2026-01-01' }))).toEqual(['GL-9701'])
+    expect(ids(await listGlitches({ q: token, from: '2026-01-02', to: '2026-01-03' }))).toEqual([
+      'GL-9703',
+      'GL-9702',
+    ])
+    expect(ids(await listGlitches({ q: token, status: ['LEAKED'], to: '2026-01-01' }))).toEqual([
+      'GL-9701',
+    ])
   })
 
   it('sorts oldest first or by lifecycle status', async () => {
-    expect(ids(await listGlitches({ q: token, sort: 'oldest' }))).toEqual(['GL-9701', 'GL-9702', 'GL-9703'])
-    expect(ids(await listGlitches({ q: token, sort: 'status' }))).toEqual(['GL-9701', 'GL-9703', 'GL-9702'])
+    expect(ids(await listGlitches({ q: token, sort: 'oldest' }))).toEqual([
+      'GL-9701',
+      'GL-9702',
+      'GL-9703',
+    ])
+    expect(ids(await listGlitches({ q: token, sort: 'status' }))).toEqual([
+      'GL-9701',
+      'GL-9703',
+      'GL-9702',
+    ])
   })
 
   it('maps assignee, location and echo count onto list items', async () => {
@@ -89,9 +148,16 @@ describe.skipIf(!reachable)('glitch repository (Postgres)', () => {
 
   it('returns the detail with echoes oldest first, reporter and image url', async () => {
     const detail = await findGlitchDetail('GL-9701')
-    expect(detail?.echoes.map((e) => e.description)).toEqual(['first report', 'second report', 'system report'])
+    expect(detail?.echoes.map((e) => e.description)).toEqual([
+      'first report',
+      'second report',
+      'system report',
+    ])
     expect(detail?.echoes[0]?.reporter?.codename).toBe(`test-${token}`)
-    expect(detail?.echoes[1]).toMatchObject({ groupedByAi: true, imageUrl: `/api/images/${detail?.echoes[1]?.echoId}` })
+    expect(detail?.echoes[1]).toMatchObject({
+      groupedByAi: true,
+      imageUrl: `/api/images/${detail?.echoes[1]?.echoId}`,
+    })
     expect(detail?.echoes[2]?.reporter).toBeNull()
     expect(detail?.runbook).toEqual([])
     expect(detail?.mergedInto).toBeNull()

@@ -22,7 +22,11 @@ describe('jev classifier', () => {
 
   it('ranks choice options by probability', async () => {
     const fetchMock = vi.fn(async () =>
-      json({ answers: { q: { type: 'choice', choice: 'o1', probabilities: { o0: 0.1, o1: 0.85, o2: 0.05 } } } }),
+      json({
+        answers: {
+          q: { type: 'choice', choice: 'o1', probabilities: { o0: 0.1, o1: 0.85, o2: 0.05 } },
+        },
+      }),
     )
     const jev = createJevClassifier({ apiKey: 'k', fetch: fetchMock as typeof fetch })
 
@@ -58,7 +62,8 @@ describe('jev classifier', () => {
   it('returns null on an HTTP error or an unexpected answer shape', async () => {
     const unauthorized = createJevClassifier({
       apiKey: 'bad',
-      fetch: (async () => json({ detail: { error_type: 'authentication_error' } }, 401)) as typeof fetch,
+      fetch: (async () =>
+        json({ detail: { error_type: 'authentication_error' } }, 401)) as typeof fetch,
     })
     const malformed = createJevClassifier({
       apiKey: 'k',

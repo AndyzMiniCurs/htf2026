@@ -1,4 +1,17 @@
-import { and, asc, desc, eq, gte, ilike, inArray, isNull, lte, or, sql, type SQL } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNull,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { db } from '#/db/index.ts'
 import { echoes, glitches, guardians } from '#/db/schema.ts'
@@ -59,7 +72,6 @@ function toListItem(row: ListRow): GlitchListItem {
     source: row.source,
   }
 }
-
 
 /** `%` and `_` in a search are literal characters, not wildcards. */
 const likePattern = (q: string) => `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`
@@ -125,21 +137,19 @@ export async function findGlitchDetail(glitchId: string): Promise<GlitchDetail |
 
   return {
     ...toListItem(row),
-    echoes: echoRows.map(
-      (e): Echo => ({
-        echoId: e.echoId,
-        glitchId: e.glitchId,
-        description: e.description,
-        timestamp: e.timestamp,
-        reporter:
-          e.reporterId !== null && e.reporterCodename !== null && e.reporterRole !== null
-            ? { guardianId: e.reporterId, codename: e.reporterCodename, role: e.reporterRole }
-            : null,
-        location: toLocation(e.locationX, e.locationY),
-        groupedByAi: e.groupedByAi,
-        imageUrl: e.hasImage ? `/api/images/${e.echoId}` : null,
-      }),
-    ),
+    echoes: echoRows.map((e): Echo => ({
+      echoId: e.echoId,
+      glitchId: e.glitchId,
+      description: e.description,
+      timestamp: e.timestamp,
+      reporter:
+        e.reporterId !== null && e.reporterCodename !== null && e.reporterRole !== null
+          ? { guardianId: e.reporterId, codename: e.reporterCodename, role: e.reporterRole }
+          : null,
+      location: toLocation(e.locationX, e.locationY),
+      groupedByAi: e.groupedByAi,
+      imageUrl: e.hasImage ? `/api/images/${e.echoId}` : null,
+    })),
     runbook: row.runbook?.steps ?? [],
     mergedInto: row.mergedInto,
   }

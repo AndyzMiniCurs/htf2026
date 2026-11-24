@@ -35,7 +35,7 @@ export function Panel({ heading, actions, flush, className, children, ...props }
 
 function Corners() {
   const cube =
-    'pointer-events-none absolute size-2.5 rotate-45 rounded-[2px] border border-curse-hi/70 bg-curse shadow-[0_2px_6px_rgb(0_0_0/0.5)]'
+    'pointer-events-none absolute size-2.5 rotate-45 rounded-[2px] border border-gold-hi/70 bg-gold-deep shadow-[0_2px_6px_rgb(0_0_0/0.5)]'
   return (
     <>
       <span aria-hidden className={cx(cube, '-left-[5px] -top-[5px]')} />

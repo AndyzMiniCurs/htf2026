@@ -1,4 +1,10 @@
-export const ERROR_CODES = ['UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'VALIDATION', 'CONFLICT'] as const
+export const ERROR_CODES = [
+  'UNAUTHORIZED',
+  'FORBIDDEN',
+  'NOT_FOUND',
+  'VALIDATION',
+  'CONFLICT',
+] as const
 
 export type ErrorCode = (typeof ERROR_CODES)[number]
 

@@ -76,8 +76,8 @@ function StatusTally({ byStatus }: { byStatus: Record<GlitchStatus, number> }) {
 /** The latest happenings, written along the bottom of the world like a story caption. */
 function Chronicle({ glitches }: { glitches: Array<GlitchListItem> }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-[linear-gradient(0deg,rgb(22_15_31/0.92),transparent)] px-5 pt-12 pb-4 sm:block">
-      <p className="label-caps mb-1.5 text-[0.65rem] text-pink">Chronicle</p>
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-[linear-gradient(0deg,rgb(12_15_26/0.92),transparent)] px-5 pt-12 pb-4 sm:block">
+      <p className="label-caps mb-1.5 text-[0.65rem] text-gold">Chronicle</p>
       <ul className="flex flex-col gap-1 font-serif text-[0.95rem] text-[#e1e7ff]">
         {glitches.slice(0, 3).map((g) => (
           <li key={g.glitchId} className="truncate">

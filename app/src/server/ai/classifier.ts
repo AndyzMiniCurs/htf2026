@@ -7,7 +7,10 @@ import { nullClassifier } from './null.classifier.ts'
  */
 export interface Classifier {
   /** Options ranked by probability, highest first. */
-  choose(question: string, options: string[]): Promise<{ option: string; probability: number }[] | null>
+  choose(
+    question: string,
+    options: string[],
+  ): Promise<{ option: string; probability: number }[] | null>
   /** A 0..1 score per item, in the same order as `items`. */
   score(question: string, items: string[]): Promise<number[] | null>
   /** P(yes), 0..1. */

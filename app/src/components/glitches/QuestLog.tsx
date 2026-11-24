@@ -70,7 +70,7 @@ function Quest({
       className={cx(
         'group grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1 rounded-xl border p-3.5 transition-[border-color,background-color,box-shadow] duration-300',
         highlighted
-          ? 'border-curse-hi bg-panel-hi shadow-[0_10px_28px_-14px_var(--curse)]'
+          ? 'border-gold/70 bg-panel-hi shadow-[0_10px_28px_-14px_var(--gold)]'
           : 'border-line bg-ground-2/60 hover:border-line-strong',
       )}
     >
@@ -107,9 +107,9 @@ function Quest({
 export function QuestLogHeading({ count }: { count: number }) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <ScrollText aria-hidden className="size-6 text-curse-hi" />
+      <ScrollText aria-hidden className="size-6 text-gold" />
       Quest log
-      <span className="label-caps rounded-full bg-curse px-2 py-0.5 text-[0.7rem] text-on-accent">
+      <span className="label-caps rounded-full bg-royal px-2 py-0.5 text-[0.7rem] text-on-accent">
         {count} open
       </span>
     </span>

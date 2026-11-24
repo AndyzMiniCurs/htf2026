@@ -10,4 +10,6 @@ export const requireGuardian = createMiddleware({ type: 'function' }).server(asy
 /** Commander-only server functions. */
 export const requireCommander = createMiddleware({ type: 'function' })
   .middleware([requireGuardian])
-  .server(async ({ next, context }) => next({ context: { guardian: assertCommander(context.guardian) } }))
+  .server(async ({ next, context }) =>
+    next({ context: { guardian: assertCommander(context.guardian) } }),
+  )

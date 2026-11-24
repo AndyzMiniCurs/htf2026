@@ -49,7 +49,10 @@ export function parseReportEchoForm(data: FormData): ReportEchoInput {
   })
   if (!result.success) {
     const issue = result.error.issues[0]
-    throw new AppError('VALIDATION', issue ? `${issue.path.join('.')}: ${issue.message}` : 'Invalid echo')
+    throw new AppError(
+      'VALIDATION',
+      issue ? `${issue.path.join('.')}: ${issue.message}` : 'Invalid echo',
+    )
   }
   const { description, x, y } = result.data
   const image = data.get('image')

@@ -12,6 +12,6 @@ export const logout = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .handler(async (): Promise<void> => auth.logout())
 
-export const getMe = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<Guardian | null> => auth.getMe(),
+export const getMe = createServerFn({ method: 'GET' }).handler(async (): Promise<Guardian | null> =>
+  auth.getMe(),
 )

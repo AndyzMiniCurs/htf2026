@@ -126,7 +126,14 @@ export function fixtureGlitchDetail(glitchId: string): GlitchDetail | null {
 export const fixtureDashboard: Dashboard = {
   magicLevel: 79,
   byStatus: { LEAKED: 1, ASSESSING: 1, CONTAINING: 1, FIXED: 1 },
-  byType: { 'time-anomaly': 1, 'magic-drain': 1, portal: 1, 'sensor-fault': 1, creature: 0, unknown: 0 },
+  byType: {
+    'time-anomaly': 1,
+    'magic-drain': 1,
+    portal: 1,
+    'sensor-fault': 1,
+    creature: 0,
+    unknown: 0,
+  },
   recent: fixtureGlitches.slice(0, 3),
   lockdown: false,
 }
@@ -170,5 +177,9 @@ export const fixtureAssistantAnswer: AssistantAnswer = {
   intent: 'glitch-status',
   text: 'GL-0142 is LEAKED (time-anomaly), assigned to Nova. Last echo: "The clock tower keeps repeating the same minute".',
   glitchIds: ['GL-0142'],
-  suggestions: ['What is going on right now?', 'How much magic is left?', 'What should I do about GL-0139?'],
+  suggestions: [
+    'What is going on right now?',
+    'How much magic is left?',
+    'What should I do about GL-0139?',
+  ],
 }

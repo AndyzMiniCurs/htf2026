@@ -8,6 +8,9 @@ export function validate<S extends z.ZodType>(schema: S) {
     if (result.success) return result.data
     const issue = result.error.issues[0]
     const field = issue?.path.join('.')
-    throw new AppError('VALIDATION', issue ? (field ? `${field}: ${issue.message}` : issue.message) : 'Invalid input')
+    throw new AppError(
+      'VALIDATION',
+      issue ? (field ? `${field}: ${issue.message}` : issue.message) : 'Invalid input',
+    )
   }
 }

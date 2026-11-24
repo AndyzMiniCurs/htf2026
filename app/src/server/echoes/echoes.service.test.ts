@@ -21,8 +21,16 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     await db.delete(guardians).where(like(guardians.codename, 'echotest-%'))
     const [row] = await db
       .insert(guardians)
-      .values({ codename: `echotest-${Date.now().toString(36)}`, role: 'defender', passwordHash: 'x' })
-      .returning({ guardianId: guardians.guardianId, codename: guardians.codename, role: guardians.role })
+      .values({
+        codename: `echotest-${Date.now().toString(36)}`,
+        role: 'defender',
+        passwordHash: 'x',
+      })
+      .returning({
+        guardianId: guardians.guardianId,
+        codename: guardians.codename,
+        role: guardians.role,
+      })
     if (!row) throw new Error('no guardian')
     reporter = row
   })
@@ -44,7 +52,12 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
 
     expect(result.outcome).toBe('created')
     expect(result.glitchId).toMatch(/^GL-\d{4,}$/)
-    expect(result.echo).toMatchObject({ glitchId: result.glitchId, reporter, imageUrl: null, groupedByAi: false })
+    expect(result.echo).toMatchObject({
+      glitchId: result.glitchId,
+      reporter,
+      imageUrl: null,
+      groupedByAi: false,
+    })
     expect(result.echo.timestamp >= before).toBe(true)
 
     const [glitch] = await db.select().from(glitches).where(eq(glitches.glitchId, result.glitchId))
@@ -58,7 +71,11 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
       source: 'echo',
     })
     const [echo] = await db.select().from(echoes).where(eq(echoes.glitchId, result.glitchId))
-    expect(echo).toMatchObject({ reportingGuardianId: reporter.guardianId, locationX: 40, hasImage: false })
+    expect(echo).toMatchObject({
+      reportingGuardianId: reporter.guardianId,
+      locationX: 40,
+      hasImage: false,
+    })
   })
 
   it('gives every new glitch its own id', async () => {
@@ -77,7 +94,10 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
     created.push(result.glitchId)
 
     expect(result.echo.imageUrl).toBe(`/api/images/${result.echo.echoId}`)
-    const [image] = await db.select().from(echoImages).where(eq(echoImages.echoId, result.echo.echoId))
+    const [image] = await db
+      .select()
+      .from(echoImages)
+      .where(eq(echoImages.echoId, result.echo.echoId))
     expect(image?.mime).toBe('image/png')
     expect(Uint8Array.from(image?.bytes ?? [])).toEqual(png)
   })
@@ -89,7 +109,9 @@ describe.skipIf(!reachable)('reportEcho (Postgres)', () => {
       reportEcho(reporter, {
         description: 'Report with a PDF',
         location: null,
-        image: new File([new TextEncoder().encode('%PDF-1.7')], 'report.png', { type: 'image/png' }),
+        image: new File([new TextEncoder().encode('%PDF-1.7')], 'report.png', {
+          type: 'image/png',
+        }),
       }),
     ).rejects.toMatchObject({ code: 'VALIDATION' })
     expect(await count()).toBe(before)

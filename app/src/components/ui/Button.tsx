@@ -12,7 +12,7 @@ const variants = {
   danger:
     'bg-ember text-on-accent border-b-[color-mix(in_oklab,var(--ember)_55%,black)] hover:brightness-110',
   ghost:
-    'bg-transparent text-fg border border-line-strong border-b-line-strong hover:bg-panel-hi hover:border-curse-hi',
+    'bg-transparent text-fg border border-line-strong border-b-line-strong hover:bg-panel-hi hover:border-gold',
 } as const
 
 const sizes = {

@@ -19,7 +19,7 @@ const SKY_FRAGMENT = /* glsl */ `
     float h = vDir.y;
     vec3 c = h > 0.0 ? mix(uHorizon, uTop, pow(h, 0.55)) : mix(uHorizon, uBottom, pow(-h, 0.45));
     // A violet band where the curse glows on the horizon.
-    c += vec3(0.35, 0.08, 0.5) * exp(-abs(h) * 9.0) * 0.6;
+    c += vec3(0.22, 0.1, 0.42) * exp(-abs(h) * 9.0) * 0.35;
     gl_FragColor = vec4(c, 1.0);
   }
 `
@@ -31,7 +31,7 @@ export function SkyDome() {
     SKY_FRAGMENT,
     {
       uTop: { value: new THREE.Color('#05030b') },
-      uHorizon: { value: new THREE.Color('#2b1150') },
+      uHorizon: { value: new THREE.Color('#1c2550') },
       uBottom: { value: new THREE.Color('#0b0616') },
     },
     { side: THREE.BackSide, transparent: false, depthWrite: false, fog: false },
@@ -59,7 +59,7 @@ export function Moon() {
   const halo = useShader(
     UV_VERTEX,
     HALO_FRAGMENT,
-    { uColor: { value: new THREE.Color('#c9a8ff') } },
+    { uColor: { value: new THREE.Color('#b4bfff') } },
     { blending: THREE.AdditiveBlending, fog: false },
   )
   return (
@@ -105,7 +105,7 @@ export function CloudSea({ lowPower }: { lowPower: boolean }) {
         segments={lowPower ? 30 : 70}
         bounds={[70, 3, 70]}
         volume={22}
-        color="#4a2d86"
+        color="#2c3672"
         position={[0, -17, 0]}
         fade={90}
         speed={0.08}
@@ -172,11 +172,11 @@ const MIST_FRAGMENT = /* glsl */ `
 `
 
 const MIST_BANKS: Array<{ position: [number, number, number]; scale: number; color: string }> = [
-  { position: [0, -6, 0], scale: 90, color: '#5a2f9a' },
-  { position: [-22, -2, 18], scale: 34, color: '#7a4fc4' },
-  { position: [24, -3, -16], scale: 38, color: '#6a3fb0' },
-  { position: [6, -1, 26], scale: 30, color: '#8e5ad6' },
-  { position: [-26, 0, -20], scale: 32, color: '#5e3aa6' },
+  { position: [0, -6, 0], scale: 90, color: '#2f3d86' },
+  { position: [-22, -2, 18], scale: 34, color: '#4a56b0' },
+  { position: [24, -3, -16], scale: 38, color: '#3c4aa2' },
+  { position: [6, -1, 26], scale: 30, color: '#6a5cc4' },
+  { position: [-26, 0, -20], scale: 32, color: '#36418f' },
 ]
 
 /** Low banks of violet haze drifting between the islands: depth layers for the camera to look through. */

@@ -55,9 +55,9 @@ export default function AchronaScene(props: AchronaSceneProps) {
       <SkyDome />
       <Starfield reducedMotion={reducedMotion} />
       <Moon />
-      <fog attach="fog" args={['#1d1036', 48, 135]} />
+      <fog attach="fog" args={['#121a33', 48, 135]} />
 
-      <hemisphereLight args={['#9c88ff', '#3a1d5c', 1.25]} />
+      <hemisphereLight args={['#8f9cff', '#262447', 1.25]} />
       <directionalLight
         position={[-42, 34, -58]}
         intensity={3.4}

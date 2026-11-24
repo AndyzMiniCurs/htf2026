@@ -19,7 +19,10 @@ export async function findCredentials(codename: string) {
 }
 
 export async function findGuardianById(guardianId: number): Promise<Guardian | null> {
-  const [row] = await db.select(publicColumns).from(guardians).where(eq(guardians.guardianId, guardianId))
+  const [row] = await db
+    .select(publicColumns)
+    .from(guardians)
+    .where(eq(guardians.guardianId, guardianId))
   return row ?? null
 }
 
@@ -27,7 +30,11 @@ export async function listGuardians(): Promise<Guardian[]> {
   return db.select(publicColumns).from(guardians).orderBy(asc(guardians.codename))
 }
 
-export async function insertGuardian(values: { codename: string; role: Role; passwordHash: string }) {
+export async function insertGuardian(values: {
+  codename: string
+  role: Role
+  passwordHash: string
+}) {
   const [row] = await db.insert(guardians).values(values).returning(publicColumns)
   if (!row) throw new Error('Insert returned no guardian')
   return row

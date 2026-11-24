@@ -11,7 +11,7 @@ const ToastContext = createContext<ToastApi | null>(null)
 const TOAST_MS = 5000
 
 const toneStyle: Record<Tone, { icon: ReactNode; color: string }> = {
-  info: { icon: <Sparkles className="size-5" />, color: 'var(--curse-hi)' },
+  info: { icon: <Sparkles className="size-5" />, color: 'var(--royal-hi)' },
   success: { icon: <CircleCheck className="size-5" />, color: 'var(--verdant)' },
   error: { icon: <CircleAlert className="size-5" />, color: 'var(--ember)' },
 }
