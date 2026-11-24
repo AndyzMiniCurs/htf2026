@@ -8,6 +8,7 @@ import { Crest } from '#/components/layout/Crest.tsx'
 import { ToastProvider } from '#/components/ui/Toast.tsx'
 import { getMe } from '#/lib/auth.functions.ts'
 
+import { MagicCursor } from '#/components/layout/MagicCursor.tsx'
 import appCss from '../styles.css?url'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
@@ -35,6 +36,7 @@ export const Route = createRootRoute({
   component: () => (
     <ToastProvider>
       <ServiceWorker />
+      <MagicCursor />
       <Outlet />
     </ToastProvider>
   ),

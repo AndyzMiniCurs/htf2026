@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { BellRing, Monitor, Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '#/components/ui/Button.tsx'
+import { CursorPicker } from '#/components/layout/MagicCursor.tsx'
 import { Panel } from '#/components/ui/Panel.tsx'
 import { Switch } from '#/components/ui/Switch.tsx'
 import { useToast } from '#/components/ui/Toast.tsx'
@@ -79,6 +80,9 @@ function SettingsPage() {
       </Panel>
       <Panel heading="Appearance">
         <ThemePicker />
+      </Panel>
+      <Panel heading="Cursor">
+        <CursorPicker />
       </Panel>
     </div>
   )
