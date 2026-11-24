@@ -165,7 +165,7 @@ export async function updateGlitchStatus(
   glitchId: string,
   from: GlitchStatus,
   to: GlitchStatus,
-  fixed: { fixedAt: string; fixedBy: number } | null,
+  fixed: { fixedAt: string; fixedBy: number | null } | null,
 ): Promise<boolean> {
   const rows = await db
     .update(glitches)

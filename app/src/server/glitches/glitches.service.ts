@@ -35,11 +35,9 @@ export async function advanceStatus(actor: Guardian, glitchId: string): Promise<
   assertCanAdvance(actor, state.assignedGuardianId)
   const to = nextStatus(state.status)
   if (!to) throw new AppError('CONFLICT', `${glitchId} is already FIXED`)
-  // The fix is credited to the assignee (leaderboard), or to whoever closed an unassigned glitch.
+  // Leaderboard credit goes to the assignee at the moment of the fix (spec); unassigned = nobody.
   const fixed =
-    to === 'FIXED'
-      ? { fixedAt: new Date().toISOString(), fixedBy: state.assignedGuardianId ?? actor.guardianId }
-      : null
+    to === 'FIXED' ? { fixedAt: new Date().toISOString(), fixedBy: state.assignedGuardianId } : null
   if (!(await repo.updateGlitchStatus(glitchId, state.status, to, fixed))) {
     throw new AppError('CONFLICT', `${glitchId} changed in the meantime, reload and try again`)
   }
