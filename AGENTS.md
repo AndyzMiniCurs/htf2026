@@ -40,7 +40,7 @@ Dependency direction: `routes/components/hooks → lib` · `lib/*.functions.ts �
 
 - TypeScript strict, no `any`, no non-null `!` on data. Use types inferred from zod (`z.infer`) instead of hand-written duplicates.
 - Validate every server function input with its zod schema. Throw `AppError` (`lib/errors.ts`) with a code (`UNAUTHORIZED | FORBIDDEN | NOT_FOUND | VALIDATION | CONFLICT`); never leak stack traces or password hashes.
-- Every server function except `login`/`getMe` goes through `requireGuardian`; commander-only ones through `requireCommander`.
+- Every server function except `login`/`getMe`/`logout` goes through `requireGuardian`; commander-only ones through `requireCommander`.
 - AI fails open: a `null` classifier result means "no opinion" and takes the non-AI path. Never block a guardian's action on AI.
 - Business rules (status transitions, magic level, anomaly detection, badges, runbook filling) are pure functions with Vitest tests in the same task.
 - Follow the starter's conventions: `#/` imports, ISO-text timestamps, `GL-0000` glitch ids, `components/ui` primitives before new markup.
