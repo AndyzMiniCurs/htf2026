@@ -19,12 +19,31 @@ export const LIGHT = {
   lantern: '#ffb35c',
 } as const
 
+const tinted = new WeakSet<THREE.Object3D>()
+
+/** Kenney's daylight palette (pink roofs, bright stone) pulled into moonlight, once per cached model. */
+function nightTint(scene: THREE.Object3D) {
+  if (tinted.has(scene)) return
+  tinted.add(scene)
+  scene.traverse((object) => {
+    const mesh = object as THREE.Mesh
+    if (!mesh.isMesh) return
+    const material = mesh.material as THREE.MeshStandardMaterial
+    material.color.multiply(new THREE.Color('#9d92c9'))
+    material.emissive = new THREE.Color('#2b1f4d')
+    material.emissiveMap = material.map
+    material.emissiveIntensity = 0.7
+    material.roughness = 0.85
+  })
+}
+
 /** A Kenney model placed in the world. */
 export function Prop({
   name,
   ...props
 }: { name: string } & Omit<ComponentProps<typeof Clone>, 'object'>) {
   const { scene } = useGLTF(KENNEY(name))
+  nightTint(scene)
   return <Clone object={scene} castShadow receiveShadow {...props} />
 }
 
@@ -65,7 +84,7 @@ export function House({
 }
 
 /** The islands pack ships dark daylight textures; lift them with Achrona's violet night glow. */
-export function useNightMaterial(material: THREE.Material, glow = '#6a45b8') {
+export function useNightMaterial(material: THREE.Material, glow = '#7a58c8') {
   return useMemo(() => {
     const night = (material as THREE.MeshStandardMaterial).clone()
     night.color = new THREE.Color('#ffffff')
@@ -74,7 +93,7 @@ export function useNightMaterial(material: THREE.Material, glow = '#6a45b8') {
     // Re-use the texture as a faint violet self-glow so the rock keeps its form under a night sky.
     night.emissive = new THREE.Color(glow)
     night.emissiveMap = night.map
-    night.emissiveIntensity = 0.85
+    night.emissiveIntensity = 1.05
     return night
   }, [material, glow])
 }

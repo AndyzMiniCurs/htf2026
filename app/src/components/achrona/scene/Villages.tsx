@@ -131,7 +131,7 @@ export function Villages({ reducedMotion }: { reducedMotion: boolean }) {
           count={26}
           scale={[7, 3, 7]}
           position={[d.position[0], d.position[1] + 1.8, d.position[2]]}
-          size={3.5}
+          size={2.2}
           speed={reducedMotion ? 0 : 0.4}
           color={LIGHT.lantern}
         />

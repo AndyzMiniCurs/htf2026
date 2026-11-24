@@ -10,7 +10,8 @@ import { DistantIslands, Districts } from './scene/Islands.tsx'
 import { LIGHT } from './scene/kit.tsx'
 import { LeyLines } from './scene/LeyLines.tsx'
 import { Rifts } from './scene/Rifts.tsx'
-import { CloudSea, Moon, SkyDome, Starfield } from './scene/Sky.tsx'
+import { Flock, SkyLanterns } from './scene/Life.tsx'
+import { CloudSea, MistBanks, Moon, SkyDome, Starfield } from './scene/Sky.tsx'
 import { Villages } from './scene/Villages.tsx'
 import type { RiftsProps } from './scene/Rifts.tsx'
 
@@ -19,8 +20,10 @@ export type AchronaSceneProps = RiftsProps & {
   lowPower?: boolean
 }
 
-const CAMERA_HOME = new THREE.Vector3(40, 21, 40)
-const CAMERA_TARGET = new THREE.Vector3(0, 5, 0)
+// A low, wide establishing shot: the citadel a little off-centre, districts receding into haze.
+const CAMERA_HOME = new THREE.Vector3(36, 13, 46)
+const CAMERA_TARGET = new THREE.Vector3(0, 7, 0)
+const FOCUS_DISTANCE = CAMERA_HOME.distanceTo(CAMERA_TARGET)
 
 /** The world of Achrona: the citadel and its districts floating over a sea of cursed cloud. */
 export default function AchronaScene(props: AchronaSceneProps) {
@@ -52,13 +55,13 @@ export default function AchronaScene(props: AchronaSceneProps) {
       <SkyDome />
       <Starfield reducedMotion={reducedMotion} />
       <Moon />
-      <fog attach="fog" args={['#24123f', 42, 115]} />
+      <fog attach="fog" args={['#1d1036', 48, 135]} />
 
-      <hemisphereLight args={['#b3a2ff', '#2a1640', 1.6]} />
+      <hemisphereLight args={['#9c88ff', '#3a1d5c', 1.25]} />
       <directionalLight
-        position={[-30, 30, -40]}
-        intensity={2.2}
-        color="#e4dcff"
+        position={[-42, 34, -58]}
+        intensity={3.4}
+        color="#d6c8ff"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-30}
@@ -66,6 +69,8 @@ export default function AchronaScene(props: AchronaSceneProps) {
         shadow-camera-top={30}
         shadow-camera-bottom={-30}
       />
+      {/* Moonlight is the backlight (rim on every silhouette); a cool fill keeps the camera side readable. */}
+      <directionalLight position={[34, 14, 40]} intensity={0.9} color="#7484ff" />
       {/* Curse light from below lights the islands' undersides violet. */}
       <directionalLight position={[0, -20, 10]} intensity={1.4} color={LIGHT.curse} />
       <Environment resolution={128} frames={1}>
@@ -81,6 +86,7 @@ export default function AchronaScene(props: AchronaSceneProps) {
       </Environment>
 
       <CloudSea lowPower={lowPower} />
+      <MistBanks />
       <DistantIslands reducedMotion={reducedMotion} />
       <Districts corrupted={corrupted} />
       <Citadel reducedMotion={reducedMotion} onCore={setCore} />
@@ -88,12 +94,15 @@ export default function AchronaScene(props: AchronaSceneProps) {
       <LeyLines corrupted={corrupted} />
       <Rifts {...props} />
       <CubeDebris reducedMotion={reducedMotion} />
+      <Flock reducedMotion={reducedMotion} />
+      <SkyLanterns reducedMotion={reducedMotion} />
       <Sparkles
-        count={lowPower ? 80 : 220}
-        scale={[70, 26, 70]}
-        position={[0, 4, 0]}
-        size={3.2}
-        speed={reducedMotion ? 0 : 0.3}
+        count={lowPower ? 60 : 140}
+        scale={[60, 24, 60]}
+        position={[0, 6, 0]}
+        size={1.6}
+        speed={reducedMotion ? 0 : 0.25}
+        opacity={0.7}
         color={LIGHT.pink}
       />
 
@@ -102,9 +111,9 @@ export default function AchronaScene(props: AchronaSceneProps) {
           enablePan={false}
           enableZoom={false}
           autoRotate={!reducedMotion}
-          autoRotateSpeed={0.22}
-          minPolarAngle={0.9}
-          maxPolarAngle={1.32}
+          autoRotateSpeed={0.18}
+          minPolarAngle={1.05}
+          maxPolarAngle={1.42}
           target={CAMERA_TARGET}
         />
       ) : (
@@ -115,7 +124,14 @@ export default function AchronaScene(props: AchronaSceneProps) {
           onDone={() => setArrived(true)}
         />
       )}
-      {!lowPower && <Effects sun={core} desync={desync} reducedMotion={reducedMotion} />}
+      {!lowPower && (
+        <Effects
+          sun={core}
+          focusDistance={FOCUS_DISTANCE}
+          desync={desync}
+          reducedMotion={reducedMotion}
+        />
+      )}
     </Canvas>
   )
 }

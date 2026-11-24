@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { LIGHT } from './kit.tsx'
 
-const CUBES = 160
+const CUBES = 64
 
 /** The event's loose crystal cubes: a slow ring of debris circling the whole world. */
 export function CubeDebris({ reducedMotion }: { reducedMotion: boolean }) {
@@ -14,9 +14,9 @@ export function CubeDebris({ reducedMotion }: { reducedMotion: boolean }) {
     const q = new THREE.Quaternion()
     for (let i = 0; i < CUBES; i++) {
       const a = (i / CUBES) * Math.PI * 2 + Math.sin(i * 12.9) * 0.4
-      const r = 27 + Math.abs(Math.sin(i * 7.3)) * 12
+      const r = 38 + Math.abs(Math.sin(i * 7.3)) * 16
       const y = -9 + Math.abs(Math.sin(i * 3.1)) * 15
-      const s = 0.1 + Math.abs(Math.sin(i * 5.7)) * 0.32
+      const s = 0.12 + Math.abs(Math.sin(i * 5.7)) * 0.3
       q.setFromEuler(new THREE.Euler(i, i * 0.7, i * 0.3))
       out.push(
         new THREE.Matrix4().compose(
@@ -43,7 +43,7 @@ export function CubeDebris({ reducedMotion }: { reducedMotion: boolean }) {
         <meshStandardMaterial
           color={LIGHT.curseHi}
           emissive={LIGHT.curse}
-          emissiveIntensity={1.6}
+          emissiveIntensity={0.7}
           flatShading
           toneMapped={false}
         />
@@ -98,7 +98,7 @@ export function ResponsiveLens() {
   const aspect = useThree((state) => state.size.width / state.size.height)
   useEffect(() => {
     if (!(camera instanceof THREE.PerspectiveCamera)) return
-    camera.fov = aspect < 1 ? 62 : aspect < 1.4 ? 44 : 36
+    camera.fov = aspect < 1 ? 60 : aspect < 1.4 ? 42 : 34
     camera.updateProjectionMatrix()
   }, [camera, aspect])
   return null

@@ -1,4 +1,5 @@
 import { Billboard, Cloud, Clouds, Stars } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { LIGHT, UV_VERTEX, useShader } from './kit.tsx'
 
@@ -148,5 +149,71 @@ export function CloudSea({ lowPower }: { lowPower: boolean }) {
         </>
       )}
     </Clouds>
+  )
+}
+
+const MIST_FRAGMENT = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uTime;
+  uniform float uSeed;
+  varying vec2 vUv;
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7)) + uSeed) * 43758.5453); }
+  float noise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+  }
+  void main() {
+    vec2 p = vUv * 3.0 + vec2(uTime * 0.02, uTime * 0.01);
+    float n = noise(p) * 0.6 + noise(p * 2.1) * 0.3 + noise(p * 4.3) * 0.1;
+    float edge = smoothstep(0.5, 0.05, length(vUv - 0.5));
+    gl_FragColor = vec4(uColor, n * edge * 0.42);
+  }
+`
+
+const MIST_BANKS: Array<{ position: [number, number, number]; scale: number; color: string }> = [
+  { position: [0, -6, 0], scale: 90, color: '#5a2f9a' },
+  { position: [-22, -2, 18], scale: 34, color: '#7a4fc4' },
+  { position: [24, -3, -16], scale: 38, color: '#6a3fb0' },
+  { position: [6, -1, 26], scale: 30, color: '#8e5ad6' },
+  { position: [-26, 0, -20], scale: 32, color: '#5e3aa6' },
+]
+
+/** Low banks of violet haze drifting between the islands: depth layers for the camera to look through. */
+export function MistBanks() {
+  return (
+    <group>
+      {MIST_BANKS.map((bank, i) => (
+        <MistBank key={i} seed={i * 17.3} {...bank} />
+      ))}
+    </group>
+  )
+}
+
+function MistBank({
+  position,
+  scale,
+  color,
+  seed,
+}: {
+  position: [number, number, number]
+  scale: number
+  color: string
+  seed: number
+}) {
+  const material = useShader(
+    UV_VERTEX,
+    MIST_FRAGMENT,
+    { uColor: { value: new THREE.Color(color) }, uTime: { value: 0 }, uSeed: { value: seed } },
+    { side: THREE.DoubleSide },
+  )
+  useFrame((_, delta) => {
+    material.uniforms.uTime.value += delta
+  })
+  return (
+    <mesh position={position} rotation={[-Math.PI / 2, 0, seed]} scale={scale}>
+      <planeGeometry />
+      <primitive object={material} attach="material" />
+    </mesh>
   )
 }

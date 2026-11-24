@@ -22,7 +22,7 @@ const FRESNEL_FRAGMENT = /* glsl */ `
   void main() {
     float f = pow(1.0 - max(dot(vNormal, vView), 0.0), 2.2);
     float pulse = 0.85 + 0.15 * sin(uTime * 2.0);
-    gl_FragColor = vec4(uColor * (0.6 + f * 3.2) * pulse, 0.4 + f * 0.6);
+    gl_FragColor = vec4(uColor * (0.25 + f * 2.4) * pulse, 0.25 + f * 0.7);
   }
 `
 const BEAM_FRAGMENT = /* glsl */ `
@@ -32,7 +32,7 @@ const BEAM_FRAGMENT = /* glsl */ `
   void main() {
     float flow = 0.6 + 0.4 * sin(vUv.y * 30.0 - uTime * 6.0);
     float fade = pow(1.0 - vUv.y, 1.4);
-    gl_FragColor = vec4(uColor * 2.0 * flow, fade * 0.55);
+    gl_FragColor = vec4(uColor * 1.6 * flow, fade * 0.32);
   }
 `
 const RUNES_FRAGMENT = /* glsl */ `
@@ -43,7 +43,7 @@ const RUNES_FRAGMENT = /* glsl */ `
     float a = atan(vUv.y - 0.5, vUv.x - 0.5) / 6.28318 + 0.5;
     float seg = fract(a * 36.0);
     float rune = step(0.15, seg) * step(seg, 0.65) * step(0.3, fract(a * 7.0 + 0.2));
-    gl_FragColor = vec4(uColor * 2.4, rune * 0.9);
+    gl_FragColor = vec4(uColor * 1.8, rune * 0.75);
   }
 `
 
@@ -155,9 +155,9 @@ export function Citadel({ reducedMotion, onCore }: CitadelProps) {
 
       <group ref={crystal} position={[0, 15, 0]}>
         {/* The bright core is also the god-ray source. */}
-        <mesh ref={onCore} scale={[0.9, 2, 0.9]}>
+        <mesh ref={onCore} scale={[0.55, 1.3, 0.55]}>
           <octahedronGeometry args={[1, 0]} />
-          <meshBasicMaterial color="#ffd6ff" toneMapped={false} />
+          <meshBasicMaterial color="#f2c6ff" toneMapped={false} />
         </mesh>
         <mesh scale={[1.7, 3.6, 1.7]}>
           <octahedronGeometry args={[1, 0]} />
@@ -181,12 +181,12 @@ export function Citadel({ reducedMotion, onCore }: CitadelProps) {
           ))}
         </group>
       </group>
-      <mesh ref={haloA} position={[0, 15, 0]} rotation={[Math.PI / 2 - 0.35, 0, 0]}>
-        <ringGeometry args={[4.6, 5.1, 128, 1]} />
+      <mesh ref={haloA} position={[0, 15, 0]} rotation={[Math.PI / 2 - 0.14, 0, 0]}>
+        <ringGeometry args={[5.4, 5.85, 160, 1]} />
         <primitive object={runes} attach="material" />
       </mesh>
-      <mesh ref={haloB} position={[0, 15, 0]} rotation={[Math.PI / 2 + 0.5, 0.3, 0]}>
-        <torusGeometry args={[6.2, 0.06, 8, 160]} />
+      <mesh ref={haloB} position={[0, 15, 0]} rotation={[Math.PI / 2 + 0.1, 0.06, 0]}>
+        <torusGeometry args={[7.6, 0.045, 8, 200]} />
         <meshBasicMaterial color={LIGHT.pink} toneMapped={false} />
       </mesh>
       {/* Beam from the crystal down to the keep, and up into the sky. */}
@@ -201,7 +201,7 @@ export function Citadel({ reducedMotion, onCore }: CitadelProps) {
       <pointLight
         position={[0, 14, 0]}
         color={LIGHT.curseHi}
-        intensity={140}
+        intensity={90}
         distance={40}
         decay={2}
       />

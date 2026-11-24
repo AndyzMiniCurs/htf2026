@@ -13,7 +13,7 @@ const FLOW_FRAGMENT = /* glsl */ `
     // Tube uv.x runs along the line: send pulses of magic travelling outward from the citadel.
     float flow = fract(vUv.x * 7.0 - uTime * uSpeed);
     float pulse = smoothstep(0.0, 0.12, flow) * smoothstep(0.45, 0.12, flow);
-    gl_FragColor = vec4(uColor * (0.5 + pulse * 3.0), 0.22 + pulse * 0.78);
+    gl_FragColor = vec4(uColor * (0.4 + pulse * 2.2), 0.06 + pulse * 0.6);
   }
 `
 
@@ -32,16 +32,16 @@ function LeyLine({ to, corrupted }: { to: [number, number, number]; corrupted: b
   const geometry = useMemo(() => {
     const from = new THREE.Vector3(
       CITADEL.position[0],
-      CITADEL.position[1] + 0.4,
+      CITADEL.position[1] - 3.5,
       CITADEL.position[2],
     )
-    const end = new THREE.Vector3(to[0], to[1] + 0.4, to[2])
+    const end = new THREE.Vector3(to[0], to[1] - 2.5, to[2])
     const mid = from.clone().lerp(end, 0.5)
-    mid.y -= 3.5
+    mid.y -= 4
     return new THREE.TubeGeometry(
       new THREE.QuadraticBezierCurve3(from, mid, end),
       64,
-      0.09,
+      0.05,
       8,
       false,
     )

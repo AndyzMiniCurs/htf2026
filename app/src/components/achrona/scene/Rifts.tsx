@@ -225,16 +225,16 @@ function Rift({
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={highlighted ? 4 : 2.6}
+          emissiveIntensity={highlighted ? 3 : 1.8}
           flatShading
           toneMapped={false}
         />
       </mesh>
       <Sparkles
-        count={40}
+        count={22}
         scale={[2.6, HEIGHT, 2.6]}
         position={[0, HEIGHT / 2, 0]}
-        size={4}
+        size={2.4}
         speed={reducedMotion ? 0 : 1.1}
         color={color}
       />
