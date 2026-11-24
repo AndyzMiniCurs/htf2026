@@ -1,6 +1,16 @@
 import { sql } from 'drizzle-orm'
 import { db } from './index.ts'
-import { glitches } from './schema.ts'
+import { glitches, guardians } from './schema.ts'
+// Relative import: seed runs under plain node, which doesn't resolve the `#/` alias.
+import { hashPassword } from '../server/auth/password.ts'
+
+/** Demo accounts; the passwords are listed in the root README. */
+const demoGuardians = [
+  { codename: 'Aegis', role: 'commander', password: 'aegis-2026' },
+  { codename: 'Nova', role: 'defender', password: 'nova-2026' },
+  { codename: 'Orion', role: 'defender', password: 'orion-2026' },
+  { codename: 'Lyra', role: 'defender', password: 'lyra-2026' },
+] as const
 
 const rows: (typeof glitches.$inferInsert)[] = [
   { glitchId: 'GL-0142', status: 'LEAKED', description: 'Time loop detected near the eastern clock tower', timestamp: '2026-11-10T13:42:00Z' },
@@ -15,8 +25,13 @@ await db.transaction(async (tx) => {
     echo_images, echoes, sessions, notification_prefs, sensor_readings, app_state, glitches, guardians
     restart identity cascade`)
   await tx.execute(sql`alter sequence glitch_seq restart with 200`)
+  await tx.insert(guardians).values(
+    await Promise.all(
+      demoGuardians.map(async ({ password, ...g }) => ({ ...g, passwordHash: await hashPassword(password) })),
+    ),
+  )
   await tx.insert(glitches).values(rows)
 })
 await db.$client.end()
 
-console.log(`Seeded ${rows.length} glitches.`)
+console.log(`Seeded ${demoGuardians.length} guardians and ${rows.length} glitches.`)

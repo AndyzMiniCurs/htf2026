@@ -26,6 +26,17 @@ npm run dev                    # http://localhost:3000
 
 Everything in Docker: `docker compose --profile full up --build`
 
+### Demo accounts
+
+Created by `npm run db:setup` (re-running it resets them).
+
+| Codename | Role | Password |
+|----------|------|----------|
+| Aegis | commander | `aegis-2026` |
+| Nova | defender | `nova-2026` |
+| Orion | defender | `orion-2026` |
+| Lyra | defender | `lyra-2026` |
+
 ## Team split
 
 | Owner | Paths |
