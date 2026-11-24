@@ -19,7 +19,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [x] 2.1 [BE] Write `server/auth/password.ts` (scrypt hash + timing-safe verify); verify unit tests: correct password ok, wrong password rejected, two hashes of the same password differ
 - [x] 2.2 [BE] Implement sessions (`server/auth/session.ts`) and the real `login`/`logout`/`getMe`; verify login sets an httpOnly cookie, a wrong codename or password gives the same generic error, and logout clears the session row
 - [x] 2.3 [BE] Add `requireGuardian` / `requireCommander` middleware to every server function; verify tests: anonymous call -> `UNAUTHORIZED`, defender on a commander-only function -> `FORBIDDEN`
-- [ ] 2.4 [BE] Implement the guardians service (`listGuardians`, `createGuardian`, `setGuardianRole`) including the last-commander rule; verify tests for duplicate codename and for demoting the last commander
+- [x] 2.4 [BE] Implement the guardians service (`listGuardians`, `createGuardian`, `setGuardianRole`) including the last-commander rule; verify tests for duplicate codename and for demoting the last commander
 - [x] 2.5 [BE] Seed demo guardians (one commander, three defenders) with passwords listed in the root README; verify login works for each after `npm run db:setup`
 - [ ] 2.6 [FE] Build the `/login` page (mobile-first form, inline validation, generic error message); verify a wrong password shows the error and a correct one lands on the dashboard
 - [ ] 2.7 [FE] Add the auth guard in the root route `beforeLoad` (redirect to `/login`) and a user menu with codename, role and logout; verify an anonymous visit to `/glitches` redirects to `/login`

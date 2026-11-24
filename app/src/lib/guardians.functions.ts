@@ -1,26 +1,19 @@
 import { createServerFn } from '@tanstack/react-start'
-import { AppError } from '#/lib/errors.ts'
-import { fixtureGuardians } from '#/lib/fixtures.ts'
 import { createGuardianInput, setGuardianRoleInput, type Guardian } from '#/lib/guardian.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander } from '#/server/auth/middleware.ts'
+import * as guardians from '#/server/guardians/guardians.service.ts'
 
 export const listGuardians = createServerFn({ method: 'GET' })
   .middleware([requireCommander])
-  .handler(async (): Promise<Guardian[]> => fixtureGuardians)
+  .handler(async (): Promise<Guardian[]> => guardians.listGuardians())
 
 export const createGuardian = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(createGuardianInput))
-  .handler(
-    async ({ data }): Promise<Guardian> => ({ guardianId: 99, codename: data.codename, role: data.role }),
-  )
+  .handler(async ({ data }): Promise<Guardian> => guardians.createGuardian(data))
 
 export const setGuardianRole = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(setGuardianRoleInput))
-  .handler(async ({ data }): Promise<Guardian> => {
-    const guardian = fixtureGuardians.find((g) => g.guardianId === data.guardianId)
-    if (!guardian) throw new AppError('NOT_FOUND', 'Guardian not found')
-    return { ...guardian, role: data.role }
-  })
+  .handler(async ({ data }): Promise<Guardian> => guardians.setGuardianRole(data))
