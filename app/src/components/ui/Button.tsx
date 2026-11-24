@@ -48,7 +48,7 @@ export function Button({
       className={cx(
         'label-caps inline-flex shrink-0 items-center justify-center rounded-full border-b-[3px] whitespace-nowrap',
         'transition-[background-color,transform,filter,border-color] duration-200 ease-out-expo',
-        'active:translate-y-px active:border-b-[1px] disabled:pointer-events-none disabled:opacity-45',
+        'active:translate-y-px active:scale-[0.97] active:border-b-[1px] disabled:pointer-events-none disabled:opacity-45',
         'min-w-11',
         variants[variant],
         sizes[size],

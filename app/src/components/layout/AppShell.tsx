@@ -1,5 +1,7 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation, useRouterState } from '@tanstack/react-router'
 import { Ellipsis, WifiOff } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { cx } from '#/components/ui/cx.ts'
 import { HornIcon } from '#/components/icons/RealmIcons.tsx'
 import { useOnline } from '#/hooks/useOnline.ts'
@@ -28,6 +30,8 @@ type AppShellProps = {
 export function AppShell({ me, magicLevel, children }: AppShellProps) {
   const online = useOnline()
   const items = navItems.filter((item) => !item.commanderOnly || me?.role === 'commander')
+  // The rendered match, not the location: the location changes before the new page is ready.
+  const page = useRouterState({ select: (state) => state.matches.at(-1)?.pathname })
   return (
     <div className="flex min-h-dvh flex-col">
       <CurseVeins />
@@ -48,7 +52,10 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
           <OfflineNotice />
           {/* Offline, every form control on the page pauses; links and reading keep working. */}
           <fieldset disabled={!online} className="contents">
-            {children}
+            {/* Keyed by route so each page plays its entrance once on arrival. */}
+            <div key={page} className="page-enter">
+              {children}
+            </div>
           </fieldset>
         </main>
       </div>
@@ -58,8 +65,15 @@ export function AppShell({ me, magicLevel, children }: AppShellProps) {
 }
 
 function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
+  const loading = useRouterState({ select: (state) => state.status === 'pending' })
   return (
     <header className="print:hidden! sticky top-0 z-30 border-b border-line bg-[color-mix(in_oklab,var(--ground)_82%,transparent)] backdrop-blur-md pt-[env(safe-area-inset-top)]">
+      {loading && (
+        <span
+          aria-hidden
+          className="nav-progress absolute inset-x-0 -bottom-px h-0.5 bg-[linear-gradient(90deg,var(--gold-deep),var(--gold-hi),var(--curse-hi))] shadow-[0_0_10px_var(--gold)]"
+        />
+      )}
       <div className="flex h-16 items-center gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
         <Link to="/" className="flex min-h-11 shrink-0 items-center gap-3 rounded-lg">
           <Crest className="size-10 drop-shadow-[0_4px_10px_rgb(165_43_217/0.5)] lg:size-12" />
@@ -82,7 +96,7 @@ function Hud({ me, magicLevel }: { me: Guardian | null; magicLevel: number }) {
           {me?.role === 'commander' && <LockdownControl />}
           <Link
             to="/echoes/new"
-            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm whitespace-nowrap text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-colors hover:bg-royal-hi lg:inline-flex"
+            className="label-caps hidden h-11 items-center gap-2 rounded-full border-b-[3px] border-b-royal-deep bg-royal px-5 text-sm whitespace-nowrap text-on-accent shadow-[0_8px_20px_-10px_var(--royal)] transition-[background-color,transform] duration-200 ease-out-expo hover:bg-royal-hi active:scale-[0.97] lg:inline-flex"
           >
             <HornIcon className="size-5" />
             Report an echo
@@ -142,7 +156,7 @@ function OfflineNotice() {
 }
 
 const railItem =
-  'group relative flex size-13 items-center justify-center rounded-lg border border-line bg-field/70 text-fg-muted shadow-[inset_0_2px_8px_rgb(0_0_0/0.5)] transition-[color,border-color,box-shadow] duration-200 hover:border-line-strong hover:text-fg'
+  'group relative isolate flex size-13 items-center justify-center rounded-lg border border-line bg-field/70 text-fg-muted shadow-[inset_0_2px_8px_rgb(0_0_0/0.5)] transition-[color,border-color,box-shadow] duration-200 hover:border-line-strong hover:text-fg'
 
 /** The spellbook rail: one inventory slot per page; the active slot is framed in gold. Labels show as tooltips. */
 function Rail({ items }: { items: Array<NavItem> }) {
@@ -152,59 +166,192 @@ function Rail({ items }: { items: Array<NavItem> }) {
       className="print:hidden! sticky top-20 z-20 hidden h-[calc(100dvh-5rem)] w-22 shrink-0 flex-col items-center gap-2 border-r border-line bg-[color-mix(in_oklab,var(--ground)_70%,transparent)] py-6 backdrop-blur-md lg:flex"
     >
       {items.map((item) => (
-        <NavEntry key={item.label} item={item} className={railItem} iconClass="size-9" tooltip />
+        <NavEntry
+          key={item.label}
+          item={item}
+          className={railItem}
+          iconClass="size-9"
+          indicator="rail-active"
+          tooltip
+        />
       ))}
     </nav>
   )
 }
 
 const hotbarItem =
-  'group flex h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent text-fg-muted text-[0.7rem] font-medium transition-colors'
+  'group relative isolate flex h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border border-transparent text-fg-muted text-[0.7rem] font-medium transition-colors'
 
 /** Phone navigation: four hotbar slots and the report seal raised in the middle. */
 function Hotbar({ items }: { items: Array<NavItem> }) {
   const slots = items.filter((item) => item.hotbar)
   const left = slots.slice(0, 2)
   const right = slots.slice(2, 3)
+  const rest = items.filter((item) => !item.hotbar)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const closeMore = useCallback(() => setMoreOpen(false), [])
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const moreActive = rest.some((item) => item.to === pathname)
   return (
-    <nav
-      aria-label="Main"
-      className="print:hidden! fixed inset-x-0 bottom-0 z-30 border-t border-line bg-[color-mix(in_oklab,var(--ground-2)_92%,transparent)] px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
-    >
-      <div className="mx-auto flex max-w-lg items-end gap-1 py-1.5">
-        {left.map((item) => (
-          <NavEntry
-            key={item.label}
-            item={item}
-            className={hotbarItem}
-            iconClass="size-9"
-            showLabel
-          />
-        ))}
-        <div className="flex flex-1 justify-center">
-          <Link
-            to="/echoes/new"
-            aria-label="Report an echo"
-            className="-mt-7 grid size-16 place-items-center rounded-full border-4 border-ground bg-[radial-gradient(circle_at_35%_30%,var(--gold-hi),var(--gold)_45%,var(--gold-deep))] text-[#2a1a05] shadow-[0_10px_24px_-6px_var(--gold)] transition-transform active:scale-95"
+    <>
+      <MoreSheet items={rest} open={moreOpen} onClose={closeMore} />
+      <nav
+        aria-label="Main"
+        className="print:hidden! fixed inset-x-0 bottom-0 z-30 border-t border-line bg-[color-mix(in_oklab,var(--ground-2)_92%,transparent)] px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      >
+        <div className="mx-auto flex max-w-lg items-end gap-1 py-1.5">
+          {left.map((item) => (
+            <NavEntry
+              key={item.label}
+              item={item}
+              className={hotbarItem}
+              iconClass="size-9"
+              indicator="hotbar-active"
+              showLabel
+            />
+          ))}
+          <div className="flex flex-1 justify-center">
+            <Link
+              to="/echoes/new"
+              aria-label="Report an echo"
+              className="-mt-7 grid size-16 place-items-center rounded-full border-4 border-ground bg-[radial-gradient(circle_at_35%_30%,var(--gold-hi),var(--gold)_45%,var(--gold-deep))] text-[#2a1a05] shadow-[0_10px_24px_-6px_var(--gold)] transition-transform duration-200 ease-out-expo active:scale-90"
+            >
+              <HornIcon className="size-8" />
+            </Link>
+          </div>
+          {right.map((item) => (
+            <NavEntry
+              key={item.label}
+              item={item}
+              className={hotbarItem}
+              iconClass="size-9"
+              indicator="hotbar-active"
+              showLabel
+            />
+          ))}
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((open) => !open)}
+            className={cx(hotbarItem, (moreOpen || moreActive) && 'text-gold-hi')}
           >
-            <HornIcon className="size-8" />
-          </Link>
+            {moreActive && !moreOpen && <ActiveFrame id="hotbar-active" />}
+            <Ellipsis aria-hidden className="size-9 p-1.5" />
+            More
+          </button>
         </div>
-        {right.map((item) => (
-          <NavEntry
-            key={item.label}
-            item={item}
-            className={hotbarItem}
-            iconClass="size-9"
-            showLabel
+      </nav>
+    </>
+  )
+}
+
+/** Phone: the pages that do not fit the hotbar, in a sheet that rises from it. Drag down to dismiss. */
+function MoreSheet({
+  items,
+  open,
+  onClose,
+}: {
+  items: Array<NavItem>
+  open: boolean
+  onClose: () => void
+}) {
+  const first = useRef<HTMLAnchorElement>(null)
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const openedAt = useRef(pathname)
+
+  useEffect(() => {
+    if (!open) return
+    openedAt.current = pathname
+    first.current?.focus()
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  useEffect(() => {
+    if (open && pathname !== openedAt.current) onClose()
+  }, [open, pathname, onClose])
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[25] lg:hidden">
+          <motion.button
+            type="button"
+            aria-label="Close menu"
+            tabIndex={-1}
+            onClick={onClose}
+            className="absolute inset-0 bg-[rgb(8_4_14/0.6)] backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           />
-        ))}
-        <button type="button" className={hotbarItem}>
-          <Ellipsis aria-hidden className="size-6" />
-          More
-        </button>
-      </div>
-    </nav>
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="More pages"
+            className="absolute inset-x-2 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] rounded-2xl border border-line-strong bg-panel-hi p-3 shadow-(--shadow)"
+            initial={{ y: 40, opacity: 0, scale: 0.97 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 30, opacity: 0, transition: { duration: 0.16 } }}
+            transition={{ type: 'spring', stiffness: 520, damping: 38 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.05, bottom: 0.6 }}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 60 || info.velocity.y > 400) onClose()
+            }}
+          >
+            <span aria-hidden className="mx-auto mb-3 block h-1 w-10 rounded-full bg-line-strong" />
+            <ul className="grid grid-cols-3 gap-2">
+              {items.map((item, i) =>
+                item.to ? (
+                  <motion.li
+                    key={item.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.04 + i * 0.03, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <Link
+                      ref={i === 0 ? first : undefined}
+                      to={item.to}
+                      className="flex min-h-22 flex-col items-center justify-center gap-1.5 rounded-xl border border-line bg-field/70 p-2 text-center text-[0.75rem] font-medium text-fg-muted transition-[transform,border-color,color] duration-150 active:scale-95"
+                      activeProps={{ className: 'border-gold/80! text-gold-hi!' }}
+                    >
+                      <img
+                        src={item.image}
+                        alt=""
+                        width={128}
+                        height={128}
+                        draggable={false}
+                        className="size-10 rounded-md object-cover"
+                      />
+                      {item.label}
+                    </Link>
+                  </motion.li>
+                ) : null,
+              )}
+            </ul>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+/** The gilt frame of the active slot; a shared layout id makes it glide between slots. */
+function ActiveFrame({ id }: { id: string }) {
+  return (
+    <motion.span
+      layoutId={id}
+      aria-hidden
+      transition={{ type: 'spring', stiffness: 480, damping: 36 }}
+      className="absolute inset-0 -z-10 rounded-lg border border-gold/80 bg-[radial-gradient(circle_at_50%_35%,color-mix(in_oklab,var(--gold)_24%,transparent),color-mix(in_oklab,var(--gold-deep)_18%,var(--field))_75%)] shadow-[0_0_18px_-4px_var(--gold),inset_0_1px_0_color-mix(in_oklab,var(--gold-hi)_40%,transparent)]"
+    />
   )
 }
 
@@ -214,15 +361,19 @@ function NavEntry({
   iconClass,
   showLabel,
   tooltip,
+  indicator,
 }: {
   item: NavItem
   className: string
   iconClass: string
   showLabel?: boolean
   tooltip?: boolean
+  /** Layout id of the gliding active frame this entry shares with its siblings. */
+  indicator?: string
 }) {
-  const content = (
+  const content = (active: boolean) => (
     <>
+      {active && indicator && <ActiveFrame id={indicator} />}
       <img
         src={item.image}
         alt=""
@@ -255,7 +406,7 @@ function NavEntry({
         aria-label={showLabel ? undefined : item.label}
         className={cx(className, 'cursor-not-allowed opacity-75')}
       >
-        {content}
+        {content(false)}
       </button>
     )
   }
@@ -265,12 +416,9 @@ function NavEntry({
       aria-label={showLabel ? undefined : item.label}
       className={className}
       activeOptions={{ exact: item.to === '/' }}
-      activeProps={{
-        className:
-          'text-gold-hi! border-gold/80! bg-[radial-gradient(circle_at_50%_35%,color-mix(in_oklab,var(--gold)_24%,transparent),color-mix(in_oklab,var(--gold-deep)_18%,var(--field))_75%)] shadow-[0_0_18px_-4px_var(--gold),inset_0_1px_0_color-mix(in_oklab,var(--gold-hi)_40%,transparent)]',
-      }}
+      activeProps={{ className: 'text-gold-hi!' }}
     >
-      {content}
+      {({ isActive }) => content(isActive)}
     </Link>
   )
 }

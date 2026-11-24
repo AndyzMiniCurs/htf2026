@@ -11,6 +11,7 @@ import { getErrorCode } from '#/lib/errors.ts'
 import { advanceStatus, assignGlitch } from '#/lib/glitches.functions.ts'
 import { setLockdown } from '#/lib/monitoring.functions.ts'
 import type { AssistantAnswer, Intent, OracleAction } from '#/lib/assistant.ts'
+import type { ReactNode } from 'react'
 
 export const Route = createFileRoute('/_app/assistant')({
   head: () => ({ meta: [{ title: 'Oracle · Guardians of the Grid' }] }),
@@ -179,9 +180,15 @@ function OraclePage() {
           {messages.length === 0 && <Welcome />}
           <ol className="flex flex-col gap-4">
             {messages.map((m) => (
-              <li key={m.id}>
+              <motion.li
+                key={m.id}
+                initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                style={{ transformOrigin: m.from === 'guardian' ? '100% 100%' : '0% 0%' }}
+              >
                 <Bubble message={m} onConfirm={confirm} onCancel={cancel} />
-              </li>
+              </motion.li>
             ))}
             {pending && (
               <li>
@@ -200,7 +207,7 @@ function OraclePage() {
                 type="button"
                 disabled={pending}
                 onClick={() => void ask(s)}
-                className="h-11 shrink-0 rounded-full border border-line px-3.5 text-sm lg:h-9 whitespace-nowrap text-fg-muted transition-colors hover:border-gold hover:text-fg disabled:opacity-50"
+                className="h-11 shrink-0 rounded-full border border-line px-3.5 text-sm lg:h-9 whitespace-nowrap text-fg-muted transition-[color,border-color,transform] duration-200 ease-out-expo hover:border-gold hover:text-fg active:scale-95 disabled:opacity-50"
               >
                 {s}
               </button>
@@ -224,13 +231,13 @@ function OraclePage() {
               autoComplete="off"
               enterKeyHint="send"
               placeholder="Ask the Oracle…"
-              className="h-12 min-w-0 flex-1 rounded-full border border-line bg-field px-5 text-base text-fg placeholder:text-fg-faint focus:border-royal-hi focus:outline-none"
+              className="h-12 min-w-0 flex-1 rounded-full border border-line bg-field px-5 text-base text-fg transition-[border-color,box-shadow] duration-200 placeholder:text-fg-faint focus:border-royal-hi focus:shadow-[0_0_0_3px_color-mix(in_oklab,var(--royal-hi)_35%,transparent)] focus:outline-none"
             />
             <button
               type="submit"
               aria-label="Ask"
               disabled={pending || !question.trim()}
-              className="grid size-12 shrink-0 place-items-center rounded-full bg-royal text-on-accent transition-colors hover:bg-royal-hi disabled:opacity-45"
+              className="grid size-12 shrink-0 place-items-center rounded-full bg-royal text-on-accent transition-[background-color,transform,opacity] duration-200 ease-out-expo hover:bg-royal-hi active:scale-90 disabled:opacity-45"
             >
               <SendHorizontal aria-hidden className="size-5" />
             </button>
@@ -348,24 +355,45 @@ function Bubble({
   )
 }
 
-/** Turns the glitch ids the answer names into links to their pages. */
+/**
+ * Turns the glitch ids the answer names into links to their pages, and lets the answer write
+ * itself word by word. The whole text is in the DOM at once, so screen readers get it whole.
+ */
 function LinkedText({ text, glitchIds }: { text: string; glitchIds: Array<string> }) {
-  if (glitchIds.length === 0) return <>{text}</>
-  const pattern = new RegExp(`(${glitchIds.map((id) => id.replace(/[-]/g, '\\-')).join('|')})`, 'g')
+  const parts =
+    glitchIds.length === 0
+      ? [text]
+      : text.split(
+          new RegExp(`(${glitchIds.map((id) => id.replace(/[-]/g, '\\-')).join('|')})`, 'g'),
+        )
+  // Long answers write faster, so none takes more than about 1.4 s to finish.
+  const step = Math.min(28, 1400 / Math.max(1, text.split(/\s+/).length))
+  let word = 0
+  const reveal = (key: string, children: ReactNode) => (
+    <span key={key} className="word-in" style={{ animationDelay: `${word++ * step}ms` }}>
+      {children}
+    </span>
+  )
   return (
     <>
-      {text.split(pattern).map((part, i) =>
+      {parts.map((part, i) =>
         glitchIds.includes(part) ? (
-          <Link
-            key={i}
-            to="/glitches/$glitchId"
-            params={{ glitchId: part }}
-            className="font-gothic font-bold text-gold-hi underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
-          >
-            {part}
-          </Link>
+          reveal(
+            `${i}`,
+            <Link
+              to="/glitches/$glitchId"
+              params={{ glitchId: part }}
+              className="font-gothic font-bold text-gold-hi underline decoration-gold/50 underline-offset-2 hover:decoration-gold"
+            >
+              {part}
+            </Link>,
+          )
         ) : (
-          <Fragment key={i}>{part}</Fragment>
+          <Fragment key={i}>
+            {part
+              .split(/(\s+)/)
+              .map((chunk, j) => (chunk.trim() === '' ? chunk : reveal(`${i}-${j}`, chunk)))}
+          </Fragment>
         ),
       )}
     </>

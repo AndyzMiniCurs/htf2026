@@ -1,5 +1,6 @@
 import { HeadContent, Outlet, Scripts, createRootRoute, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { MotionConfig } from 'motion/react'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { useOnline } from '#/hooks/useOnline.ts'
@@ -34,11 +35,13 @@ export const Route = createRootRoute({
   beforeLoad: async () => ({ me: await getMe() }),
   shellComponent: RootDocument,
   component: () => (
-    <ToastProvider>
-      <ServiceWorker />
-      <MagicCursor />
-      <Outlet />
-    </ToastProvider>
+    <MotionConfig reducedMotion="user">
+      <ToastProvider>
+        <ServiceWorker />
+        <MagicCursor />
+        <Outlet />
+      </ToastProvider>
+    </MotionConfig>
   ),
   errorComponent: RootError,
 })

@@ -12,7 +12,7 @@ export function IconButton({
       type={type}
       className={cx(
         'inline-flex size-11 items-center justify-center rounded-full text-fg-muted',
-        'transition-colors duration-200 hover:bg-panel-hi hover:text-fg disabled:opacity-45',
+        'transition-[color,background-color,transform] duration-200 ease-out-expo hover:bg-panel-hi active:scale-90 hover:text-fg disabled:opacity-45',
         className,
       )}
       {...props}

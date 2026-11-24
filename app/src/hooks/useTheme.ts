@@ -4,6 +4,18 @@ export type ThemeChoice = 'dark' | 'light' | 'system'
 const KEY = 'theme'
 const listeners = new Set<() => void>()
 
+// The day/night wipe grows from the last tap, wherever that theme control sits.
+if (typeof document !== 'undefined') {
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      document.documentElement.style.setProperty('--wipe-x', `${event.clientX}px`)
+      document.documentElement.style.setProperty('--wipe-y', `${event.clientY}px`)
+    },
+    { passive: true, capture: true },
+  )
+}
+
 function read(): ThemeChoice {
   const stored = localStorage.getItem(KEY)
   return stored === 'light' || stored === 'system' ? stored : 'dark'
@@ -29,8 +41,16 @@ export function useTheme(): [ThemeChoice, (choice: ThemeChoice) => void] {
   )
   const set = useCallback((next: ThemeChoice) => {
     localStorage.setItem(KEY, next)
-    apply(next)
-    listeners.forEach((notify) => notify())
+    const commit = () => {
+      apply(next)
+      listeners.forEach((notify) => notify())
+    }
+    if (
+      'startViewTransition' in document &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      document.startViewTransition(commit)
+    } else commit()
   }, [])
   return [choice, set]
 }

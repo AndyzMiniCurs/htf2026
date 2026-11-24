@@ -88,7 +88,7 @@ export function Textarea({
           id={id}
           aria-describedby={describedBy}
           aria-invalid={invalid || undefined}
-          className={cx(control, 'min-h-28 resize-y py-2.5 leading-relaxed', className)}
+          className={cx(control, 'field-sizing-content max-h-[60dvh] min-h-28 resize-y py-2.5 leading-relaxed', className)}
           {...props}
         />
       )}
