@@ -3,7 +3,7 @@ import {GlitchesTable} from '#/components/GlitchesTable.tsx'
 import {getGlitches} from '#/lib/glitches.functions.ts'
 
 export const Route = createFileRoute('/')({
-  loader: () => getGlitches(),
+  loader: () => getGlitches({ data: {} }),
   component: OverviewPage,
 })
 

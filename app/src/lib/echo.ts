@@ -36,7 +36,7 @@ export type ReportEchoInput = {
  * Validator for `reportEcho`. The client sends FormData with `description`, optional `x`/`y`
  * (0-100) and an optional `image` file.
  */
-export function parseReportEchoForm(data: unknown): ReportEchoInput {
+export function parseReportEchoForm(data: FormData): ReportEchoInput {
   if (!(data instanceof FormData)) throw new AppError('VALIDATION', 'Expected form data')
   const field = (name: string) => {
     const value = data.get(name)
