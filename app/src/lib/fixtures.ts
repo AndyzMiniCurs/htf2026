@@ -1,12 +1,5 @@
 // Stub data for the server functions until each one gets its real service (design D13).
-import { SENSORS, SENSOR_IDS } from './monitoring.ts'
-import type {
-  Dashboard,
-  LeaderboardEntry,
-  NotificationPrefs,
-  Report,
-  SensorSeries,
-} from './monitoring.ts'
+import type { Dashboard, LeaderboardEntry, NotificationPrefs, Report } from './monitoring.ts'
 import type { AssistantAnswer } from './assistant.ts'
 import type { Echo, GlitchDetail, GlitchListItem } from './glitch.ts'
 import type { Guardian } from './guardian.ts'
@@ -135,20 +128,6 @@ export const fixtureDashboard: Dashboard = {
   },
   recent: fixtureGlitches,
   lockdown: false,
-}
-
-/** 15 minutes of readings every 3 s, ending now. */
-export function fixtureSensorSeries(minutes = 15): Array<SensorSeries> {
-  const now = Date.now()
-  const count = Math.floor((minutes * 60) / 3)
-  return SENSOR_IDS.map((sensorId, s) => ({
-    sensorId,
-    ...SENSORS[sensorId],
-    points: Array.from({ length: count }, (_, i) => ({
-      timestamp: new Date(now - (count - 1 - i) * 3000).toISOString(),
-      value: Math.round((70 + 10 * Math.sin(i / 20 + s * 2) + 3 * Math.sin(i / 3 + s)) * 10) / 10,
-    })),
-  }))
 }
 
 export const fixtureLeaderboard: Array<LeaderboardEntry> = [

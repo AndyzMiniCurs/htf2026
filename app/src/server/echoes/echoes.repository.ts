@@ -2,7 +2,7 @@ import { eq, sql } from 'drizzle-orm'
 import { db } from '#/db/index.ts'
 import { echoImages, echoes, glitchSeq, glitches } from '#/db/schema.ts'
 import type { EchoImageMime } from '#/lib/echo.ts'
-import type { Location } from '#/lib/glitch.ts'
+import type { GlitchSource, GlitchType, Location } from '#/lib/glitch.ts'
 
 export type NewEcho = {
   description: string
@@ -11,6 +11,9 @@ export type NewEcho = {
   location: Location | null
   image: { mime: EchoImageMime; bytes: Buffer } | null
 }
+
+/** How the new glitch is classified; defaults to an `unknown` glitch from a guardian's echo. */
+export type NewGlitchMeta = { type?: GlitchType; source?: GlitchSource; sensorId?: string | null }
 
 /** Next id from `glitch_seq`, formatted `GL-0200`. */
 async function nextGlitchId(tx: Pick<typeof db, 'execute'>): Promise<string> {
@@ -21,6 +24,7 @@ async function nextGlitchId(tx: Pick<typeof db, 'execute'>): Promise<string> {
 /** Creates a `LEAKED` glitch from the echo, the echo and its image, all in one transaction. */
 export async function insertEchoWithNewGlitch(
   echo: NewEcho,
+  meta: NewGlitchMeta = {},
 ): Promise<{ glitchId: string; echoId: number }> {
   return db.transaction(async (tx) => {
     const glitchId = await nextGlitchId(tx)
@@ -31,7 +35,9 @@ export async function insertEchoWithNewGlitch(
       timestamp: echo.timestamp,
       locationX: echo.location?.x ?? null,
       locationY: echo.location?.y ?? null,
-      source: 'echo',
+      type: meta.type ?? 'unknown',
+      source: meta.source ?? 'echo',
+      sensorId: meta.sensorId ?? null,
     })
     const rows = await tx
       .insert(echoes)

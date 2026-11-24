@@ -48,8 +48,8 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 
 - [x] 5.1 [BE] Write `server/events/bus.ts` and the `GET /api/events` SSE route (session required, 15 s heartbeat, notification events only to the target guardian); publish events from every write service; verify `curl -N` with a session cookie prints events while reporting an echo
 - [x] 5.2 [BE] Write `server/monitoring/magic.ts` (pure, weights from the spec) and the real `getDashboard` (`recent` = every open glitch + the 5 latest FIXED, newest first); verify unit tests: all fixed -> 100, one normal `LEAKED` -> 90, never below 0
-- [ ] 5.3 [BE] Write the sensor simulator (3 s random walk for 3 sensors, lazy start once per process), the real `getSensorSeries` and `triggerIncident` (C); verify readings grow in `sensor_readings` and `triggerIncident` produces a visible drop
-- [ ] 5.4 [BE] Implement `setLockdown` (C) stored in `app_state`, publishing a `lockdown` event; verify a defender call -> `FORBIDDEN`
+- [x] 5.3 [BE] Write the sensor simulator (3 s random walk for 3 sensors, lazy start once per process), the real `getSensorSeries` and `triggerIncident` (C); verify readings grow in `sensor_readings` and `triggerIncident` produces a visible drop
+- [x] 5.4 [BE] Implement `setLockdown` (C) stored in `app_state`, publishing a `lockdown` event; verify a defender call -> `FORBIDDEN`
 - [x] 5.5 [FE] Write the `useLiveEvents` hook (EventSource, backoff reconnect, `router.invalidate()` on data events, lockdown and notification dispatch); verify that an echo reported in browser A appears in browser B within 2 s (verified against a stubbed SSE stream; end-to-end once /api/events (5.1) exists)
 - [x] 5.6 [FE] Build the dashboard `/`: SVG magic gauge, counts per status and type, recent glitches, lockdown banner; verify the gauge drops when a glitch is reported (UI done 2026-11-24; the drop shows once 5.2 makes getDashboard real)
 - [x] 5.7 [FE] Build `/sensors`: one `recharts` line chart per sensor (last 15 min), appended live; verify the charts move without reload (polls every 3 s until 5.5 live events exist)
@@ -61,7 +61,7 @@ Architecture and the server function contract: `design.md` (D1, D12). Behaviour:
 - [ ] 6.1 [BE] Add moderation and type classification to `reportEcho` through the classifier port; verify tests with a fake classifier: spam rejected with the spec message, "time loop" -> `time-anomaly`, classifier `null` -> `unknown` and still created
 - [ ] 6.2 [BE] Add duplicate grouping (open glitches) and reopen (glitches fixed in the last 24 h) at the 0.8 threshold; verify tests: 0.85 -> grouped with `groupedByAi`, 0.5 -> new glitch, match on a fixed glitch -> reopened `LEAKED`
 - [ ] 6.3 [BE] Add auto-close to `addGlitchUpdate` (P(solved) ≥ 0.8 -> `FIXED`, `autoClosed: true`); verify tests for both outcomes
-- [ ] 6.4 [BE] Write `server/monitoring/anomaly.ts` (pure: ≥40% drop in 5 min, 3σ over 15 min) and wire predictive glitch creation (one open per sensor, `source: 'prediction'`); verify unit tests with crafted series and that `triggerIncident` creates exactly one glitch
+- [x] 6.4 [BE] Write `server/monitoring/anomaly.ts` (pure: ≥40% drop in 5 min, 3σ over 15 min) and wire predictive glitch creation (one open per sensor, `source: 'prediction'`); verify unit tests with crafted series and that `triggerIncident` creates exactly one glitch
 - [ ] 6.5 [BE] Add auto-assign (Jev score × 1/(1 + open load), fallback = least-loaded defender); verify a test where the specialist with the lower load wins
 - [ ] 6.6 [BE] Write `server/ai/runbook-library.ts` (5-8 steps per type), ranking + placeholder filling, and `setRunbookStep`; verify tests: 3-6 steps, placeholders filled, no AI -> first 4 library steps
 - [ ] 6.7 [BE] Implement `askAssistant`: Jev intent + glitch id regex + templated answers from repository data, `unknown` -> suggestions; verify a test per intent

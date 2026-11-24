@@ -41,6 +41,26 @@ export async function currentGuardian(): Promise<Guardian | null> {
   return repo.findGuardianBySession(hashToken(token), new Date().toISOString())
 }
 
+/**
+ * The current request's session, for long-lived responses (the live stream) that must notice a
+ * logout or expiry later: `isActive()` re-reads the session row without needing the request.
+ */
+export async function currentSession(): Promise<{
+  guardian: Guardian
+  isActive: () => Promise<boolean>
+} | null> {
+  const token = getCookie(SESSION_COOKIE)
+  if (!token) return null
+  const tokenHash = hashToken(token)
+  const guardian = await repo.findGuardianBySession(tokenHash, new Date().toISOString())
+  if (!guardian) return null
+  return {
+    guardian,
+    isActive: async () =>
+      (await repo.findGuardianBySession(tokenHash, new Date().toISOString())) !== null,
+  }
+}
+
 export async function endSession(): Promise<void> {
   const token = getCookie(SESSION_COOKIE)
   if (token) await repo.deleteSession(hashToken(token))

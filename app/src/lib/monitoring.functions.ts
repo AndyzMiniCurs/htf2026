@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { fixtureLeaderboard, fixtureReport, fixtureSensorSeries } from '#/lib/fixtures.ts'
+import { fixtureLeaderboard, fixtureReport } from '#/lib/fixtures.ts'
 import { sensorSeriesInput, setLockdownInput, triggerIncidentInput } from '#/lib/monitoring.ts'
 import { validate } from '#/lib/validate.ts'
 import { requireCommander, requireGuardian } from '#/server/auth/middleware.ts'
@@ -13,17 +13,19 @@ export const getDashboard = createServerFn({ method: 'GET' })
 export const getSensorSeries = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
   .validator(validate(sensorSeriesInput))
-  .handler(async ({ data }): Promise<Array<SensorSeries>> => fixtureSensorSeries(data.minutes))
+  .handler(async ({ data }): Promise<Array<SensorSeries>> =>
+    monitoring.getSensorSeries(data.minutes),
+  )
 
 export const setLockdown = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(setLockdownInput))
-  .handler(async ({ data }): Promise<{ on: boolean }> => ({ on: data.on }))
+  .handler(async ({ data }): Promise<{ on: boolean }> => monitoring.setLockdown(data.on))
 
 export const triggerIncident = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(triggerIncidentInput))
-  .handler(async (): Promise<void> => {})
+  .handler(async ({ data }): Promise<void> => monitoring.triggerIncident(data.sensorId))
 
 export const getLeaderboard = createServerFn({ method: 'GET' })
   .middleware([requireGuardian])
