@@ -76,14 +76,25 @@ describe('jev classifier', () => {
 
 describe('createClassifier', () => {
   it('uses the null classifier when no API key is set', async () => {
-    const classifier = createClassifier('')
+    const classifier = createClassifier({})
     expect(classifier).toBe(nullClassifier)
     expect(await classifier.yesNo('x?')).toBeNull()
     expect(await classifier.choose('x?', ['a'])).toBeNull()
     expect(await classifier.score('x?', ['a'])).toBeNull()
   })
 
-  it('uses Jev when a key is set', () => {
-    expect(createClassifier('k')).not.toBe(nullClassifier)
+  it('prefers Jev over OpenRouter when both keys are set', async () => {
+    const fetchMock = vi.fn(async (_url: string | URL | Request, _init?: RequestInit) =>
+      json({ answers: {} }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    await createClassifier({ TYPESAFE_API_KEY: 't', OPENROUTER_API_KEY: 'o' }).yesNo('x?')
+    await createClassifier({ OPENROUTER_API_KEY: 'o' }).yesNo('x?')
+    vi.unstubAllGlobals()
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://api.typesafe.ai/v1/systemone',
+      'https://openrouter.ai/api/v1/chat/completions',
+    ])
   })
 })

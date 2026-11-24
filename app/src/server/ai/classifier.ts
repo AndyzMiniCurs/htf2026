@@ -1,5 +1,6 @@
 import { createJevClassifier } from './jev.classifier.ts'
 import { nullClassifier } from './null.classifier.ts'
+import { createOpenRouterClassifier } from './openrouter.classifier.ts'
 
 /**
  * The AI port (design D6). Every method resolves to `null` when the AI has no opinion
@@ -17,8 +18,14 @@ export interface Classifier {
   yesNo: (question: string) => Promise<number | null>
 }
 
-export function createClassifier(apiKey = process.env.TYPESAFE_API_KEY): Classifier {
-  return apiKey ? createJevClassifier({ apiKey }) : nullClassifier
+type AiKeys = { TYPESAFE_API_KEY?: string; OPENROUTER_API_KEY?: string }
+
+/** Jev first (the team's choice), OpenRouter as the fallback, otherwise no AI. */
+export function createClassifier(keys: AiKeys = process.env): Classifier {
+  if (keys.TYPESAFE_API_KEY) return createJevClassifier({ apiKey: keys.TYPESAFE_API_KEY })
+  if (keys.OPENROUTER_API_KEY)
+    return createOpenRouterClassifier({ apiKey: keys.OPENROUTER_API_KEY })
+  return nullClassifier
 }
 
 let instance: Classifier | undefined
