@@ -4,7 +4,14 @@ import { db } from '#/db/index.ts'
 import { echoes, glitches, guardians } from '#/db/schema.ts'
 import { GLITCH_STATUSES } from '#/lib/glitch.ts'
 import type { SQL } from 'drizzle-orm'
-import type { Echo, GlitchDetail, GlitchListItem, GlitchQuery, Location } from '#/lib/glitch.ts'
+import type {
+  Echo,
+  GlitchDetail,
+  GlitchListItem,
+  GlitchQuery,
+  GlitchStatus,
+  Location,
+} from '#/lib/glitch.ts'
 
 const assignee = alias(guardians, 'assignee')
 const reporter = alias(guardians, 'reporter')
@@ -135,4 +142,35 @@ export async function findGlitchDetail(glitchId: string): Promise<GlitchDetail |
     runbook: row.runbook?.steps ?? [],
     mergedInto: row.mergedInto,
   }
+}
+
+/** What the status rules need to know about a glitch. */
+export async function findGlitchState(glitchId: string) {
+  const rows = await db
+    .select({
+      status: glitches.status,
+      assignedGuardianId: glitches.assignedGuardianId,
+      mergedInto: glitches.mergedInto,
+    })
+    .from(glitches)
+    .where(eq(glitches.glitchId, glitchId))
+  return rows.at(0) ?? null
+}
+
+/**
+ * Moves the glitch from `from` to `to`. Returns false when its status changed in the meantime,
+ * so two guardians advancing at once cannot skip a step.
+ */
+export async function updateGlitchStatus(
+  glitchId: string,
+  from: GlitchStatus,
+  to: GlitchStatus,
+  fixed: { fixedAt: string; fixedBy: number } | null,
+): Promise<boolean> {
+  const rows = await db
+    .update(glitches)
+    .set({ status: to, fixedAt: fixed?.fixedAt ?? null, fixedBy: fixed?.fixedBy ?? null })
+    .where(and(eq(glitches.glitchId, glitchId), eq(glitches.status, from)))
+    .returning({ glitchId: glitches.glitchId })
+  return rows.length > 0
 }

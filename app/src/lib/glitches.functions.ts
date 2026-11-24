@@ -32,15 +32,14 @@ export const getGlitch = createServerFn({ method: 'GET' })
 export const advanceStatus = createServerFn({ method: 'POST' })
   .middleware([requireGuardian])
   .validator(validate(glitchIdInput))
-  .handler(async ({ data }): Promise<GlitchListItem> => fixtureItem(data.glitchId))
+  .handler(async ({ data, context }): Promise<GlitchListItem> =>
+    glitches.advanceStatus(context.guardian, data.glitchId),
+  )
 
 export const reopenGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
   .validator(validate(glitchIdInput))
-  .handler(async ({ data }): Promise<GlitchListItem> => ({
-    ...fixtureItem(data.glitchId),
-    status: 'LEAKED',
-  }))
+  .handler(async ({ data }): Promise<GlitchListItem> => glitches.reopenGlitch(data.glitchId))
 
 export const assignGlitch = createServerFn({ method: 'POST' })
   .middleware([requireCommander])
